@@ -6,6 +6,7 @@ from pathlib import Path
 import json
 import streamlit as st
 import httpx
+from cosmetic_agent.common.config import settings
 from app.components.sidebar import render_product_sidebar
 from app.components.cards import render_result_card
 
@@ -18,7 +19,7 @@ st.set_page_config(
 
 @st.cache_data
 def load_mock_products():
-    path = Path("data/assets/mock_products.json")
+    path = settings.MOCK_PRODUCTS_PATH
     if path.exists():
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -42,10 +43,9 @@ def main():
         )
         if st.button("문구 심사 시작", type="primary"):
             with st.spinner("법령 검색 및 에이전트 판정 중..."):
-                # TODO: FastAPI /review 호출 또는 로컬 Service 직접 호출
                 try:
                     res = httpx.post(
-                        "http://localhost:8000/review",
+                        f"{settings.API_BASE_URL}/review",
                         json={"copy_text": copy_input, "product": selected_product},
                         timeout=30.0,
                     )

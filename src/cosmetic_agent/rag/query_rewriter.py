@@ -4,11 +4,13 @@
 """
 from pathlib import Path
 import json
+from ..common.config import settings
 
 
 class QueryRewriter:
-    def __init__(self, term_map_path: Path = Path("data/assets/term_map.json")):
-        self.term_map = self._load_term_map(term_map_path)
+    def __init__(self, term_map_path: Path | None = None):
+        self.term_map_path = term_map_path or settings.TERM_MAP_PATH
+        self.term_map = self._load_term_map(self.term_map_path)
 
     @staticmethod
     def _load_term_map(path: Path) -> dict[str, str]:
