@@ -6,18 +6,23 @@ from pathlib import Path
 from typing import Any
 import json
 import re
+from ..common.config import settings
 
 
 class RuleEngine:
     def __init__(
         self,
-        banned_terms_path: Path = Path("data/assets/banned_terms.json"),
-        claim_ladder_path: Path = Path("data/assets/claim_ladder.json"),
-        functional_claims_path: Path = Path("data/assets/functional_claims.json"),
+        banned_terms_path: Path | None = None,
+        claim_ladder_path: Path | None = None,
+        functional_claims_path: Path | None = None,
     ):
-        self.banned_terms = self._load_json(banned_terms_path)
-        self.claim_ladder = self._load_json(claim_ladder_path)
-        self.functional_claims = self._load_json(functional_claims_path)
+        self.banned_terms_path = banned_terms_path or settings.BANNED_TERMS_PATH
+        self.claim_ladder_path = claim_ladder_path or settings.CLAIM_LADDER_PATH
+        self.functional_claims_path = functional_claims_path or settings.FUNCTIONAL_CLAIMS_PATH
+
+        self.banned_terms = self._load_json(self.banned_terms_path)
+        self.claim_ladder = self._load_json(self.claim_ladder_path)
+        self.functional_claims = self._load_json(self.functional_claims_path)
 
     @staticmethod
     def _load_json(path: Path) -> list[dict[str, Any]]:
