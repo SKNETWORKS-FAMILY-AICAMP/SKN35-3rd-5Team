@@ -48,39 +48,39 @@
 
 ## 3. 역할별 상세 파일 체크리스트
 
-### 👑 1. 팀장 · 통합 파트
+###  팀장 · 통합 파트
 * [ ] [`configs/base.yaml`](file:///c:/SKN35_kim/SKN35-3rd-5Team/configs/base.yaml): 재시도 횟수 상한 및 시스템 제한값 튜닝
 * [ ] [`src/cosmetic_agent/workflow/graph.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/src/cosmetic_agent/workflow/graph.py): 9개 노드와 3개 조건부 엣지가 누락 없이 컴파일되도록 조립
 * [ ] [`src/cosmetic_agent/workflow/edges.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/src/cosmetic_agent/workflow/edges.py): 재검색/재제안 카운터 증가 및 `route_*` 분기 완성
 * [ ] [`src/cosmetic_agent/service.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/src/cosmetic_agent/service.py): 그래프 실행 결과(`final_state`)를 `ReviewResult` 계약에 맞게 최종 조립
 * [ ] [`api/routes/review.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/api/routes/review.py): 상세페이지 일괄 처리(`POST /review/bulk`) 문장 분할 및 `batch()` 연동
 
-### 📚 2. 데이터 · 규칙 파트
+###  데이터 · 규칙 파트
 * [ ] [`indexing/01_download_regulations.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/indexing/01_download_regulations.py) ~ [`04_enrich_metadata.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/indexing/04_enrich_metadata.py): 법령/고시 PDF 텍스트 추출 및 정규식 조항 분리
 * [ ] [`indexing/05_build_indexes.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/indexing/05_build_indexes.py): Qdrant 적재 및 BM25 `.pkl` 파일 덤프
 * [ ] [`data/assets/banned_terms.json`](file:///c:/SKN35_kim/SKN35-3rd-5Team/data/assets/banned_terms.json): 식약처 행정처분 및 고시 기준 금지 표현 패턴 추가
 * [ ] [`data/assets/claim_ladder.json`](file:///c:/SKN35_kim/SKN35-3rd-5Team/data/assets/claim_ladder.json): 효능별 0~2단계 표현 및 필요 시험 자산 보강
 * [ ] [`src/cosmetic_agent/rag/hybrid.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/src/cosmetic_agent/rag/hybrid.py): Dense 10 + BM25 10 순위를 RRF 점수로 합산하고 법령 최소 2개 보장
 
-### ✍️ 3. 프롬프트 · 판정 파트
+###  프롬프트 · 판정 파트
 * [ ] [`src/cosmetic_agent/workflow/prompts.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/src/cosmetic_agent/workflow/prompts.py): `JUDGE_PROMPT`와 `SUGGEST_PROMPT`에 실무 Few-shot 예시 추가
 * [ ] [`src/cosmetic_agent/models/gpt_judge.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/src/cosmetic_agent/models/gpt_judge.py): `with_structured_output`으로 일관된 JSON 추출 로직 완성
 * [ ] [`src/cosmetic_agent/domain/schemas.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/src/cosmetic_agent/domain/schemas.py): Pydantic `@model_validator`로 조건부/불가 판정의 필수 필드 검증 강화
 * [ ] [`src/cosmetic_agent/domain/verifier.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/src/cosmetic_agent/domain/verifier.py): 제안 문구의 숫자(정규식 `\d+%`)와 시험성적서 수치 일치 여부 대조
 
-### 📊 4. 평가 파트
+###  평가 파트
 * [ ] [`data/golden_set/dev.jsonl`](file:///c:/SKN35_kim/SKN35-3rd-5Team/data/golden_set/dev.jsonl): 실험용 30건 이상 문구와 정답 라벨(level, violation_type, 근거ID) 구축
 * [ ] [`data/golden_set/holdout.jsonl`](file:///c:/SKN35_kim/SKN35-3rd-5Team/data/golden_set/holdout.jsonl): 최종 검증용 20건 이상 블라인드 벤치마크 데이터 구축
 * [ ] [`eval/metrics/eval_metrics.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/eval/metrics/eval_metrics.py): Macro-F1 및 검색 Hit@4 함수 구현
 * [ ] [`eval/run_eval.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/eval/run_eval.py): 골든셋 순회 후 R0(규칙) vs R1(GPT) vs R4(최종) 비교표 출력
 
-### 🧠 5. 파인튜닝 파트
+###  파인튜닝 파트
 * [ ] [`finetune/dataset/generate_synthetic.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/finetune/dataset/generate_synthetic.py): 금지어 변형 마케팅 문구 300~500건 생성 후 검수
 * [ ] [`finetune/dataset/validate_leakage.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/finetune/dataset/validate_leakage.py): Train 세트와 Dev/Holdout 세트 간 텍스트 누수 0건 검증
 * [ ] [`finetune/recipes/qlora_qwen.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/finetune/recipes/qlora_qwen.py): Colab T4에서 Qwen 3B 4-bit QLoRA 학습
 * [ ] [`src/cosmetic_agent/models/ft_judge.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/src/cosmetic_agent/models/ft_judge.py): 학습된 LoRA 가중치를 로드하여 추론하는 어댑터 연결
 
-### 🖥️ 6. 화면 · 발표 파트
+###  화면 · 발표 파트
 * [ ] [`app/components/sidebar.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/app/components/sidebar.py): 가상 제품 선택 시 보유 시험 성적서 동적 체크박스 렌더링
 * [ ] [`app/components/cards.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/app/components/cards.py): 가능(초록), 조건부(노랑), 불가(빨강) 신호등 카드 및 근거 조항 아코디언 추가
 * [ ] [`app/streamlit_app.py`](file:///c:/SKN35_kim/SKN35-3rd-5Team/app/streamlit_app.py): 상세페이지 일괄 검토 탭에서 문장별 위반 하이라이트 UI 구현
