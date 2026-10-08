@@ -1,0 +1,10 @@
+# Base System Configuration
+app:
+  name: "cosmetic-ad-agent"
+  version: "0.1.0"
+  environment: "development"
+
+limits:
+  max_retry_query: 2     # 재검색 최대 횟수
+  max_retry_copy: 2      # 제안 문구 재생성 최대 횟수
+  max_sentence_batch: 50 # 상세페이지 문장 일괄 분할 상한

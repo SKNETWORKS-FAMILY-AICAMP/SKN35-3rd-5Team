@@ -1,0 +1,65 @@
+[
+  {
+    "product_id": "PROD_001",
+    "name": "하이드라 워터 크림",
+    "category": "일반",
+    "functional_type": null,
+    "owned_evidence": [
+      {
+        "test_type": "인체적용시험",
+        "item": "피부 겉보습 및 속보습 개선",
+        "value": "4주 사용 후 보습력 42% 개선",
+        "institute": "한국피부과학연구원"
+      }
+    ]
+  },
+  {
+    "product_id": "PROD_002",
+    "name": "시카 릴리프 진정 토너",
+    "category": "일반",
+    "functional_type": null,
+    "owned_evidence": []
+  },
+  {
+    "product_id": "PROD_003",
+    "name": "데일리 프레시 샴푸",
+    "category": "일반",
+    "functional_type": null,
+    "owned_evidence": []
+  },
+  {
+    "product_id": "PROD_004",
+    "name": "루트 리바이탈 탈모 샴푸",
+    "category": "기능성",
+    "functional_type": "탈모 증상 완화",
+    "owned_evidence": [
+      {
+        "test_type": "인체적용시험",
+        "item": "탈모 증상 완화 도움",
+        "value": "24주 사용 대조군 비교 유의미성 확보",
+        "institute": "글로벌의학연구센터"
+      }
+    ]
+  },
+  {
+    "product_id": "PROD_005",
+    "name": "아크네 클리어 폼클렌저",
+    "category": "기능성",
+    "functional_type": "여드름성 피부 완화",
+    "owned_evidence": []
+  },
+  {
+    "product_id": "PROD_006",
+    "name": "타임리스 펩타이드 주름 세럼",
+    "category": "기능성",
+    "functional_type": "주름 개선",
+    "owned_evidence": [
+      {
+        "test_type": "자사비교시험",
+        "item": "피부 탄력감 만족도",
+        "value": "사용 2주차 만족도 91%",
+        "institute": "사내 설문평가"
+      }
+    ]
+  }
+]

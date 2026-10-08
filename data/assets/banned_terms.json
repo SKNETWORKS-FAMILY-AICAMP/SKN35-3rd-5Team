@@ -1,0 +1,29 @@
+[
+  {
+    "term": "발모",
+    "pattern": "발모|육모|양모|모발\\s*성장",
+    "level": 2,
+    "type": "의약품오인",
+    "scope": "공통",
+    "basis_id": "LAW_COSMETIC_RULE_별표5_2가",
+    "fix_hint": "탈모 증상 완화에 도움(기능성 화장품에 한함)"
+  },
+  {
+    "term": "재생",
+    "pattern": "피부\\s*재생|세포\\s*재생|진피\\s*재생",
+    "level": 2,
+    "type": "의약품오인",
+    "scope": "공통",
+    "basis_id": "LAW_COSMETIC_RULE_별표5_2가",
+    "fix_hint": "피부 장벽 강화 또는 피부결 개선"
+  },
+  {
+    "term": "치료",
+    "pattern": "여드름\\s*치료|염증\\s*치료|아토피\\s*완치",
+    "level": 2,
+    "type": "의약품오인",
+    "scope": "공통",
+    "basis_id": "LAW_COSMETIC_RULE_별표5_2가",
+    "fix_hint": "여드름성 피부 완화에 도움(기능성) 또는 피부 진정"
+  }
+]

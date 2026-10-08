@@ -1,0 +1,2 @@
+{"id": "G_DEV_001", "split": "dev", "product_id": "PROD_001", "copy_text": "단 4주 만에 보습력 42% 폭발적 개선 입증!", "ground_truth_level": 1, "violation_type": "소비자오인", "target_claim_type": "보습수치", "required_citation": "NOTICE_실증규정_제3조", "notes": "인체적용시험 수치는 보유하고 있으나 표현이 과장되어 조건부 가능"}
+{"id": "G_DEV_002", "split": "dev", "product_id": "PROD_002", "copy_text": "손상된 피부 세포를 완벽하게 재생시켜 여드름 흉터를 치료합니다.", "ground_truth_level": 2, "violation_type": "의약품오인", "target_claim_type": "세포재생치료", "required_citation": "LAW_COSMETIC_RULE_별표5_2가", "notes": "일반 화장품의 세포 재생 및 치료 표방은 절대 불가"}

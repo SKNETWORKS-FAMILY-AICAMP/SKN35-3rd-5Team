@@ -1,0 +1,1 @@
+{"id": "G_HOLD_001", "split": "holdout", "product_id": "PROD_004", "copy_text": "단 2주 만에 새로운 모발이 빽빽하게 자라나는 발모 기적!", "ground_truth_level": 2, "violation_type": "의약품오인", "target_claim_type": "발모육모", "required_citation": "LAW_COSMETIC_RULE_별표5_2가", "notes": "탈모 기능성 화장품이라도 발모 표방은 불가"}

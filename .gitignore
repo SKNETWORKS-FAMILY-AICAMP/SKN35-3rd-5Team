@@ -1,0 +1,30 @@
+# Python environment
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Local Environment Variables
+.env
+
+# Data & Model weights
+data/01_raw/*.pdf
+data/01_raw/*.hwp
+data/02_processed/*.pkl
+finetune/adapters/*
+!finetune/adapters/.gitkeep
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
