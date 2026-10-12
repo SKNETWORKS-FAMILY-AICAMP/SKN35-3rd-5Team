@@ -10,7 +10,14 @@ from langchain_core.documents import Document
 
 
 def tokenize(text: str) -> list[str]:
-    return re.findall(r"[가-힣]+|[A-Za-z]+|\d+(?:-\d+)*", text.lower())
+    terms = re.findall(r"[가-힣]+|[A-Za-z]+|\d+(?:-\d+)*", text.lower())
+    tokens = list(terms)
+    for term in terms:
+        if not re.fullmatch(r"[가-힣]+", term):
+            continue
+        for size in (2, 3):
+            tokens.extend(f"ko{size}:{term[i:i + size]}" for i in range(len(term) - size + 1))
+    return tokens
 
 
 class SparseBM25Retriever:
@@ -25,15 +32,36 @@ class SparseBM25Retriever:
             payload = pickle.load(stream)
         self.index = payload["index"]
         self.chunks = payload["chunks"]
+        self.tokenized_corpus = payload.get("tokenized_corpus") or [
+            tokenize(chunk["content"]) for chunk in self.chunks
+        ]
 
-    def search_sparse(self, query: str, top_k: int = 10) -> list[Document]:
+    def search_sparse(
+        self,
+        query: str,
+        top_k: int = 10,
+        product_scope: str = "공통",
+    ) -> list[Document]:
         """BM25 점수가 높은 청크를 반환한다."""
         tokens = tokenize(query)
         if not tokens:
             return []
+        query_tokens = set(tokens)
         scores = self.index.get_scores(tokens)
+        allowed_scopes = (
+            None if not product_scope or product_scope == "공통"
+            else {"공통", product_scope}
+        )
         ranked = sorted(
-            (index for index, score in enumerate(scores) if float(score) > 0.0),
+            (
+                index
+                for index, score in enumerate(scores)
+                if query_tokens.intersection(self.tokenized_corpus[index])
+                and (
+                    allowed_scopes is None
+                    or self.chunks[index].get("product_scope", "공통") in allowed_scopes
+                )
+            ),
             key=lambda index: float(scores[index]),
             reverse=True,
         )

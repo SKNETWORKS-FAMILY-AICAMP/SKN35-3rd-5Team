@@ -35,7 +35,7 @@ class Settings(BaseSettings):
 
     # Qdrant
     QDRANT_URL: str = "http://localhost:6333"
-    QDRANT_COLLECTION_NAME: str = "cosmetic_ad_rules"
+    QDRANT_COLLECTION_NAME: str = "cosmetic_ad_rules_v2"
     QDRANT_API_KEY: str = ""
 
     # Assets & Indexes 파일 기본 경로

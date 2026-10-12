@@ -31,8 +31,15 @@ def _batched(items: list[Any], size: int) -> Iterable[list[Any]]:
 
 
 def tokenize(text: str) -> list[str]:
-    """법령 번호와 한글 단어를 보존하는 BM25 토크나이저."""
-    return re.findall(r"[가-힣]+|[A-Za-z]+|\d+(?:-\d+)*", text.lower())
+    """어절과 한글 2·3그램을 함께 사용해 조사·활용형 차이를 완화한다."""
+    terms = re.findall(r"[가-힣]+|[A-Za-z]+|\d+(?:-\d+)*", text.lower())
+    tokens = list(terms)
+    for term in terms:
+        if not re.fullmatch(r"[가-힣]+", term):
+            continue
+        for size in (2, 3):
+            tokens.extend(f"ko{size}:{term[i:i + size]}" for i in range(len(term) - size + 1))
+    return tokens
 
 
 def load_chunks(path: Path = DEFAULT_CHUNKS_PATH) -> list[dict[str, Any]]:
@@ -117,8 +124,9 @@ def build_bm25_index(chunks: list[dict[str, Any]], output_path: Path) -> None:
     tokenized_corpus = [tokenize(chunk["content"]) for chunk in chunks]
     payload = {
         "version": 1,
-        "tokenizer": "ko-regex-v1",
+        "tokenizer": "ko-char-ngram-v2",
         "chunks": chunks,
+        "tokenized_corpus": tokenized_corpus,
         "index": BM25Okapi(tokenized_corpus),
     }
     with output_path.open("wb") as stream:

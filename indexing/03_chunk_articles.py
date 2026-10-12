@@ -85,6 +85,11 @@ DOCUMENT_ID_NAMES = {
     "화장품 표시·광고 관리 지침": "관리지침",
 }
 
+AD_RELEVANT_ARTICLES = {
+    "화장품법": {"제2조", "제4조", "제13조", "제14조"},
+    "화장품법 시행규칙": {"제22조", "제23조"},
+}
+
 
 def _canonical_id(prefix: str, source: str, location: str, part: int = 1) -> str:
     """골든셋 채점 규칙인 ``종류_문서_위치`` 형식의 ID를 만든다."""
@@ -219,6 +224,10 @@ def _law_chunk(
 ) -> dict[str, Any]:
     prefix = "NOTICE" if "고시" in law_type else "LAW"
     scope = "기능성" if "기능성화장품" in source else "공통"
+    if source == "화장품법" and section == "제4조":
+        scope = "기능성"
+    if source == "화장품법 시행규칙" and section == "별표5-2나":
+        scope = "일반"
     return {
         "id": _canonical_id(prefix, source, section, part),
         "legacy_ids": _legacy_ids(prefix, source, section, part),
@@ -387,6 +396,7 @@ def _guide_chunk(
         _split_long_text(body, max_chars=available, overlap_chars=DEFAULT_OVERLAP_CHARS), 1
     ):
         content = f"{header}\n{part}"
+        scope = "일반" if location == "별표1_기능성" else "공통"
         chunks.append({
             "id": _canonical_id("GUIDE", source, location, index),
             "legacy_ids": _legacy_ids("GUIDE", source, location, index),
@@ -396,7 +406,7 @@ def _guide_chunk(
             "section_title": location,
             "document_type": "지침",
             "authority": 3,
-            "product_scope": "공통",
+            "product_scope": scope,
             "effective_date": effective_date,
             "source_file": source_file,
             "part": index,
@@ -406,7 +416,29 @@ def _guide_chunk(
 
 def chunk_guide_text(path: Path, max_chars: int = DEFAULT_MAX_CHARS) -> list[dict[str, Any]]:
     """표시·광고 관리지침 TXT를 장/별표 단위로 청킹한다."""
-    text = _clean_text(path.read_text(encoding="utf-8"))
+    raw_text = path.read_text(encoding="utf-8")
+    # PDF 열 경계에서 단어가 잘린 대표적인 변환 오류를 복원한다.
+    raw_text = re.sub(r"엑소\s*\n\s*좀", "엑소좀", raw_text)
+    raw_text = re.sub(r"것으\s*\n\s*로", "것으로", raw_text)
+    raw_text = re.sub(r"규\s*\n\s*정", "규정", raw_text)
+    raw_text = re.sub(r"사\s*\n\s*용", "사용", raw_text)
+    # 13~14쪽의 3열 표가 텍스트 추출 과정에서 행 순서가 뒤섞인 부분을 복원한다.
+    mixed_start = raw_text.find("· 인체에서 유래한 특정성분")
+    page_fourteen = raw_text.find("<!-- page 14 -->", mixed_start)
+    continuation = raw_text.find("로 오인할 수 있는 표현", page_fourteen)
+    next_category = raw_text.find("저속하거나", continuation)
+    if min(mixed_start, page_fourteen, continuation, next_category) >= 0:
+        notes_start = raw_text.find("\n", mixed_start) + 1
+        notes = raw_text[notes_start:page_fourteen].strip()
+        repaired = (
+            "· 인체에서 유래한 특정성분(엑소좀, 리포좀 등)이 들어 있는 것으로 "
+            "오인할 수 있는 표현\n"
+            "<예시> 엑소좀 화장품, 엑소좀 등\n"
+            f"{notes}\n"
+        )
+        raw_text = raw_text[:mixed_start] + repaired + raw_text[next_category:]
+    text = _clean_text(raw_text)
+    text = re.sub(r"(?m)^(?:구\s*분|금\s*지\s*표\s*현|비\s*고)\s*$\n?", "", text)
     source = "화장품 표시·광고 관리 지침"
     date_match = re.search(r"(20\d{2})[.\-]\s*(\d{1,2})[.\-]\s*(\d{1,2})", text)
     effective_date = "-".join(
@@ -439,18 +471,25 @@ def chunk_guide_text(path: Path, max_chars: int = DEFAULT_MAX_CHARS) -> list[dic
             ("별표1_모발", r"모발\s*관련\s*표현"),
             ("별표1_생리활성", r"생리활성\s*관련"),
             ("별표1_신체개선", r"신체\s*개선\s*표현"),
+            ("별표1_기타", r"원료\s*관련\s*표현"),
+            ("별표1_기타", r"(?m)^기타\s*$"),
             ("별표1_기능성", r"기능성\s*관련\s*표현"),
+            ("별표1_기타", r"천연[·ㆍ]?유기농"),
             ("별표1_지정공인", r"특정인\s*또는\s*\n?기관의\s*지정"),
             ("별표1_범위이탈", r"화장품의\s*범위를\s*\n?벗어나는\s*광고"),
             ("별표1_인체유래", r"인체\s*유래\s*성분"),
+            ("별표1_기타", r"저속하거나\s*\n?혐오감을"),
             ("별표1_사용방법", r"사실과\s*\n?다르거나\s*\n?소비자가"),
             ("별표1_기타", r"그\s*밖의\s*기타\s*\n?표현"),
         ]
+        grouped_sections: dict[str, list[str]] = {}
         for location, body in _slice_marked_sections(appendix_one_text, category_specs):
+            grouped_sections.setdefault(location, []).append(body)
+        for location, bodies in grouped_sections.items():
             chunks.extend(_guide_chunk(
                 source=source,
                 location=location,
-                body=body,
+                body="\n\n".join(bodies),
                 effective_date=effective_date,
                 source_file=path.name,
                 max_chars=max_chars,
@@ -498,6 +537,7 @@ def chunk_case_text(path: Path, max_chars: int = DEFAULT_MAX_CHARS) -> list[dict
     date_match = re.search(r"(20\d{2})[-._ ](\d{2})[-._ ](\d{2})", path.name)
     effective_date = "-".join(date_match.groups()) if date_match else ""
     topic = re.sub(r"^case_\d{4}-\d{2}-\d{2}_", "", path.stem).replace("_", "")
+    topic = re.sub(r"\d+건$", "", topic)
     # 웹페이지 복사 과정에서 붙은 스크립트/저작권 안내는 검색 노이즈라 제거한다.
     text = re.split(r"//\s*0\)\s*\{|저작권정책 담당자안내", text, maxsplit=1)[0].strip()
     header = f"[행정처분·부당광고 사례 > {title}]"
@@ -550,8 +590,27 @@ def chunk_raw_documents(raw_dir: Path, max_chars: int = DEFAULT_MAX_CHARS) -> li
     for path in sorted((raw_dir / "guide").glob("*.txt")):
         chunks.extend(chunk_guide_text(path, max_chars=max_chars))
     for path in sorted((raw_dir / "cases").glob("*.txt")):
+        raw = path.read_text(encoding="utf-8")
+        if "화장품" not in raw:
+            continue
         chunks.extend(chunk_case_text(path, max_chars=max_chars))
-    return chunks
+    return [chunk for chunk in chunks if _is_ad_relevant_chunk(chunk)]
+
+
+def _is_ad_relevant_chunk(chunk: dict[str, Any]) -> bool:
+    """광고 심사에 직접 쓰이는 법적 근거와 화장품 사례만 남긴다."""
+    source = chunk["source"]
+    article = chunk["article"]
+    document_type = chunk["document_type"]
+    if document_type in {"지침", "사례"}:
+        return True
+    if source == "화장품 표시·광고 실증에 관한 규정":
+        return True
+    if source in AD_RELEVANT_ARTICLES:
+        return article in AD_RELEVANT_ARTICLES[source] or (
+            source == "화장품법 시행규칙" and article.startswith("별표5-")
+        )
+    return False
 
 
 def validate_chunks(chunks: Iterable[dict[str, Any]], max_chars: int) -> list[dict[str, Any]]:

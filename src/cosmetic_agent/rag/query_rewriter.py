@@ -36,7 +36,14 @@ class QueryRewriter:
                 expansions.append(regulatory_term)
 
         # 특정 평가 문구가 아닌 일반적인 위반 유형 신호만 사용한다.
-        if re.search(r"(치료|재생|질병|흉터|염증|예방|세포)", copy_text):
+        medical_signal = re.search(
+            r"(치료|재생|질병|흉터|염증|예방|세포)", copy_text
+        )
+        hair_growth_signal = re.search(
+            r"(발모|육모|양모|모발.{0,10}(성장|자라|증가)|머리카락.{0,10}(성장|자라|증가))",
+            copy_text,
+        )
+        if medical_signal or hair_growth_signal:
             expansions.append("의약품으로 잘못 인식할 우려가 있는 효능 효과 표시 광고")
         if re.search(r"(\d+(?:\.\d+)?\s*%|입증|임상|시험|개선)", copy_text):
             expansions.append("광고 주장 실증자료 시험결과 객관적 과학적 근거 직접적인 관계")

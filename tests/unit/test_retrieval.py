@@ -12,7 +12,7 @@ class FakeRetriever:
     def search_dense(self, query, top_k, product_scope):
         return self.documents[:top_k]
 
-    def search_sparse(self, query, top_k):
+    def search_sparse(self, query, top_k, product_scope="공통"):
         return self.documents[:top_k]
 
 
@@ -50,3 +50,9 @@ def test_query_rewriter_adds_regulatory_vocabulary():
 
     assert "의약품으로 잘못 인식" in rewritten
     assert "소비자 오인" in rewritten
+
+
+def test_query_rewriter_maps_general_hair_growth_claims():
+    rewritten = QueryRewriter().rewrite("모발이 빠르게 자라도록 돕습니다")
+
+    assert "의약품으로 잘못 인식" in rewritten
