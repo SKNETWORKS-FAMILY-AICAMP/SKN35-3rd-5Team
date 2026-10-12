@@ -33,6 +33,8 @@ def test_chunk_law_xml_adds_legal_metadata(tmp_path):
 
     assert len(chunks) == 1
     assert chunks[0]["article"] == "제13조"
+    assert chunks[0]["id"] == "LAW_화장품법_제13조"
+    assert "LAW*화장품법*제13조" in chunks[0]["legacy_ids"]
     assert chunks[0]["authority"] == 1
     assert chunks[0]["effective_date"] == "2026-01-01"
     assert "의약품으로 오인" in chunks[0]["content"]
@@ -57,3 +59,21 @@ def test_validate_chunks_rejects_duplicate_ids():
         assert "중복" in str(error)
     else:
         raise AssertionError("중복 ID를 허용하면 안 됩니다.")
+
+
+def test_appendix_five_is_split_into_item_locations():
+    text = """1. 화장품 광고의 매체 또는 수단
+    가. 신문 또는 방송
+    2. 화장품 표시ㆍ광고 시 준수사항
+    가. 의약품으로 잘못 인식할 광고를 하지 말 것
+    나. 기능성화장품으로 잘못 인식할 광고를 하지 말 것
+    카. 다른 제품을 비방하지 말 것"""
+
+    sections = chunk_articles._split_advertising_appendix(text)
+
+    assert [location for location, _ in sections] == [
+        "별표5-1",
+        "별표5-2가",
+        "별표5-2나",
+        "별표5-2카",
+    ]

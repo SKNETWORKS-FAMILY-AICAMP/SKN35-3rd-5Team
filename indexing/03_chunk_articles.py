@@ -8,7 +8,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
 import unicodedata
@@ -78,9 +77,32 @@ def _document_type_for_law(law_type: str) -> str:
     return "고시" if "고시" in law_type else "법령"
 
 
-def _stable_id(prefix: str, source: str, section: str, part: int, content: str) -> str:
-    digest = hashlib.sha1(content.encode("utf-8")).hexdigest()[:10]
-    return f"{prefix}_{_slug(source)}_{_slug(section)}_{part:03d}_{digest}"
+DOCUMENT_ID_NAMES = {
+    "화장품법": "화장품법",
+    "화장품법 시행규칙": "시행규칙",
+    "화장품 표시·광고 실증에 관한 규정": "실증규정",
+    "화장품 표시ㆍ광고 실증에 관한 규정": "실증규정",
+    "화장품 표시·광고 관리 지침": "관리지침",
+}
+
+
+def _canonical_id(prefix: str, source: str, location: str, part: int = 1) -> str:
+    """골든셋 채점 규칙인 ``종류_문서_위치`` 형식의 ID를 만든다."""
+    document = DOCUMENT_ID_NAMES.get(source, _slug(source))
+    normalized_location = re.sub(r"[^0-9A-Za-z가-힣-]+", "_", location).strip("_")
+    base = f"{prefix}_{document}_{normalized_location}"
+    return base if part == 1 else f"{base}_part{part}"
+
+
+def _legacy_ids(prefix: str, source: str, location: str, part: int = 1) -> list[str]:
+    """이전 생성본 및 초기 골든셋 ID와 전환 기간 동안 호환한다."""
+    document = DOCUMENT_ID_NAMES.get(source, _slug(source))
+    location_star = re.sub(r"\s+", "", location)
+    suffix = "" if part == 1 else f"*part{part}"
+    aliases = [f"{prefix}*{document}*{location_star}{suffix}"]
+    if prefix == "LAW" and document == "시행규칙" and location == "별표5-2가":
+        aliases.append("LAW_COSMETIC_RULE_별표5_2가")
+    return aliases
 
 
 def _is_searchable_body(body: str) -> bool:
@@ -164,6 +186,26 @@ def _article_reference(article: ET.Element) -> str:
     return f"제{number}조" + (f"의{branch}" if branch and branch != "0" else "")
 
 
+def _split_advertising_appendix(body: str) -> list[tuple[str, str]]:
+    """시행규칙 별표5를 1항과 광고 준수사항 2가~2카로 분리한다."""
+    second = re.search(r"(?m)^\s*2\.\s*화장품\s*표시[ㆍ·]광고\s*시\s*준수사항", body)
+    if not second:
+        return [("별표5", body)]
+
+    sections: list[tuple[str, str]] = []
+    first = body[: second.start()].strip()
+    if first:
+        sections.append(("별표5-1", first))
+
+    compliance = body[second.start():]
+    item_matches = list(re.finditer(r"(?m)^\s*([가-카])\.\s+", compliance))
+    for index, match in enumerate(item_matches):
+        end = item_matches[index + 1].start() if index + 1 < len(item_matches) else len(compliance)
+        item = compliance[match.start():end].strip()
+        sections.append((f"별표5-2{match.group(1)}", item))
+    return sections
+
+
 def _law_chunk(
     *,
     source: str,
@@ -178,7 +220,8 @@ def _law_chunk(
     prefix = "NOTICE" if "고시" in law_type else "LAW"
     scope = "기능성" if "기능성화장품" in source else "공통"
     return {
-        "id": _stable_id(prefix, source, section, part, content),
+        "id": _canonical_id(prefix, source, section, part),
+        "legacy_ids": _legacy_ids(prefix, source, section, part),
         "content": content,
         "source": source,
         "article": section,
@@ -262,27 +305,34 @@ def chunk_law_xml(path: Path, max_chars: int = DEFAULT_MAX_CHARS) -> list[dict[s
     for annex in root.findall("./별표/별표단위"):
         number = _text(annex, "별표번호").lstrip("0") or "0"
         branch = _text(annex, "별표가지번호").lstrip("0")
-        section = "별표" + (f" {number}" if number != "0" else "") + (f"의{branch}" if branch else "")
+        annex_kind = _text(annex, "별표구분") or "별표"
+        section = annex_kind + (f" {number}" if number != "0" else "") + (f"의{branch}" if branch else "")
         title = _text(annex, "별표제목")
         body = _text(annex, "별표내용")
         if not _is_searchable_body(body):
             continue
-        header = f"[{source} {section}" + (f" {title}" if title else "") + "]"
-        available = max(200, max_chars - len(header) - 1)
-        for index, part in enumerate(_split_long_text(body, max_chars=available), 1):
-            content = f"{header}\n{part}"
-            chunks.append(
-                _law_chunk(
-                    source=source,
-                    section=section,
-                    title=title,
-                    content=content,
-                    law_type=law_type,
-                    effective_date=effective_date,
-                    source_file=path.name,
-                    part=index,
+        structured_sections = (
+            _split_advertising_appendix(body)
+            if source == "화장품법 시행규칙" and annex_kind == "별표" and number == "5" and not branch
+            else [(re.sub(r"\s+", "", section), body)]
+        )
+        for location, section_body in structured_sections:
+            header = f"[{source} {location}" + (f" {title}" if title else "") + "]"
+            available = max(200, max_chars - len(header) - 1)
+            for index, part in enumerate(_split_long_text(section_body, max_chars=available), 1):
+                content = f"{header}\n{part}"
+                chunks.append(
+                    _law_chunk(
+                        source=source,
+                        section=location,
+                        title=title,
+                        content=content,
+                        law_type=law_type,
+                        effective_date=effective_date,
+                        source_file=path.name,
+                        part=index,
+                    )
                 )
-            )
     return chunks
 
 
@@ -303,40 +353,130 @@ def _sectionize_text(text: str, heading_re: re.Pattern[str]) -> list[tuple[str, 
     return [(title, _clean_text("\n".join(lines))) for title, lines in sections]
 
 
+def _slice_marked_sections(
+    text: str,
+    specifications: list[tuple[str, str]],
+) -> list[tuple[str, str]]:
+    """라벨과 시작 패턴 목록을 사용해 표 형태 TXT의 의미 구간을 자른다."""
+    starts: list[tuple[int, str]] = []
+    for label, pattern in specifications:
+        match = re.search(pattern, text, flags=re.IGNORECASE | re.MULTILINE)
+        if match:
+            starts.append((match.start(), label))
+    starts.sort()
+    sections: list[tuple[str, str]] = []
+    for index, (start, label) in enumerate(starts):
+        end = starts[index + 1][0] if index + 1 < len(starts) else len(text)
+        sections.append((label, text[start:end].strip()))
+    return sections
+
+
+def _guide_chunk(
+    *,
+    source: str,
+    location: str,
+    body: str,
+    effective_date: str,
+    source_file: str,
+    max_chars: int,
+) -> list[dict[str, Any]]:
+    header = f"[{source} > {location}]"
+    available = max(200, max_chars - len(header) - 1)
+    chunks: list[dict[str, Any]] = []
+    for index, part in enumerate(
+        _split_long_text(body, max_chars=available, overlap_chars=DEFAULT_OVERLAP_CHARS), 1
+    ):
+        content = f"{header}\n{part}"
+        chunks.append({
+            "id": _canonical_id("GUIDE", source, location, index),
+            "legacy_ids": _legacy_ids("GUIDE", source, location, index),
+            "content": content,
+            "source": source,
+            "article": location,
+            "section_title": location,
+            "document_type": "지침",
+            "authority": 3,
+            "product_scope": "공통",
+            "effective_date": effective_date,
+            "source_file": source_file,
+            "part": index,
+        })
+    return chunks
+
+
 def chunk_guide_text(path: Path, max_chars: int = DEFAULT_MAX_CHARS) -> list[dict[str, Any]]:
     """표시·광고 관리지침 TXT를 장/별표 단위로 청킹한다."""
-    text = path.read_text(encoding="utf-8")
+    text = _clean_text(path.read_text(encoding="utf-8"))
     source = "화장품 표시·광고 관리 지침"
     date_match = re.search(r"(20\d{2})[.\-]\s*(\d{1,2})[.\-]\s*(\d{1,2})", text)
     effective_date = "-".join(
         [date_match.group(1), date_match.group(2).zfill(2), date_match.group(3).zfill(2)]
     ) if date_match else ""
     chunks: list[dict[str, Any]] = []
-    for heading, body in _sectionize_text(text, GUIDE_HEADING_RE):
+    appendix_one = re.search(r"(?m)^\[별표\s*1\]", text)
+    appendix_two = re.search(r"(?m)^\[별표\s*2\]", text)
+    preamble = text[: appendix_one.start()] if appendix_one else text
+    for heading, body in _sectionize_text(preamble, GUIDE_HEADING_RE):
         if heading == "서문" and "I. 목적" not in body:
             # 표지, 제·개정 점검표 및 목차는 검색 근거로 사용하지 않는다.
             continue
         if len(re.sub(r"\s+", " ", body).strip()) < 30:
             continue
-        header = f"[{source} > {heading}]"
-        available = max(200, max_chars - len(header) - 1)
-        for index, part in enumerate(
-            _split_long_text(body, max_chars=available, overlap_chars=DEFAULT_OVERLAP_CHARS), 1
-        ):
-            content = f"{header}\n{part}"
-            chunks.append({
-                "id": _stable_id("GUIDE", source, heading, index, content),
-                "content": content,
-                "source": source,
-                "article": heading,
-                "section_title": heading,
-                "document_type": "지침",
-                "authority": 3,
-                "product_scope": "공통",
-                "effective_date": effective_date,
-                "source_file": path.name,
-                "part": index,
-            })
+        chunks.extend(_guide_chunk(
+            source=source,
+            location=heading,
+            body=body,
+            effective_date=effective_date,
+            source_file=path.name,
+            max_chars=max_chars,
+        ))
+
+    if appendix_one and appendix_two:
+        appendix_one_text = text[appendix_one.end():appendix_two.start()]
+        category_specs = [
+            ("별표1_질병", r"질병을\s*진단[·ㆍ]?\s*\n?치료"),
+            ("별표1_피부", r"피부\s*관련\s*표현"),
+            ("별표1_모발", r"모발\s*관련\s*표현"),
+            ("별표1_생리활성", r"생리활성\s*관련"),
+            ("별표1_신체개선", r"신체\s*개선\s*표현"),
+            ("별표1_기능성", r"기능성\s*관련\s*표현"),
+            ("별표1_지정공인", r"특정인\s*또는\s*\n?기관의\s*지정"),
+            ("별표1_범위이탈", r"화장품의\s*범위를\s*\n?벗어나는\s*광고"),
+            ("별표1_인체유래", r"인체\s*유래\s*성분"),
+            ("별표1_사용방법", r"사실과\s*\n?다르거나\s*\n?소비자가"),
+            ("별표1_기타", r"그\s*밖의\s*기타\s*\n?표현"),
+        ]
+        for location, body in _slice_marked_sections(appendix_one_text, category_specs):
+            chunks.extend(_guide_chunk(
+                source=source,
+                location=location,
+                body=body,
+                effective_date=effective_date,
+                source_file=path.name,
+                max_chars=max_chars,
+            ))
+
+        appendix_two_text = text[appendix_two.end():]
+        footer = re.search(r"(?m)^\*\s*본\s*민원인\s*안내서", appendix_two_text)
+        if footer:
+            appendix_two_text = appendix_two_text[:footer.start()]
+        second = re.search(r"(?m)^\s*2\.\s*효능[·ㆍ]효과[·ㆍ]품질", appendix_two_text)
+        if second:
+            appendix_two_sections = [
+                ("별표2_실증대상", appendix_two_text[:second.start()].strip()),
+                ("별표2_효능표현", appendix_two_text[second.start():].strip()),
+            ]
+        else:
+            appendix_two_sections = [("별표2_실증대상", appendix_two_text)]
+        for location, body in appendix_two_sections:
+            chunks.extend(_guide_chunk(
+                source=source,
+                location=location,
+                body=body,
+                effective_date=effective_date,
+                source_file=path.name,
+                max_chars=max_chars,
+            ))
     return chunks
 
 
@@ -357,6 +497,7 @@ def chunk_case_text(path: Path, max_chars: int = DEFAULT_MAX_CHARS) -> list[dict
     title = _case_title(text, path)
     date_match = re.search(r"(20\d{2})[-._ ](\d{2})[-._ ](\d{2})", path.name)
     effective_date = "-".join(date_match.groups()) if date_match else ""
+    topic = re.sub(r"^case_\d{4}-\d{2}-\d{2}_", "", path.stem).replace("_", "")
     # 웹페이지 복사 과정에서 붙은 스크립트/저작권 안내는 검색 노이즈라 제거한다.
     text = re.split(r"//\s*0\)\s*\{|저작권정책 담당자안내", text, maxsplit=1)[0].strip()
     header = f"[행정처분·부당광고 사례 > {title}]"
@@ -366,8 +507,11 @@ def chunk_case_text(path: Path, max_chars: int = DEFAULT_MAX_CHARS) -> list[dict
         _split_long_text(text, max_chars=available, overlap_chars=DEFAULT_OVERLAP_CHARS), 1
     ):
         content = f"{header}\n{part}"
+        base_id = f"CASE_{effective_date or '날짜미상'}_{topic}"
+        chunk_id = base_id if index == 1 else f"{base_id}_part{index}"
         chunks.append({
-            "id": _stable_id("CASE", title, effective_date or path.stem, index, content),
+            "id": chunk_id,
+            "legacy_ids": [f"CASE*{effective_date or '날짜미상'}*{topic}" + ("" if index == 1 else f"*part{index}")],
             "content": content,
             "source": "식품의약품안전처 부당광고 적발 사례",
             "article": title,
