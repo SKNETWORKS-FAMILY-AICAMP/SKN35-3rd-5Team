@@ -2,22 +2,24 @@
 [domain/schemas.py]
 Pydantic 기반의 결과 계약 모델 및 요청/응답 스키마.
 """
-from typing import Literal, Optional
-from pydantic import BaseModel, Field, model_validator
+from typing import Annotated, Literal, Optional
+from pydantic import BaseModel, Field, StringConstraints, model_validator
+
+RequiredText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 
 class OwnedEvidence(BaseModel):
     """보유 근거 스키마"""
-    test_type: str = Field(description="시험 종류 (예: 인체적용시험, 시험성적서 등)")
-    item: str = Field(description="시험 항목 (예: 피부 겉보습 개선)")
+    test_type: RequiredText = Field(description="시험 종류 (예: 인체적용시험, 시험성적서 등)")
+    item: RequiredText = Field(description="시험 항목 (예: 피부 겉보습 개선)")
     value: Optional[str] = Field(default=None, description="수치 및 결과 (예: 42% 개선)")
     institute: Optional[str] = Field(default=None, description="시험 기관")
 
 
 class ProductCard(BaseModel):
     """제품 카드 스키마"""
-    product_id: str
-    name: str
+    product_id: RequiredText
+    name: RequiredText
     category: Literal["일반", "기능성"]
     functional_type: Optional[str] = None
     owned_evidence: list[OwnedEvidence] = Field(default_factory=list)
@@ -67,13 +69,13 @@ class ReviewResult(BaseModel):
 
 class ReviewRequest(BaseModel):
     """단일 문구 검토 요청 스키마"""
-    copy_text: str = Field(description="검토할 광고 문구")
+    copy_text: RequiredText = Field(max_length=5000, description="검토할 단일 광고 문구 (최대 5,000자)")
     product: ProductCard = Field(description="대상 제품 정보")
 
 
 class BulkReviewRequest(BaseModel):
     """상세페이지 일괄 검토 요청 스키마"""
-    full_text: str = Field(description="상세페이지 전체 텍스트 (문장 분할 대상)")
+    full_text: RequiredText = Field(max_length=50000, description="상세페이지 전체 텍스트 (최대 50,000자, 100문장)")
     product: ProductCard = Field(description="대상 제품 정보")
 
 
