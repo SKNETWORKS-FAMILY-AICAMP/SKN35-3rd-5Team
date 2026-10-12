@@ -1,0 +1,83 @@
+# Beaurette Streamlit 설정 — 클린 뷰티 워크스페이스 테마
+# 색 값은 app/components/styles/base.css 의 :root 토큰과 같다. 한쪽을 바꾸면 다른 쪽도 바꾼다.
+
+[server]
+# app/static/ 을 app/static/... 경로로 서빙 (글꼴)
+enableStaticServing = true
+
+[client]
+# Deploy 등 개발자 메뉴를 숨긴다
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "light"
+primaryColor = "#2F5D4B"              # accent (딥 세이지)
+backgroundColor = "#F7F6F3"           # bg (오프화이트)
+secondaryBackgroundColor = "#FFFFFF"  # 입력칸 바탕
+textColor = "#1E2320"                 # ink
+linkColor = "#2B5845"
+borderColor = "#E2E0DA"
+showWidgetBorder = true
+baseRadius = "8px"
+buttonRadius = "8px"
+baseFontSize = 16
+font = "'Pretendard Variable', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif"
+headingFont = "'Pretendard Variable', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif"
+codeFont = "'IBM Plex Mono', 'Pretendard Variable', ui-monospace, monospace"
+headingFontWeights = [700, 700, 650, 650, 600, 600]
+showSidebarBorder = true
+
+# 상태 색 (st.badge 등). 수정 필요 = 로즈, 실증 필요 = 앰버, 사용 가능 = 세이지, 전문가 검토 = 중성 회색
+redColor = "#B23B35"
+redBackgroundColor = "#FBEDEB"
+redTextColor = "#A3352F"
+orangeColor = "#B97A17"
+orangeBackgroundColor = "#FAF1E1"
+orangeTextColor = "#8A5A0E"
+yellowColor = "#B97A17"
+yellowBackgroundColor = "#FAF1E1"
+yellowTextColor = "#8A5A0E"
+greenColor = "#2F5D4B"
+greenBackgroundColor = "#EBF1ED"
+greenTextColor = "#2B5845"
+grayColor = "#7A7F7B"
+grayBackgroundColor = "#F0F0ED"
+grayTextColor = "#5D615E"
+blueColor = "#2F5D4B"
+blueBackgroundColor = "#EBF1ED"
+blueTextColor = "#2B5845"
+violetColor = "#2F5D4B"
+violetBackgroundColor = "#EBF1ED"
+violetTextColor = "#2B5845"
+chartCategoricalColors = ["#2F5D4B", "#8DB59A", "#C9D9CE"]
+
+# 글꼴은 저장소 안에 둔다 (발표장 인터넷이 불안해도 동작). 라이선스: app/static/fonts/LICENSE-*.txt (OFL-1.1)
+[[theme.fontFaces]]
+family = "Pretendard Variable"
+url = "app/static/fonts/PretendardVariable.woff2"
+weight = "45 920"
+style = "normal"
+
+[[theme.fontFaces]]
+family = "IBM Plex Mono"
+url = "app/static/fonts/IBMPlexMono-Latin-500.woff2"
+weight = "500"
+style = "normal"
+unicodeRange = "U+0000-00FF, U+2000-206F, U+2212"
+
+[[theme.fontFaces]]
+family = "IBM Plex Mono"
+url = "app/static/fonts/IBMPlexMono-Latin-600.woff2"
+weight = "600"
+style = "normal"
+unicodeRange = "U+0000-00FF, U+2000-206F, U+2212"
+
+[theme.sidebar]
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F3EF"
+textColor = "#1E2320"
+primaryColor = "#2F5D4B"
+borderColor = "#E7E5E0"
