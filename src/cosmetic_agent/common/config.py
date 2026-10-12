@@ -1,16 +1,17 @@
 """
 [common/config.py]
-Pydantic Settings 기반의 환경변수 및 절대 경로 설정 로더.
+경민님 로컬 환경(C:\\SKN35_kim\\SKN35-3rd-5Team) 전용 절대 경로 및 환경변수 설정 로더.
 """
 from pathlib import Path
 from typing import Literal
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# 프로젝트 루트 경로 (어느 디렉토리에서 실행해도 항상 고정된 절대 경로 기준 제공)
-# src/cosmetic_agent/common/config.py -> parents[3] = 프로젝트 루트 (레포지토리 최상위)
-PROJECT_ROOT: Path = Path(__file__).resolve().parents[3]
+# 1. 경민님 전용 프로젝트 루트 경로 (기본값: C:\SKN35_kim\SKN35-3rd-5Team)
+DEFAULT_ROOT = Path("C:/SKN35_kim/SKN35-3rd-5Team")
+PROJECT_ROOT: Path = Path(os.getenv("PROJECT_ROOT", str(DEFAULT_ROOT))).resolve()
 
-# 주요 디렉토리 경로
+# 2. 전용 하위 디렉토리 절대 경로
 DATA_DIR: Path = PROJECT_ROOT / "data"
 ASSETS_DIR: Path = DATA_DIR / "assets"
 PROCESSED_DIR: Path = DATA_DIR / "02_processed"
@@ -20,21 +21,23 @@ GOLDEN_SET_DIR: Path = DATA_DIR / "golden_set"
 class Settings(BaseSettings):
     # App & API
     PROJECT_NAME: str = "cosmetic-ad-agent"
+    PROJECT_ROOT_PATH: Path = PROJECT_ROOT
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 8000
     API_BASE_URL: str = "http://localhost:8000"
 
-    # OpenAI
+    # OpenAI & NVIDIA API
     OPENAI_API_KEY: str = ""
-    OPENAI_MODEL_NAME: str = "gpt-4o-mini"
-    OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
+    OPENAI_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
+    OPENAI_MODEL_NAME: str = "openai/gpt-oss-20b"
+    OPENAI_EMBEDDING_MODEL: str = "nvidia/nemotron-3-embed-1b"
 
     # Qdrant
     QDRANT_URL: str = "http://localhost:6333"
     QDRANT_COLLECTION_NAME: str = "cosmetic_ad_rules"
     QDRANT_API_KEY: str = ""
 
-    # Assets & Indexes 파일 절대 경로
+    # Assets & Indexes 파일 절대 경로 (경민님 전용 로컬 경로 체계)
     BM25_INDEX_PATH: Path = PROCESSED_DIR / "bm25_index.pkl"
     BANNED_TERMS_PATH: Path = ASSETS_DIR / "banned_terms.json"
     CLAIM_LADDER_PATH: Path = ASSETS_DIR / "claim_ladder.json"
