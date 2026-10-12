@@ -1,17 +1,18 @@
 """
 [common/config.py]
-경민님 로컬 환경(C:\\SKN35_kim\\SKN35-3rd-5Team) 전용 절대 경로 및 환경변수 설정 로더.
+프로젝트 공통 환경설정 및 Pydantic Settings 로더.
+로컬/개인별 설정(API 키, 커스텀 엔드포인트 등)은 .env 파일에서 덮어씁니다.
 """
 from pathlib import Path
 from typing import Literal
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# 1. 경민님 전용 프로젝트 루트 경로 (기본값: C:\SKN35_kim\SKN35-3rd-5Team)
-DEFAULT_ROOT = Path("C:/SKN35_kim/SKN35-3rd-5Team")
+# 1. 프로젝트 루트 자동 탐색 (현재 파일 기준 4단계 상위 폴더: src/cosmetic_agent/common/config.py -> 루트)
+DEFAULT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 PROJECT_ROOT: Path = Path(os.getenv("PROJECT_ROOT", str(DEFAULT_ROOT))).resolve()
 
-# 2. 전용 하위 디렉토리 절대 경로
+# 2. 데이터 하위 디렉토리 기본 경로
 DATA_DIR: Path = PROJECT_ROOT / "data"
 ASSETS_DIR: Path = DATA_DIR / "assets"
 PROCESSED_DIR: Path = DATA_DIR / "02_processed"
@@ -26,18 +27,18 @@ class Settings(BaseSettings):
     API_PORT: int = 8000
     API_BASE_URL: str = "http://localhost:8000"
 
-    # OpenAI & NVIDIA API
+    # OpenAI & LLM API (기본값: 표준 OpenAI, 커스텀/NVIDIA 사용자는 .env에서 오버라이드)
     OPENAI_API_KEY: str = ""
-    OPENAI_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
-    OPENAI_MODEL_NAME: str = "openai/gpt-oss-20b"
-    OPENAI_EMBEDDING_MODEL: str = "nvidia/nemotron-3-embed-1b"
+    OPENAI_BASE_URL: str | None = None
+    OPENAI_MODEL_NAME: str = "gpt-4o-mini"
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
 
     # Qdrant
     QDRANT_URL: str = "http://localhost:6333"
     QDRANT_COLLECTION_NAME: str = "cosmetic_ad_rules"
     QDRANT_API_KEY: str = ""
 
-    # Assets & Indexes 파일 절대 경로 (경민님 전용 로컬 경로 체계)
+    # Assets & Indexes 파일 기본 경로
     BM25_INDEX_PATH: Path = PROCESSED_DIR / "bm25_index.pkl"
     BANNED_TERMS_PATH: Path = ASSETS_DIR / "banned_terms.json"
     CLAIM_LADDER_PATH: Path = ASSETS_DIR / "claim_ladder.json"
@@ -47,7 +48,7 @@ class Settings(BaseSettings):
     DEV_SET_PATH: Path = GOLDEN_SET_DIR / "dev.jsonl"
     HOLDOUT_SET_PATH: Path = GOLDEN_SET_DIR / "holdout.jsonl"
 
-    # 공공데이터포털 (화장품 원료성분정보 등). Encoding/Decoding 키 모두 허용
+    # 공공데이터포털 (화장품 원료성분정보 등)
     DATA_GO_KR_API_KEY: str = ""
 
     # Judge Backend (rule / gpt / ft)
@@ -68,3 +69,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
