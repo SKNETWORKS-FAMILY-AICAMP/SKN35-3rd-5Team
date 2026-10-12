@@ -1,39 +1,150 @@
-"""
-[05_build_indexes.py]
-최종 정제된 청크를 Qdrant(Dense)에 임베딩 적재하고, BM25(Sparse) 인덱스 피클 파일을 생성하는 스크립트.
-"""
+"""Qdrant Dense 인덱스와 BM25 Sparse 인덱스를 생성한다."""
+
+from __future__ import annotations
+
+import json
+import os
+import pickle
+import re
+import uuid
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
+
+from dotenv import load_dotenv
+from openai import OpenAI
+from qdrant_client import QdrantClient, models
+from rank_bm25 import BM25Okapi
 
 
-def build_qdrant_index(chunks: list[dict[str, Any]], collection_name: str) -> None:
-    """Qdrant 벡터 컬렉션 생성 및 Dense 벡터 적재.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_CHUNKS_PATH = PROJECT_ROOT / "data" / "02_processed" / "chunks.jsonl"
+DEFAULT_BM25_PATH = PROJECT_ROOT / "data" / "02_processed" / "bm25_index.pkl"
+DEFAULT_COLLECTION = "cosmetic_ad_rules"
+DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
+EMBEDDING_BATCH_SIZE = 64
+UPSERT_BATCH_SIZE = 64
 
-    Args:
-        chunks: 메타데이터가 부착된 최종 청크 리스트
-        collection_name: Qdrant 컬렉션 명
-    """
-    print(f"[05_index] Qdrant 컬렉션 '{collection_name}' 에 {len(chunks)}개 청크 적재 시작")
-    # TODO (팀원 구현 영역):
-    # 1. OpenAI text-embedding-3-small 임베딩 모델 연결
-    # 2. QdrantClient 컬렉션 생성 및 payload 업로드
-    pass
+
+def _batched(items: list[Any], size: int) -> Iterable[list[Any]]:
+    for start in range(0, len(items), size):
+        yield items[start : start + size]
+
+
+def tokenize(text: str) -> list[str]:
+    """법령 번호와 한글 단어를 보존하는 BM25 토크나이저."""
+    return re.findall(r"[가-힣]+|[A-Za-z]+|\d+(?:-\d+)*", text.lower())
+
+
+def load_chunks(path: Path = DEFAULT_CHUNKS_PATH) -> list[dict[str, Any]]:
+    with path.open(encoding="utf-8") as stream:
+        chunks = [json.loads(line) for line in stream if line.strip()]
+    if not chunks:
+        raise ValueError(f"청크 파일이 비어 있습니다: {path}")
+    return chunks
+
+
+def build_qdrant_index(
+    chunks: list[dict[str, Any]],
+    collection_name: str,
+    *,
+    qdrant_url: str,
+    qdrant_api_key: str,
+    openai_api_key: str,
+    openai_base_url: str = "https://api.openai.com/v1",
+    embedding_model: str = DEFAULT_EMBEDDING_MODEL,
+) -> None:
+    """청크를 임베딩하고 Qdrant Cloud에 멱등적으로 upsert한다."""
+    openai_client = OpenAI(api_key=openai_api_key, base_url=openai_base_url)
+    qdrant = QdrantClient(
+        url=qdrant_url,
+        api_key=qdrant_api_key,
+        timeout=60,
+        check_compatibility=False,
+    )
+
+    vectors: list[list[float]] = []
+    for number, batch in enumerate(_batched(chunks, EMBEDDING_BATCH_SIZE), start=1):
+        response = openai_client.embeddings.create(
+            model=embedding_model,
+            input=[chunk["content"] for chunk in batch],
+            encoding_format="float",
+        )
+        vectors.extend(item.embedding for item in response.data)
+        print(f"[05_index] 임베딩 배치 {number} 완료 ({len(vectors)}/{len(chunks)})")
+
+    vector_size = len(vectors[0])
+    if qdrant.collection_exists(collection_name):
+        info = qdrant.get_collection(collection_name)
+        configured = info.config.params.vectors
+        existing_size = configured.size if hasattr(configured, "size") else None
+        if existing_size != vector_size:
+            raise ValueError(
+                f"기존 컬렉션 차원({existing_size})과 임베딩 차원({vector_size})이 다릅니다. "
+                "컬렉션을 삭제하거나 다른 이름을 사용하세요."
+            )
+    else:
+        qdrant.create_collection(
+            collection_name=collection_name,
+            vectors_config=models.VectorParams(size=vector_size, distance=models.Distance.COSINE),
+        )
+        print(f"[05_index] Qdrant 컬렉션 생성: {collection_name} ({vector_size}차원)")
+
+    qdrant.create_payload_index(
+        collection_name=collection_name,
+        field_name="product_scope",
+        field_schema=models.PayloadSchemaType.KEYWORD,
+        wait=True,
+    )
+
+    points = [
+        models.PointStruct(
+            id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"cosmetic-rag:{chunk['id']}")),
+            vector=vector,
+            payload={**chunk, "chunk_id": chunk["id"], "embedding_model": embedding_model},
+        )
+        for chunk, vector in zip(chunks, vectors, strict=True)
+    ]
+    uploaded = 0
+    for batch in _batched(points, UPSERT_BATCH_SIZE):
+        qdrant.upsert(collection_name=collection_name, points=batch, wait=True)
+        uploaded += len(batch)
+        print(f"[05_index] Qdrant 업로드 완료 ({uploaded}/{len(points)})")
 
 
 def build_bm25_index(chunks: list[dict[str, Any]], output_path: Path) -> None:
-    """BM25 Sparse 인덱스 생성 및 pickle 파일 저장.
-
-    Args:
-        chunks: 메타데이터가 부착된 최종 청크 리스트
-        output_path: pkl 저장 경로
-    """
+    """BM25 인덱스와 원본 청크를 하나의 pickle 파일로 저장한다."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    print(f"[05_index] BM25 인덱스 생성 및 {output_path} 저장 시작")
-    # TODO (팀원 구현 영역):
-    # 1. 형태소 분석기(Kiwi) 또는 기본 토크나이저로 청크 토큰화
-    # 2. BM25Okapi 인덱스 빌드 후 pickle.dump
-    pass
+    tokenized_corpus = [tokenize(chunk["content"]) for chunk in chunks]
+    payload = {
+        "version": 1,
+        "tokenizer": "ko-regex-v1",
+        "chunks": chunks,
+        "index": BM25Okapi(tokenized_corpus),
+    }
+    with output_path.open("wb") as stream:
+        pickle.dump(payload, stream, protocol=pickle.HIGHEST_PROTOCOL)
+    print(f"[05_index] BM25 인덱스 저장: {output_path} ({len(chunks)}개)")
+
+
+def main() -> None:
+    load_dotenv(PROJECT_ROOT / ".env")
+    required = ["OPENAI_API_KEY", "QDRANT_URL", "QDRANT_API_KEY"]
+    missing = [name for name in required if not os.getenv(name)]
+    if missing:
+        raise RuntimeError(f"필수 환경변수가 없습니다: {', '.join(missing)}")
+
+    chunks = load_chunks()
+    build_bm25_index(chunks, Path(os.getenv("BM25_INDEX_PATH", DEFAULT_BM25_PATH)))
+    build_qdrant_index(
+        chunks,
+        os.getenv("QDRANT_COLLECTION_NAME", DEFAULT_COLLECTION),
+        qdrant_url=os.environ["QDRANT_URL"],
+        qdrant_api_key=os.environ["QDRANT_API_KEY"],
+        openai_api_key=os.environ["OPENAI_API_KEY"],
+        openai_base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
+        embedding_model=os.getenv("OPENAI_EMBEDDING_MODEL", DEFAULT_EMBEDDING_MODEL),
+    )
 
 
 if __name__ == "__main__":
-    print("[05_index] 인덱싱 빌더 준비 완료")
+    main()

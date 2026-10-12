@@ -1,14 +1,14 @@
 """
 [common/config.py]
-경민님 로컬 환경(C:\\SKN35_kim\\SKN35-3rd-5Team) 전용 절대 경로 및 환경변수 설정 로더.
+프로젝트 루트를 기준으로 환경변수와 데이터 경로를 구성하는 설정 로더.
 """
 from pathlib import Path
 from typing import Literal
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# 1. 경민님 전용 프로젝트 루트 경로 (기본값: C:\SKN35_kim\SKN35-3rd-5Team)
-DEFAULT_ROOT = Path("C:/SKN35_kim/SKN35-3rd-5Team")
+# 저장소 위치가 바뀌어도 동작하도록 현재 파일에서 프로젝트 루트를 계산한다.
+DEFAULT_ROOT = Path(__file__).resolve().parents[3]
 PROJECT_ROOT: Path = Path(os.getenv("PROJECT_ROOT", str(DEFAULT_ROOT))).resolve()
 
 # 2. 전용 하위 디렉토리 절대 경로
@@ -28,16 +28,16 @@ class Settings(BaseSettings):
 
     # OpenAI & NVIDIA API
     OPENAI_API_KEY: str = ""
-    OPENAI_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
+    OPENAI_BASE_URL: str = "https://api.openai.com/v1"
     OPENAI_MODEL_NAME: str = "openai/gpt-oss-20b"
-    OPENAI_EMBEDDING_MODEL: str = "nvidia/nemotron-3-embed-1b"
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
 
     # Qdrant
     QDRANT_URL: str = "http://localhost:6333"
     QDRANT_COLLECTION_NAME: str = "cosmetic_ad_rules"
     QDRANT_API_KEY: str = ""
 
-    # Assets & Indexes 파일 절대 경로 (경민님 전용 로컬 경로 체계)
+    # Assets & Indexes
     BM25_INDEX_PATH: Path = PROCESSED_DIR / "bm25_index.pkl"
     BANNED_TERMS_PATH: Path = ASSETS_DIR / "banned_terms.json"
     CLAIM_LADDER_PATH: Path = ASSETS_DIR / "claim_ladder.json"

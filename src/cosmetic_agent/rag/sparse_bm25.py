@@ -1,20 +1,48 @@
-"""
-[rag/sparse_bm25.py]
-BM25 키워드 Sparse 검색기 래퍼.
-"""
+"""로컬 BM25 키워드 검색기."""
+
+from __future__ import annotations
+
+import pickle
+import re
 from pathlib import Path
-from typing import Any
+
 from langchain_core.documents import Document
+
+
+def tokenize(text: str) -> list[str]:
+    return re.findall(r"[가-힣]+|[A-Za-z]+|\d+(?:-\d+)*", text.lower())
 
 
 class SparseBM25Retriever:
     def __init__(self, index_path: Path):
-        self.index_path = index_path
-        # TODO (팀원 구현 영역):
-        # pickle 파일로부터 BM25Okapi 인덱스 및 문서 메타데이터 로드
+        self.index_path = Path(index_path)
+        if not self.index_path.exists():
+            raise FileNotFoundError(
+                f"BM25 인덱스가 없습니다: {self.index_path}. "
+                "먼저 indexing/05_build_indexes.py를 실행하세요."
+            )
+        with self.index_path.open("rb") as stream:
+            payload = pickle.load(stream)
+        self.index = payload["index"]
+        self.chunks = payload["chunks"]
 
     def search_sparse(self, query: str, top_k: int = 10) -> list[Document]:
-        """BM25 키워드 검색을 수행합니다."""
-        # TODO (팀원 구현 영역):
-        # 질의 토큰화 후 get_top_n 호출하여 Document 리스트 반환
-        return []
+        """BM25 점수가 높은 청크를 반환한다."""
+        tokens = tokenize(query)
+        if not tokens:
+            return []
+        scores = self.index.get_scores(tokens)
+        ranked = sorted(
+            (index for index, score in enumerate(scores) if float(score) > 0.0),
+            key=lambda index: float(scores[index]),
+            reverse=True,
+        )
+
+        documents: list[Document] = []
+        for index in ranked[:top_k]:
+            chunk = dict(self.chunks[index])
+            content = str(chunk.pop("content", ""))
+            chunk["chunk_id"] = chunk.get("chunk_id") or chunk.get("id")
+            chunk["sparse_score"] = float(scores[index])
+            documents.append(Document(page_content=content, metadata=chunk))
+        return documents
