@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     DEV_SET_PATH: Path = GOLDEN_SET_DIR / "dev.jsonl"
     HOLDOUT_SET_PATH: Path = GOLDEN_SET_DIR / "holdout.jsonl"
 
+    # 공공데이터포털 (화장품 원료성분정보 등). Encoding/Decoding 키 모두 허용
+    DATA_GO_KR_API_KEY: str = ""
+
     # Judge Backend (rule / gpt / ft)
     JUDGE_BACKEND: Literal["rule", "gpt", "ft"] = "rule"
     FT_ADAPTER_PATH: Path = PROJECT_ROOT / "finetune" / "adapters" / "qwen_ad_judge_v1"
