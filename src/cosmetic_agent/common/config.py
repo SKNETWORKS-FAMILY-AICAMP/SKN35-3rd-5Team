@@ -35,7 +35,7 @@ class Settings(BaseSettings):
 
     # Qdrant
     QDRANT_URL: str = "http://localhost:6333"
-    QDRANT_COLLECTION_NAME: str = "cosmetic_ad_rules"
+    QDRANT_COLLECTION_NAME: str = "cosmetic_ad_rules_v2"
     QDRANT_API_KEY: str = ""
 
     # Assets & Indexes 파일 기본 경로
@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     BANNED_TERMS_PATH: Path = ASSETS_DIR / "banned_terms.json"
     CLAIM_LADDER_PATH: Path = ASSETS_DIR / "claim_ladder.json"
     FUNCTIONAL_CLAIMS_PATH: Path = ASSETS_DIR / "functional_claims.json"
+    COPY_GUARD_PATH: Path = ASSETS_DIR / "copy_guard.json"
     TERM_MAP_PATH: Path = ASSETS_DIR / "term_map.json"
     MOCK_PRODUCTS_PATH: Path = ASSETS_DIR / "mock_products.json"
     DEV_SET_PATH: Path = GOLDEN_SET_DIR / "dev.jsonl"
