@@ -31,6 +31,7 @@ class AdReviewState(TypedDict):
     # 4. 제안 및 검증 (suggest_copy / verify_copy)
     suggestion: NotRequired[str]
     next_test: NotRequired[str]
+    suggest_note: NotRequired[str]        # 제안 이유 또는 LLM 오류 메시지
     verify_passed: NotRequired[bool]
     verify_note: NotRequired[str]
     copy_retry: NotRequired[int]          # 재제안 카운터 (최대 2)
