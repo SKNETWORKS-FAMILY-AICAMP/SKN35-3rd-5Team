@@ -29,8 +29,9 @@ class Hit:
     violation: str | None
     level: int | None
     reason: str
-    group: str                     # 근거 묶음: medical · scope · functional · exaggeration · superlative · proof · compare · doctor · verified
+    group: str                     # 근거 묶음: medical · scope · functional · consumer · exaggeration · superlative · proof · compare · doctor · verified
     guide_key: str | None = None   # 관리지침 금지 표현 행을 찾을 낱말
+    annex_mok: str | None = None   # 시행규칙 [별표 5] 제2호의 목 (금지 표현 사전의 law_id 에서)
     case_date: str | None = None   # 관련 적발 사례
     cites: list[int] = field(default_factory=list)
     decisive: bool = False
@@ -89,6 +90,13 @@ _NOVEL = r"엑소좀|줄기\s*세포|PDRN|연어\s*DNA|마이크로\s*니들|성
 _LABEL = {
     "medical": "의약품 오인", "scope": "범위 이탈", "functional": "기능성 오인", "exaggeration": "과장 표현",
     "superlative": "최상급 표현", "proof": "실증 필요", "compare": "비교 표현", "doctor": "전문가 표방",
+}
+# 금지 표현 사전(banned_terms.json)의 type → 근거 묶음 · 화면 라벨
+_TYPE_GROUP = {"의약품오인": "medical", "기능성오인": "functional", "범위이탈": "scope", "비교광고": "compare",
+               "소비자오인": "consumer"}
+_TYPE_LABEL = {
+    "의약품오인": _LABEL["medical"], "기능성오인": _LABEL["functional"], "범위이탈": _LABEL["scope"],
+    "비교광고": _LABEL["compare"], "소비자오인": "소비자 오인",
 }
 
 
@@ -161,11 +169,20 @@ def _candidates(text: str, product: dict) -> list[Hit]:
                 violation="의약품오인" if medical else "기능성오인", level=2,
                 reason=f"'{key}'는 {meaning} 표현으로 봅니다.", group="medical" if medical else "functional",
                 case_date=_case_for(key, None))
+    own_type = product.get("functional_type") if product.get("category") == "기능성" else None
     for term in ds.banned_terms():                            # 금지 표현 사전 (banned_terms.json)
+        if own_type and own_type in term.get("exempt_functional", []):
+            continue                                          # 심사받은 기능성 효능 표현은 그 제품에 한해 허용
+        if term.get("scope") == "기능성" and not own_type:
+            continue                                          # 기능성 제품에만 적용되는 항목
+        vtype = term.get("type", "의약품오인")
+        mok = re.search(r"별표5-2(.)", term.get("law_id") or "")
         for m in re.finditer(term["pattern"], text):
-            add(m, kind="risk", label=_LABEL["medical"], violation=term.get("type", "의약품오인"),
-                level=int(term.get("level", 2)), reason=f"금지 표현 사전 '{term['term']}'에 해당합니다.",
-                group="medical", guide_key=_guide_for(m.group(0), None), case_date=_case_for(m.group(0), None))
+            add(m, kind="risk", label=_TYPE_LABEL.get(vtype, _LABEL["medical"]), violation=vtype,
+                annex_mok=mok.group(1) if mok else None,
+                level=int(term.get("level", 2)),
+                reason=f"금지 표현 사전 '{term['term']}'에 해당합니다." + (f" 대신 — {term['fix_hint']}" if term.get("fix_hint") else ""),
+                group=_TYPE_GROUP.get(vtype, "medical"), guide_key=_guide_for(m.group(0), None), case_date=_case_for(m.group(0), None))
     for pat, guide, reason in _SCOPE:
         for m in re.finditer(pat, text):
             add(m, kind="risk", label=_LABEL["scope"], violation="범위이탈", level=2, reason=reason,
@@ -292,6 +309,8 @@ def _citations_for(h: Hit) -> list[dict]:
         return [c for c in (_law13("1"), _annex5("아"), _guide(h.guide_key)) if c]
     if h.group == "functional":
         return [c for c in (_law13("2"), _annex5("나"), _law4(), _case(h.case_date, words)) if c]
+    if h.group == "consumer":
+        return [c for c in (_law13("4"), _annex5(h.annex_mok or "사"), _guide(h.guide_key)) if c]
     if h.group == "superlative":
         return [_annex5("바"), _law13("4")]
     if h.group == "exaggeration":
@@ -432,6 +451,7 @@ _SUMMARY = {
     "scope": "화장품의 범위를 벗어나는 표현이 있어 이대로는 게재할 수 없습니다.",
     "functional": "기능성화장품으로 오인될 수 있는 표현이 있어 이대로는 게재할 수 없습니다.",
     "superlative": "객관적으로 확인되지 않은 최상급 표현이 있어 이대로는 게재할 수 없습니다.",
+    "consumer": "소비자가 사실과 다르게 인식할 수 있는 표현이 있어 이대로는 게재할 수 없습니다.",
     "exaggeration": "과장된 표현을 덜어 내야 쓸 수 있습니다.",
     "compare": "비교 대상과 기준을 밝힌 객관적 자료가 있어야 쓸 수 있습니다.",
     "proof": "수치·효능을 뒷받침하는 실증 자료가 있어야 쓸 수 있습니다.",
@@ -485,7 +505,7 @@ def review(copy_text: str, product: dict) -> dict:
         next_text, next_ui = _next_test(claim, ladder, hits, level)
 
     if ladder:
-        if decisive and decisive.level == 2 and decisive.group in ("medical", "scope", "doctor"):
+        if decisive and decisive.level == 2 and decisive.group in ("medical", "scope", "doctor", "consumer"):
             original = "X"
         elif re.search(r"\d|지속", text):
             original = 2
