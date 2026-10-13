@@ -13,6 +13,8 @@
 .st-key-bulkin textarea { font-size: var(--fs-body); line-height: 1.7; }
 .st-key-bulkbtn { justify-content: flex-end; gap: 8px; }
 .st-key-bulkfilter { margin: 8px 0 2px; }
+.bw-hint { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: var(--bw-r-md); background: var(--bw-subtle); font-size: var(--fs-small); color: var(--bw-ink-2); }
+.bw-hint .bw-i { --bw-i-size: 18px; color: var(--bw-muted); }
 
 .bw-sents { background: var(--bw-surface); border: 1px solid var(--bw-line); border-radius: var(--bw-r-xl); box-shadow: var(--bw-shadow); }
 .bw-sent { display: grid; grid-template-columns: 28px 104px minmax(0, 1fr); gap: 14px; padding: 16px 20px; border-top: 1px solid var(--bw-line); align-items: start; }

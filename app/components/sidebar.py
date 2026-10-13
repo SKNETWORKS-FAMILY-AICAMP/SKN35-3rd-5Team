@@ -50,5 +50,5 @@ def render_sidebar(pages: dict[str, st.Page], health: dict) -> None:
         else:
             cls, title, body = "is-down", "API 연결 실패", health.get("detail", "")
         html(f'<div class="bw-promo" style="margin-top:20px"><p>근거 있는 문구로<br>더 안전한<br>뷰티 마케팅을<br>'
-             f'<b>{BRAND_NAME}</b>가<br>함께합니다.</p>{scene_img(136)}</div>'
+             f'<b>{BRAND_NAME}</b>가<br>함께합니다.</p><span class="bw-promo-art">{scene_img(136)}</span></div>'
              f'<div class="bw-side-status {cls}"><span><b>{esc(title)}</b> — {esc(body)}</span></div>')

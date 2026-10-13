@@ -130,8 +130,9 @@ with center, st.container(key="center"):
 
         if run:
             text = st.session_state.get("bw_bulk_text", "").strip()
-            if not text:
-                st.session_state["bw_bulk_error"] = "검토할 글을 먼저 붙여 넣으세요."
+            if not text:  # 입력 누락은 오류가 아니라 안내다
+                st.session_state["bw_bulk_error"] = None
+                st.session_state["bw_bulk_hint"] = "검토할 글을 먼저 붙여 넣으세요. 예시 상세페이지로 시작해도 됩니다."
             else:
                 slot = st.empty()
                 try:
@@ -143,10 +144,14 @@ with center, st.container(key="center"):
                             time.sleep(0.12 * MOCK_DELAY)
                     st.session_state["bw_bulk"] = {"items": items, "ctx": ctx, "at": datetime.now(), "n": len(sentences)}
                     st.session_state.pop("bw_bulk_error", None)
+                    st.session_state.pop("bw_bulk_hint", None)
                 except backend.BackendError as err:
                     st.session_state["bw_bulk_error"] = err.message
+                    st.session_state.pop("bw_bulk_hint", None)
                 slot.empty()
 
+        if st.session_state.get("bw_bulk_hint"):
+            html(f'<div class="bw-hint" style="margin-top:12px">{icon("info", 18)}<span>{esc(st.session_state["bw_bulk_hint"])}</span></div>')
         if st.session_state.get("bw_bulk_error"):
             html(f'<div class="bw-error" style="margin-top:12px">{icon("error", 18)}<div><b>검토하지 못했습니다.</b> '
                  f'{esc(st.session_state["bw_bulk_error"])}</div></div>')

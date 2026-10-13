@@ -22,8 +22,8 @@
   /* 글자 */
   --bw-ink: #1E2320;
   --bw-ink-2: #474D49;
-  --bw-muted: #6F746F;
-  --bw-faint: #9A9E99;
+  --bw-muted: #5F645F;          /* 모든 바탕에서 4.87:1 이상 (WCAG AA) */
+  --bw-faint: #6B706B;          /* 무채 바탕에서만 쓴다 — 4.6:1 이상 */
 
   /* 강조 (딥 세이지) */
   --bw-accent: #2F5D4B;
@@ -177,7 +177,6 @@
 /* ── 검토 기준 바 (제품 · 실증 자료) ─────────────────────────────────── */
 .st-key-ctx { align-items: center; gap: 8px; padding: 12px 0 2px; }
 .st-key-ctx [data-testid="stWidgetLabel"] { display: none; }
-.bw-ctx-label { font-size: var(--fs-small); font-weight: 600; color: var(--bw-ink-2); white-space: nowrap; margin-right: 2px; }
 .bw-ctx-meta { font-size: var(--fs-meta); color: var(--bw-muted); white-space: nowrap; }
 .bw-ctx-meta b { color: var(--bw-ink-2); font-weight: 600; }
 
@@ -334,7 +333,11 @@
 }
 .bw-copy .bw-i { --bw-i-size: 16px; }
 .bw-copy:hover { background: #F7FAF6; border-color: var(--bw-accent); }
-.bw-copy:focus-visible { outline: 2px solid var(--bw-accent); outline-offset: 2px; }
+.bw-copy:focus-visible,
+.bw summary:focus-visible,
+.bw a:focus-visible,
+.st-key-nav a:focus-visible,
+.st-key-followups a:focus-visible { outline: 2px solid var(--bw-accent); outline-offset: 2px; border-radius: 8px; }
 .bw-copy.is-done { color: var(--bw-surface); background: var(--bw-accent); border-color: var(--bw-accent); }
 
 .bw-diff { grid-column: 2 / 4; margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--bw-accent-line); }
@@ -527,8 +530,6 @@
 .bw-howto li::before { content: counter(s); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 600 var(--fs-meta)/1 var(--bw-mono); color: var(--bw-accent-text); background: var(--bw-accent-soft); }
 .bw-howto b { color: var(--bw-ink); font-weight: 700; }
 
-.bw-empty-aside { padding: 22px 6px 6px; text-align: center; font-size: var(--fs-small); color: var(--bw-muted); line-height: 1.6; }
-
 /* ── 사이드바 ─────────────────────────────────────────────────────────── */
 .bw-brand { padding: 0 6px 8px; margin-top: -46px; }  /* 사이드바 머리(접기 버튼 줄) 높이만큼 끌어올린다 */
 .bw-brand img { height: 42px; width: auto; display: block; }
@@ -559,17 +560,19 @@
 [class*="st-key-recent_on_"]:hover { background: var(--bw-nav-on); }
 [class*="st-key-recent_on_"] button { color: var(--bw-ink); }
 [class*="st-key-recent_on_"] button p { font-weight: 600; }
+[class*="st-key-recent_on_"] .bw-recent-time { color: var(--bw-muted); }
 .bw-recent-time { font-size: var(--fs-meta); color: var(--bw-faint); white-space: nowrap; padding-right: 10px; }
 
 /* 사이드바 아래 — 브랜드 카드 + 데이터 상태 */
 .bw-promo {
-  position: relative; overflow: hidden;
+  position: relative;
   min-height: 188px; padding: 18px 18px 16px;
   border-radius: var(--bw-r-xl); background: #F3EDE4;
 }
 .bw-promo p { position: relative; z-index: 1; max-width: 58%; font-size: var(--fs-small); line-height: 1.65; color: var(--bw-ink-2); }
 .bw-promo p b { color: var(--bw-ink); font-weight: 700; }
-.bw-promo img { position: absolute; right: -14px; bottom: -8px; width: 136px; height: auto; }
+.bw-promo-art { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }  /* 그림만 잘린다 */
+.bw-promo-art img { position: absolute; right: -14px; bottom: -8px; width: 136px; height: auto; }
 .bw-side-status { display: flex; align-items: flex-start; gap: 8px; padding: 10px 6px 0; font-size: var(--fs-meta); line-height: 1.5; color: var(--bw-muted); }
 .bw-side-status::before { content: ""; flex: none; width: 7px; height: 7px; margin-top: 6px; border-radius: 50%; background: #C99A3A; }
 .bw-side-status.is-live::before { background: var(--bw-accent); }
