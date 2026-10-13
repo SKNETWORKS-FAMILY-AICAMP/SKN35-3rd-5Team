@@ -15,7 +15,8 @@ async def search_regulations(
 ):
     """RAG 하이브리드 검색 디버깅 엔드포인트"""
     service = request.app.state.review_service
-    docs = service.hybrid_retriever.retrieve(q, product_scope=scope)
+    rewritten_query = service.rewriter.rewrite(q)
+    docs = service.hybrid_retriever.retrieve(rewritten_query, product_scope=scope)
     return [
         {"content": doc.page_content, "metadata": doc.metadata}
         for doc in docs

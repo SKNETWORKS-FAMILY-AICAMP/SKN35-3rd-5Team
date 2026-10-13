@@ -2,29 +2,30 @@
 [workflow/graph.py]
 AdReviewState 기반의 LangGraph StateGraph 조립 및 컴파일.
 """
-from langgraph.graph import StateGraph, START, END
-from .state import AdReviewState
-from .nodes import (
-    parse_input_node,
-    rule_check_node,
-    judge_claim_node,
-    build_query_node,
-    retrieve_rules_node,
-    organize_evidence_node,
-    suggest_copy_node,
-    verify_copy_node,
-    finalize_node,
-)
-from .edges import (
-    route_evidence_check,
-    route_level_decision,
-    route_verify_decision,
-)
+from langgraph.graph import END, START, StateGraph
+
 from ..domain.rules import RuleEngine
 from ..domain.verifier import CopyVerifier
 from ..models.base import BaseJudgeModel
 from ..rag.hybrid import HybridRetriever
 from ..rag.query_rewriter import QueryRewriter
+from .edges import (
+    route_evidence_check,
+    route_level_decision,
+    route_verify_decision,
+)
+from .nodes import (
+    build_query_node,
+    finalize_node,
+    judge_claim_node,
+    organize_evidence_node,
+    parse_input_node,
+    retrieve_rules_node,
+    rule_check_node,
+    suggest_copy_node,
+    verify_copy_node,
+)
+from .state import AdReviewState
 
 
 def build_ad_review_graph(
@@ -37,14 +38,38 @@ def build_ad_review_graph(
     """LangGraph StateGraph를 빌드하고 컴파일하여 반환합니다."""
     builder = StateGraph(AdReviewState)
 
+    def run_build_query(state: AdReviewState):
+        """질의 재작성 횟수를 LangGraph 상태 업데이트로 함께 반환합니다."""
+        retry = state.get("query_retry", 0)
+        if "rewritten_query" in state:
+            retry += 1
+
+        retry_state: AdReviewState = {**state, "query_retry": retry}
+        return {
+            **build_query_node(retry_state, rewriter),
+            "query_retry": retry,
+        }
+
+    def run_suggest_copy(state: AdReviewState):
+        """문구 제안 횟수를 LangGraph 상태 업데이트로 함께 반환합니다."""
+        retry = state.get("copy_retry", 0)
+        if "suggestion" in state:
+            retry += 1
+
+        retry_state: AdReviewState = {**state, "copy_retry": retry}
+        return {
+            **suggest_copy_node(retry_state),
+            "copy_retry": retry,
+        }
+
     # 노드 등록 (클로저 주입)
     builder.add_node("parse_input", parse_input_node)
     builder.add_node("rule_check", lambda s: rule_check_node(s, rule_engine))
     builder.add_node("judge_claim", lambda s: judge_claim_node(s, judge_model))
-    builder.add_node("build_query", lambda s: build_query_node(s, rewriter))
+    builder.add_node("build_query", run_build_query)
     builder.add_node("retrieve_rules", lambda s: retrieve_rules_node(s, retriever))
     builder.add_node("organize_evidence", organize_evidence_node)
-    builder.add_node("suggest_copy", suggest_copy_node)
+    builder.add_node("suggest_copy", run_suggest_copy)
     builder.add_node("verify_copy", lambda s: verify_copy_node(s, verifier, rule_engine))
     builder.add_node("finalize", finalize_node)
 

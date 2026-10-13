@@ -5,12 +5,14 @@ LangGraph 노드 함수 구현 (9단계).
 -> 6. organize_evidence -> 7. suggest_copy -> 8. verify_copy -> 9. finalize
 """
 from typing import Any
-from .state import AdReviewState
+
 from ..domain.rules import RuleEngine
 from ..domain.verifier import CopyVerifier
 from ..models.base import BaseJudgeModel
+from ..models.copy_suggester import CopySuggester
 from ..rag.hybrid import HybridRetriever
 from ..rag.query_rewriter import QueryRewriter
+from .state import AdReviewState
 
 
 def parse_input_node(state: AdReviewState) -> dict[str, Any]:
@@ -24,7 +26,9 @@ def parse_input_node(state: AdReviewState) -> dict[str, Any]:
 def rule_check_node(state: AdReviewState, rule_engine: RuleEngine) -> dict[str, Any]:
     """2. rule_check: 금지 표현 사전 매칭 (LLM 호출 없음)"""
     category = state["product"].get("category", "일반")
-    rule_level, hits = rule_engine.check_banned_terms(state["copy_text"], category)
+    # 기능성 유형을 넘겨야 심사받은 효능 문구(예: 탈모 증상 완화)가 금지어로 오탐되지 않는다
+    functional_type = state["product"].get("functional_type")
+    rule_level, hits = rule_engine.check_banned_terms(state["copy_text"], category, functional_type)
     return {
         "rule_level": rule_level,
         "rule_hits": hits,
@@ -33,10 +37,7 @@ def rule_check_node(state: AdReviewState, rule_engine: RuleEngine) -> dict[str, 
 
 def judge_claim_node(state: AdReviewState, judge_model: BaseJudgeModel) -> dict[str, Any]:
     """3. judge_claim: 판정 모델 실행 및 level = max(rule_level, model_level) 하한 보장"""
-    category = state["product"].get("category", "일반")
-    fn_type = state["product"].get("functional_type")
-
-    judge_res = judge_model.judge(state["copy_text"], category, fn_type)
+    judge_res = judge_model.judge_product(state["copy_text"], state["product"])
     model_level = judge_res.get("model_level", 0)
     rule_level = state.get("rule_level", 0)
 
@@ -46,7 +47,11 @@ def judge_claim_node(state: AdReviewState, judge_model: BaseJudgeModel) -> dict[
     return {
         "model_level": model_level,
         "level": final_level,
-        "violation_type": judge_res.get("violation_type", "없음"),
+        "violation_type": (
+            state["rule_hits"][0]["type"]
+            if rule_level > model_level and state.get("rule_hits")
+            else judge_res.get("violation_type", "없음")
+        ),
         "claim_type": judge_res.get("claim_type", "일반"),
     }
 
@@ -81,20 +86,47 @@ def organize_evidence_node(state: AdReviewState) -> dict[str, Any]:
     }
 
 
-def suggest_copy_node(state: AdReviewState) -> dict[str, Any]:
+_default_suggester: CopySuggester | None = None
+
+
+def suggest_copy_node(state: AdReviewState, suggester: CopySuggester | None = None) -> dict[str, Any]:
     """7. suggest_copy: 안전한 대체 문구 및 필요 시험 생성"""
-    # TODO (팀원 구현 영역): LLM 호출하여 대안 문구 및 next_test 제안
+    global _default_suggester
+    if suggester is None:
+        _default_suggester = _default_suggester or CopySuggester()
+        suggester = _default_suggester
+
+    result = suggester.suggest(
+        copy_text=state["copy_text"],
+        product=state["product"],
+        owned_evidence=state["product"].get("owned_evidence", []),
+        level=state.get("level"),
+        violation_type=state.get("violation_type"),
+        evidence_text=state.get("evidence_text", ""),
+        # 재제안일 때만 이전 제안과 검증 탈락 사유를 함께 넘긴다.
+        previous_suggestion=state.get("suggestion"),
+        verify_note=None if state.get("verify_passed", True) else state.get("verify_note"),
+    )
     return {
-        "suggestion": state["copy_text"],
-        "next_test": "인체적용시험 성적서 필요",
+        "suggestion": result.get("suggestion") or "",
+        "next_test": result.get("next_test"),
+        "suggest_note": result.get("suggest_error") or result.get("suggest_rationale", ""),
     }
 
 
 def verify_copy_node(state: AdReviewState, verifier: CopyVerifier, rule_engine: RuleEngine) -> dict[str, Any]:
     """8. verify_copy: 제안 문구의 숫자 날조 및 금지어 재검증"""
     suggestion = state.get("suggestion", "")
-    evidences = state["product"].get("owned_evidence", [])
-    passed, note = verifier.verify_suggestion(suggestion, evidences, rule_engine)
+    product = state["product"]
+    passed, note = verifier.verify_suggestion(
+        suggestion,
+        product.get("owned_evidence", []),
+        rule_engine,
+        product_category=product.get("category", "일반"),
+        functional_type=product.get("functional_type"),
+        # 조건부·불가 문구는 반드시 고쳐야 하므로 원문 그대로의 제안은 탈락시킨다.
+        original=state["copy_text"] if state.get("level", 0) >= 1 else None,
+    )
     return {
         "verify_passed": passed,
         "verify_note": note,
