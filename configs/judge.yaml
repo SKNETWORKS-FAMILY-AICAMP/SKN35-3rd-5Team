@@ -1,0 +1,9 @@
+# Judge Model Configuration
+judge:
+  default_backend: "rule" # rule, gpt, ft
+  temperature: 0.0
+  gpt_model: "gpt-4o-mini"
+  ft_model:
+    base_model_name: "Qwen/Qwen2.5-3B-Instruct"
+    adapter_path: "finetune/adapters/qwen_ad_judge_v1"
+    load_in_4bit: true

@@ -1,0 +1,10 @@
+# Retrieval Configuration (Hybrid RRF)
+hybrid:
+  dense_top_k: 10
+  sparse_top_k: 10
+  final_top_k: 4
+  rrf_k: 60              # RRF 상한 상수 (rank + 60)
+  min_statute_count: 1   # 저관련 법령의 강제 삽입을 막고 직접 근거 1개만 보장
+
+gates:
+  evidence_similarity_threshold: 0.65  # 근거 충분성 1차 유사도 컷오프
