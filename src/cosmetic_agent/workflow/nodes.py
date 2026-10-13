@@ -5,13 +5,14 @@ LangGraph 노드 함수 구현 (9단계).
 -> 6. organize_evidence -> 7. suggest_copy -> 8. verify_copy -> 9. finalize
 """
 from typing import Any
-from .state import AdReviewState
+
 from ..domain.rules import RuleEngine
 from ..domain.verifier import CopyVerifier
 from ..models.base import BaseJudgeModel
 from ..models.copy_suggester import CopySuggester
 from ..rag.hybrid import HybridRetriever
 from ..rag.query_rewriter import QueryRewriter
+from .state import AdReviewState
 
 
 def parse_input_node(state: AdReviewState) -> dict[str, Any]:
@@ -23,21 +24,19 @@ def parse_input_node(state: AdReviewState) -> dict[str, Any]:
 
 
 def rule_check_node(state: AdReviewState, rule_engine: RuleEngine) -> dict[str, Any]:
-    """2. rule_check: 금지 표현 사전 매칭 (LLM 호출 없음)"""
-    category = state["product"].get("category", "일반")
-    rule_level, hits = rule_engine.check_banned_terms(state["copy_text"], category)
+    """2. rule_check: 제품 근거를 포함한 규칙 판정 (LLM 호출 없음)"""
+    # Numerical contradictions must reach the production floor gate too,
+    # rather than only being detected in the standalone rule evaluation.
+    report = rule_engine.evaluate(state["copy_text"], state["product"])
     return {
-        "rule_level": rule_level,
-        "rule_hits": hits,
+        "rule_level": report["level"],
+        "rule_hits": report["hits"],
     }
 
 
 def judge_claim_node(state: AdReviewState, judge_model: BaseJudgeModel) -> dict[str, Any]:
     """3. judge_claim: 판정 모델 실행 및 level = max(rule_level, model_level) 하한 보장"""
-    category = state["product"].get("category", "일반")
-    fn_type = state["product"].get("functional_type")
-
-    judge_res = judge_model.judge(state["copy_text"], category, fn_type)
+    judge_res = judge_model.judge_product(state["copy_text"], state["product"])
     model_level = judge_res.get("model_level", 0)
     rule_level = state.get("rule_level", 0)
 
@@ -47,7 +46,11 @@ def judge_claim_node(state: AdReviewState, judge_model: BaseJudgeModel) -> dict[
     return {
         "model_level": model_level,
         "level": final_level,
-        "violation_type": judge_res.get("violation_type", "없음"),
+        "violation_type": (
+            state["rule_hits"][0]["type"]
+            if rule_level > model_level and state.get("rule_hits")
+            else judge_res.get("violation_type", "없음")
+        ),
         "claim_type": judge_res.get("claim_type", "일반"),
     }
 

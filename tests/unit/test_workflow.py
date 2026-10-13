@@ -20,6 +20,9 @@ class StubRuleEngine:
     def check_banned_terms(self, copy_text: str, category: str, functional_type=None):
         return self.level, []
 
+    def evaluate(self, copy_text: str, product: dict):
+        return {"level": self.level, "hits": []}
+
 
 class StubJudge:
     def __init__(self, level: int = 0):
@@ -31,6 +34,9 @@ class StubJudge:
             "violation_type": "실증필요" if self.level else "없음",
             "claim_type": "보습",
         }
+
+    def judge_product(self, copy_text: str, product: dict):
+        return self.judge(copy_text, product.get("category", "일반"), product.get("functional_type"))
 
 
 class RecordingRewriter:
