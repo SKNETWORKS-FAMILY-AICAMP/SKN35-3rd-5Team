@@ -1,7 +1,10 @@
 """LangGraph 워크플로의 연결, 분기, 재시도 상한을 검증합니다."""
 from copy import deepcopy
 
+import pytest
 from langchain_core.documents import Document
+
+from cosmetic_agent.workflow import nodes
 
 from cosmetic_agent.workflow.edges import (
     route_evidence_check,
@@ -14,7 +17,7 @@ class StubRuleEngine:
     def __init__(self, level: int = 0):
         self.level = level
 
-    def check_banned_terms(self, copy_text: str, category: str):
+    def check_banned_terms(self, copy_text: str, category: str, functional_type=None):
         return self.level, []
 
 
@@ -54,9 +57,20 @@ class StubVerifier:
         self.passed = passed
         self.calls = 0
 
-    def verify_suggestion(self, suggestion, evidences, rule_engine):
+    def verify_suggestion(self, suggestion, evidences, rule_engine, **kwargs):
         self.calls += 1
         return self.passed, "검증 완료" if self.passed else "재제안 필요"
+
+
+class StubSuggester:
+    def suggest(self, **kwargs):
+        return {"suggestion": "안전한 제안 문구", "next_test": None}
+
+
+@pytest.fixture(autouse=True)
+def no_llm_suggester(monkeypatch):
+    """문구 제안 노드가 실제 LLM 을 부르지 않도록 가짜 제안기를 쓴다."""
+    monkeypatch.setattr(nodes, "_default_suggester", StubSuggester())
 
 
 def make_graph(*, level=0, documents=None, verify_passed=True):
