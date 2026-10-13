@@ -1,0 +1,1351 @@
+{
+  "evaluation_date": "2026-10-13",
+  "split": "dev",
+  "scope": "standalone_preliminary_judge_not_RAG",
+  "runs": [
+    {
+      "scope": "standalone_preliminary_judge_not_RAG",
+      "backend": "rule",
+      "model": null,
+      "prompt_version": null,
+      "split": "dev",
+      "summary": {
+        "total": 45,
+        "failed": 0,
+        "accuracy_all_cases": 1.0,
+        "macro_f1_fixed_3_classes": 1.0,
+        "critical_errors_2_to_0": 0,
+        "level2_recall": 1.0,
+        "overflag_rate_on_level0": 0.0,
+        "violation_detection_rate": 1.0,
+        "violation_type_accuracy": 1.0,
+        "mean_latency_ms": 0.6164444444444445,
+        "confusion_truth_x_pred": {
+          "0": {
+            "0": 12,
+            "1": 0,
+            "2": 0,
+            "실패": 0
+          },
+          "1": {
+            "0": 0,
+            "1": 7,
+            "2": 0,
+            "실패": 0
+          },
+          "2": {
+            "0": 0,
+            "1": 0,
+            "2": 26,
+            "실패": 0
+          }
+        }
+      },
+      "records": [
+        {
+          "id": "G_DEV_001",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 18.63
+        },
+        {
+          "id": "G_DEV_002",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "규칙 매칭: '87%'(소비자오인)",
+          "latency_ms": 0.19
+        },
+        {
+          "id": "G_DEV_003",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 0.11
+        },
+        {
+          "id": "G_DEV_004",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '피부를 재생'(의약품오인), '진피층까지 수분을 채워'(범위이탈)",
+          "latency_ms": 0.12
+        },
+        {
+          "id": "G_DEV_005",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 0.1
+        },
+        {
+          "id": "G_DEV_006",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '아토피'(의약품오인)",
+          "latency_ms": 0.13
+        },
+        {
+          "id": "G_DEV_007",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "규칙 매칭: '피부장벽'(실증필요)",
+          "latency_ms": 0.97
+        },
+        {
+          "id": "G_DEV_008",
+          "truth": 2,
+          "truth_type": "비교광고",
+          "predicted": 2,
+          "violation_type": "비교광고",
+          "rationale": "규칙 매칭: '최고'(비교광고)",
+          "latency_ms": 0.11
+        },
+        {
+          "id": "G_DEV_009",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "규칙 매칭: '전문의가 개발'(소비자오인)",
+          "latency_ms": 0.1
+        },
+        {
+          "id": "G_DEV_010",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "규칙 매칭: '피부과 테스트'(실증필요)",
+          "latency_ms": 0.19
+        },
+        {
+          "id": "G_DEV_011",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "규칙 매칭: '無 스테로이드'(범위이탈), '無'(실증필요)",
+          "latency_ms": 0.47
+        },
+        {
+          "id": "G_DEV_012",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 0.22
+        },
+        {
+          "id": "G_DEV_013",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 0.15
+        },
+        {
+          "id": "G_DEV_014",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '홍조를 개선'(의약품오인)",
+          "latency_ms": 0.13
+        },
+        {
+          "id": "G_DEV_015",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '여드름'(의약품오인), '흔적을 깨끗하게 지워'(의약품오인)",
+          "latency_ms": 0.14
+        },
+        {
+          "id": "G_DEV_016",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "규칙 매칭: '여드름성 피부에 사용'(실증필요)",
+          "latency_ms": 0.45
+        },
+        {
+          "id": "G_DEV_017",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "규칙 매칭: '피부나이'(소비자오인)",
+          "latency_ms": 0.11
+        },
+        {
+          "id": "G_DEV_018",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '상처 난 피부를 회복'(의약품오인)",
+          "latency_ms": 0.09
+        },
+        {
+          "id": "G_DEV_019",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "규칙 매칭: '식약처 인증'(소비자오인)",
+          "latency_ms": 0.07
+        },
+        {
+          "id": "G_DEV_020",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "규칙 매칭: '피지 분비를 조절'(실증필요)",
+          "latency_ms": 0.13
+        },
+        {
+          "id": "G_DEV_021",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 0.27
+        },
+        {
+          "id": "G_DEV_022",
+          "truth": 2,
+          "truth_type": "기능성오인",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "규칙 매칭: '탈모 증상'(기능성오인)",
+          "latency_ms": 0.15
+        },
+        {
+          "id": "G_DEV_023",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "규칙 매칭: '손상된 모발'(실증필요)",
+          "latency_ms": 0.16
+        },
+        {
+          "id": "G_DEV_024",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "규칙 매칭: '몸속 노폐물'(범위이탈)",
+          "latency_ms": 0.23
+        },
+        {
+          "id": "G_DEV_025",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '치료'(의약품오인)",
+          "latency_ms": 0.15
+        },
+        {
+          "id": "G_DEV_026",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 0.78
+        },
+        {
+          "id": "G_DEV_027",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '발모'(의약품오인), '3주'(소비자오인)",
+          "latency_ms": 0.28
+        },
+        {
+          "id": "G_DEV_028",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '모발이 굵어'(의약품오인)",
+          "latency_ms": 0.17
+        },
+        {
+          "id": "G_DEV_029",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 0.17
+        },
+        {
+          "id": "G_DEV_030",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '속눈썹까지 풍성하게 자라'(의약품오인)",
+          "latency_ms": 0.18
+        },
+        {
+          "id": "G_DEV_031",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '먹는 탈모약 대신'(의약품오인)",
+          "latency_ms": 0.15
+        },
+        {
+          "id": "G_DEV_032",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 0.11
+        },
+        {
+          "id": "G_DEV_033",
+          "truth": 2,
+          "truth_type": "기능성오인",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "규칙 매칭: '여드름이 예방'(기능성오인)",
+          "latency_ms": 0.2
+        },
+        {
+          "id": "G_DEV_034",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '항염'(의약품오인)",
+          "latency_ms": 0.13
+        },
+        {
+          "id": "G_DEV_035",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "규칙 매칭: '99.9%'(실증필요), '항균'(실증필요)",
+          "latency_ms": 0.24
+        },
+        {
+          "id": "G_DEV_036",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 0.24
+        },
+        {
+          "id": "G_DEV_037",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "규칙 매칭: 'MTS'(소비자오인), '2배'(실증필요)",
+          "latency_ms": 0.23
+        },
+        {
+          "id": "G_DEV_038",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 0.17
+        },
+        {
+          "id": "G_DEV_039",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "규칙 매칭: '보톡스'(범위이탈)",
+          "latency_ms": 0.19
+        },
+        {
+          "id": "G_DEV_040",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "규칙 매칭: '2주, 91%'(실증필요)",
+          "latency_ms": 0.23
+        },
+        {
+          "id": "G_DEV_041",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "규칙 매칭: '필러'(범위이탈)",
+          "latency_ms": 0.16
+        },
+        {
+          "id": "G_DEV_042",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "규칙 매칭: 없음",
+          "latency_ms": 0.11
+        },
+        {
+          "id": "G_DEV_043",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '세포와 DNA를 활성'(의약품오인)",
+          "latency_ms": 0.11
+        },
+        {
+          "id": "G_DEV_044",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "규칙 매칭: '윤곽을 개선'(의약품오인)",
+          "latency_ms": 0.1
+        },
+        {
+          "id": "G_DEV_045",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "규칙 매칭: '완전히'(소비자오인), '노화'(실증필요)",
+          "latency_ms": 0.22
+        }
+      ]
+    },
+    {
+      "scope": "standalone_preliminary_judge_not_RAG",
+      "backend": "gpt",
+      "model": "gpt-4o-mini",
+      "prompt_version": "judge-zero-shot-v2",
+      "split": "dev",
+      "summary": {
+        "total": 45,
+        "failed": 0,
+        "accuracy_all_cases": 0.6888888888888889,
+        "macro_f1_fixed_3_classes": 0.6392586019915213,
+        "critical_errors_2_to_0": 0,
+        "level2_recall": 0.7692307692307693,
+        "overflag_rate_on_level0": 0.5,
+        "violation_detection_rate": 1.0,
+        "violation_type_accuracy": 0.6666666666666666,
+        "mean_latency_ms": 1298.2484444444444,
+        "confusion_truth_x_pred": {
+          "0": {
+            "0": 6,
+            "1": 5,
+            "2": 1,
+            "실패": 0
+          },
+          "1": {
+            "0": 0,
+            "1": 5,
+            "2": 2,
+            "실패": 0
+          },
+          "2": {
+            "0": 0,
+            "1": 6,
+            "2": 20,
+            "실패": 0
+          }
+        }
+      },
+      "records": [
+        {
+          "id": "G_DEV_001",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "제품의 보습력 개선 수치가 인체적용시험 결과로 명확히 뒷받침되므로, 법적 문제를 확인할 수 없다.",
+          "latency_ms": 2618.24
+        },
+        {
+          "id": "G_DEV_002",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "'보습력 87% 개선'이라는 수치는 보유한 시험 결과인 '보습력 42% 개선'과 일치하지 않으며, 이를 입증할 추가적인 자료가 필요하다.",
+          "latency_ms": 1676.85
+        },
+        {
+          "id": "G_DEV_003",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "제품의 광고 문구는 일반적인 보습 효과를 나타내며, 보유한 인체적용시험 결과와 일치하여 법적 문제를 확인할 수 없습니다.",
+          "latency_ms": 1000.08
+        },
+        {
+          "id": "G_DEV_004",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'피부를 재생시킵니다'라는 표현은 피부 재생을 암시하며, 이는 의약품 오인에 해당하는 주장으로, 화장품으로서 사용할 수 없습니다.",
+          "latency_ms": 1448.68
+        },
+        {
+          "id": "G_DEV_005",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "제품이 일반 화장품으로, '가려움의 일시적 완화'는 보습 효과에 따른 표현으로 문제되지 않으며, 보유한 인체적용시험 결과가 보습력 개선을 입증하고 있다.",
+          "latency_ms": 1618.89
+        },
+        {
+          "id": "G_DEV_006",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'아토피 피부도 안심하고 쓰는'이라는 표현은 아토피와 관련된 피부 질환을 언급하고 있어 의약품으로 오인될 수 있는 위험이 있다.",
+          "latency_ms": 1076.64
+        },
+        {
+          "id": "G_DEV_007",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "'피부장벽 개선'이라는 표현은 관리지침 별표2 실증대상에 해당하므로, 이를 입증할 수 있는 시험 자료가 필요하다.",
+          "latency_ms": 1726.69
+        },
+        {
+          "id": "G_DEV_008",
+          "truth": 2,
+          "truth_type": "비교광고",
+          "predicted": 1,
+          "violation_type": "비교광고",
+          "rationale": "'업계 최고의 보습력'이라는 표현은 비교 광고에 해당하며, 비교 기준이 명확하지 않아 소비자에게 오해를 줄 수 있습니다.",
+          "latency_ms": 1142.84
+        },
+        {
+          "id": "G_DEV_009",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 1,
+          "violation_type": "소비자오인",
+          "rationale": "'피부과 전문의가 개발한'이라는 표현은 소비자에게 전문성을 암시하지만, 이를 뒷받침할 수 있는 구체적인 인증이나 자료가 부족하여 소비자 오인을 초래할 수 있다.",
+          "latency_ms": 1849.41
+        },
+        {
+          "id": "G_DEV_010",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "'피부과 테스트 완료'라는 표현은 시험을 언급하고 있으나, 해당 효능을 직접 입증하는 자료가 부족하여 실증이 필요하다.",
+          "latency_ms": 1099.04
+        },
+        {
+          "id": "G_DEV_011",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 1,
+          "violation_type": "범위이탈",
+          "rationale": "'무 스테로이드'라는 표현은 특정 성분의 부재를 강조하는 것으로, 범위이탈에 해당할 수 있습니다. 그러나 보습 효과에 대한 인체적용시험이 존재하므로 조건부로 사용 가능하다고 판단했습니다.",
+          "latency_ms": 1496.0
+        },
+        {
+          "id": "G_DEV_012",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "제품이 일반 화장품으로, 사용감과 제형에 대한 표현이 적절하며, 보유한 인체적용시험 결과와 일치하여 문제를 확인하지 못함.",
+          "latency_ms": 1095.86
+        },
+        {
+          "id": "G_DEV_013",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "일반 화장품으로서 민감한 피부를 진정시킨다는 표현은 일반적인 사용감에 해당하며, 법적 문제를 확인할 수 없다.",
+          "latency_ms": 2034.53
+        },
+        {
+          "id": "G_DEV_014",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'붉은 홍조를 개선해 주는' 표현은 피부의 상태를 치료하거나 개선하는 의약품적 효과를 암시하므로 의약품오인에 해당합니다.",
+          "latency_ms": 1462.88
+        },
+        {
+          "id": "G_DEV_015",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'여드름 흔적을 깨끗하게 지워주는'이라는 표현은 여드름 흔적 제거를 주장하고 있어 의약품으로 오인될 수 있는 표현입니다.",
+          "latency_ms": 1278.12
+        },
+        {
+          "id": "G_DEV_016",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "여드름성 피부에 사용하기 적합하다는 주장은 실증이 필요하며, 이를 입증할 자료가 없기 때문에 조건부로 평가하였다.",
+          "latency_ms": 1135.29
+        },
+        {
+          "id": "G_DEV_017",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "'피부나이 5세 어려지는'이라는 표현은 사실과 다른 과장된 주장으로 소비자에게 오인을 초래할 수 있어 불가하다.",
+          "latency_ms": 1479.33
+        },
+        {
+          "id": "G_DEV_018",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'상처 난 피부를 회복시켜요'라는 표현은 피부의 상처 회복을 암시하여 의약품으로 오인될 수 있는 내용입니다.",
+          "latency_ms": 1028.15
+        },
+        {
+          "id": "G_DEV_019",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "'식약처 인증'이라는 표현은 소비자에게 의약품이나 기능성 제품으로 오인할 수 있는 여지가 있으며, 이는 소비자오인에 해당합니다.",
+          "latency_ms": 1302.08
+        },
+        {
+          "id": "G_DEV_020",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "피지 분비 조절에 대한 표현은 관리지침 별표2 실증대상에 해당하므로, 이를 입증할 수 있는 시험이 필요하다.",
+          "latency_ms": 1206.88
+        },
+        {
+          "id": "G_DEV_021",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "제품이 일반 샴푸로, 두피 세정 및 모발 윤기 추가에 대한 표현은 일반적인 사용감에 해당하여 문제되지 않습니다.",
+          "latency_ms": 928.14
+        },
+        {
+          "id": "G_DEV_022",
+          "truth": 2,
+          "truth_type": "기능성오인",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "탈모 증상 완화는 기능성 심사를 받은 제품에서만 사용할 수 있는 표현으로, 일반 제품인 데일리 프레시 샴푸에서는 사용할 수 없습니다.",
+          "latency_ms": 1095.38
+        },
+        {
+          "id": "G_DEV_023",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "제품이 일반 화장품으로 분류되며, '손상된 모발을 개선하는'이라는 표현은 기능성 제품에서만 사용할 수 있는 주장으로, 기능성 심사를 받지 않은 제품에서 사용하면 기능성오인에 해당합니다.",
+          "latency_ms": 1213.25
+        },
+        {
+          "id": "G_DEV_024",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "'몸속 노폐물을 배출하는'이라는 표현은 화장품의 범위를 넘어서는 주장으로, 범위이탈에 해당합니다.",
+          "latency_ms": 1174.9
+        },
+        {
+          "id": "G_DEV_025",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'치료'라는 표현은 의약품으로 오인될 수 있는 표현으로, 비듬과 두피염을 치료한다고 명시하고 있어 의약품오인에 해당합니다.",
+          "latency_ms": 1112.15
+        },
+        {
+          "id": "G_DEV_026",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "탈모 증상 완화에 도움을 줄 수 있다는 표현은 기능성 제품의 효능을 나타내지만, 이를 직접 입증하는 자료가 부족하여 실증이 필요하다.",
+          "latency_ms": 1097.55
+        },
+        {
+          "id": "G_DEV_027",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'발모 효과'라는 표현은 탈모 증상 완화와 관련된 의약품 오인을 초래할 수 있으며, 이는 질병 치료를 암시하는 것으로 간주됩니다.",
+          "latency_ms": 1368.31
+        },
+        {
+          "id": "G_DEV_028",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 1,
+          "violation_type": "기능성오인",
+          "rationale": "'모발이 굵어지는'이라는 표현은 탈모 증상 완화와 관련된 기능성 심사를 받지 않은 것으로 보이며, 이를 입증할 자료가 부족하여 실증이 필요하다.",
+          "latency_ms": 1108.07
+        },
+        {
+          "id": "G_DEV_029",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "'빠지는 모발 수를 감소시켜 줍니다'라는 표현은 탈모 증상 완화와 관련이 있으나, 이를 직접 입증하는 자료가 부족하여 실증이 필요합니다.",
+          "latency_ms": 1181.17
+        },
+        {
+          "id": "G_DEV_030",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'눈썹과 속눈썹까지 풍성하게 자라나요'라는 표현은 탈모 증상 완화와 관련된 주장으로, 눈썹과 속눈썹의 성장에 대한 직접적인 언급이 있어 의약품으로 오인될 수 있는 표현입니다.",
+          "latency_ms": 1351.75
+        },
+        {
+          "id": "G_DEV_031",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "'먹는 탈모약 대신 쓰는 샴푸'라는 표현은 탈모약과의 비교를 통해 제품의 효과를 암시하고 있어 범위이탈에 해당합니다.",
+          "latency_ms": 1075.48
+        },
+        {
+          "id": "G_DEV_032",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "여드름성 피부 완화라는 표현은 기능성 제품의 효능으로 인정되지만, 이를 입증할 수 있는 자료가 없으므로 실증이 필요하다.",
+          "latency_ms": 1091.41
+        },
+        {
+          "id": "G_DEV_033",
+          "truth": 2,
+          "truth_type": "기능성오인",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "여드름 예방이라는 표현은 기능성 심사를 받지 않은 제품에서 사용될 수 없는 표현으로, 기능성 제품이지만 여드름 예방에 대한 근거가 부족하여 기능성오인으로 판단된다.",
+          "latency_ms": 1251.17
+        },
+        {
+          "id": "G_DEV_034",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'항염'이라는 표현은 염증을 치료하거나 예방하는 의약품적 의미를 내포하고 있어 의약품오인에 해당합니다.",
+          "latency_ms": 1042.43
+        },
+        {
+          "id": "G_DEV_035",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "'항균 세정으로 트러블균 99.9% 제거'라는 표현은 여드름성 피부 완화와 관련된 기능성을 주장하고 있으나, 해당 제품이 기능성 심사를 받지 않았기 때문에 기능성오인에 해당합니다.",
+          "latency_ms": 1473.13
+        },
+        {
+          "id": "G_DEV_036",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "제품이 여드름성 피부 완화 기능성으로 분류되지만, '모공 속 노폐물까지 깨끗하게 씻어내는' 표현은 기능성 심사를 받지 않은 효능을 암시하여 기능성오인에 해당합니다.",
+          "latency_ms": 1376.05
+        },
+        {
+          "id": "G_DEV_037",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "MTS 니들 시술 후 효과를 언급하며 시술 효과를 암시하는 표현이 포함되어 있어 범위이탈로 판단됩니다.",
+          "latency_ms": 1083.69
+        },
+        {
+          "id": "G_DEV_038",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "주름 개선 기능성 제품으로서 '주름 개선에 도움을 주는' 표현은 사용 가능하나, 이를 입증할 수 있는 시험 자료가 부족하여 실증이 필요하다.",
+          "latency_ms": 1134.06
+        },
+        {
+          "id": "G_DEV_039",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "'보톡스 효과'라는 표현은 보톡스 시술의 효과를 암시하며, 이는 화장품의 범위를 넘어서는 주장으로 범위이탈에 해당합니다.",
+          "latency_ms": 1221.25
+        },
+        {
+          "id": "G_DEV_040",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "사용자 만족도 수치가 자사 조사에 기반하고 있어 실증 자료로 인정되지 않으므로, 이를 입증할 수 있는 외부 시험이 필요하다.",
+          "latency_ms": 1091.89
+        },
+        {
+          "id": "G_DEV_041",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "'필러처럼 꺼진 볼륨을 채워주는' 표현은 주름 개선과 관련된 효과를 암시하지만, 이를 직접 입증하는 시험이 없으므로 실증이 필요하다.",
+          "latency_ms": 1289.72
+        },
+        {
+          "id": "G_DEV_042",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "주름 개선 기능성 제품이지만, '식물 엑소좀'에 대한 구체적인 시험 결과가 없고, 자사 설문조사만으로는 실증 자료로 인정되지 않기 때문에 실증이 필요하다.",
+          "latency_ms": 1264.01
+        },
+        {
+          "id": "G_DEV_043",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'세포와 DNA를 활성화'라는 표현은 의약품으로 오인될 수 있는 내용으로, 화장품에서 사용할 수 없는 표현입니다.",
+          "latency_ms": 1178.87
+        },
+        {
+          "id": "G_DEV_044",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "'얼굴 윤곽을 개선해 V라인을 만들어 주는' 표현은 기능성 화장품의 범위를 넘어서는 주장을 포함하고 있어 범위이탈로 판단됩니다.",
+          "latency_ms": 1105.2
+        },
+        {
+          "id": "G_DEV_045",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "'노화를 완전히 되돌리는'이라는 표현은 사실과 다른 과장된 주장으로 소비자에게 오인을 줄 수 있어 불가하다.",
+          "latency_ms": 1335.67
+        }
+      ]
+    },
+    {
+      "scope": "standalone_preliminary_judge_not_RAG",
+      "backend": "gpt-few",
+      "model": "gpt-4o-mini",
+      "prompt_version": "judge-few-shot-v2",
+      "split": "dev",
+      "summary": {
+        "total": 45,
+        "failed": 0,
+        "accuracy_all_cases": 0.7333333333333333,
+        "macro_f1_fixed_3_classes": 0.6124338624338624,
+        "critical_errors_2_to_0": 0,
+        "level2_recall": 0.9615384615384616,
+        "overflag_rate_on_level0": 0.6666666666666666,
+        "violation_detection_rate": 1.0,
+        "violation_type_accuracy": 0.7272727272727273,
+        "mean_latency_ms": 1056.2555555555555,
+        "confusion_truth_x_pred": {
+          "0": {
+            "0": 4,
+            "1": 6,
+            "2": 2,
+            "실패": 0
+          },
+          "1": {
+            "0": 0,
+            "1": 4,
+            "2": 3,
+            "실패": 0
+          },
+          "2": {
+            "0": 0,
+            "1": 1,
+            "2": 25,
+            "실패": 0
+          }
+        }
+      },
+      "records": [
+        {
+          "id": "G_DEV_001",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "수치·기간·시험 종류가 보유 인체적용시험 결과와 일치",
+          "latency_ms": 1103.98
+        },
+        {
+          "id": "G_DEV_002",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "보유 시험 결과(42%)와 다른 수치(87%)로 사실과 다름",
+          "latency_ms": 1112.57
+        },
+        {
+          "id": "G_DEV_003",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "일반적인 보습 표현으로 보유 시험과 일치함",
+          "latency_ms": 871.92
+        },
+        {
+          "id": "G_DEV_004",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "진피층까지 수분을 채우고 재생시킨다는 표현은 화장품의 범위를 벗어남",
+          "latency_ms": 1150.67
+        },
+        {
+          "id": "G_DEV_005",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "가려움 완화는 실증대상인데 보유 시험은 보습력 개선만 포함되어 직접 입증 자료가 필요",
+          "latency_ms": 1078.95
+        },
+        {
+          "id": "G_DEV_006",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "아토피 피부에 대한 언급은 의약품으로 오인될 수 있는 표현",
+          "latency_ms": 994.54
+        },
+        {
+          "id": "G_DEV_007",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "피부장벽 개선은 실증대상인데 보유 시험은 보습력 개선만으로 직접 입증 자료가 필요",
+          "latency_ms": 1009.93
+        },
+        {
+          "id": "G_DEV_008",
+          "truth": 2,
+          "truth_type": "비교광고",
+          "predicted": 2,
+          "violation_type": "비교광고",
+          "rationale": "업계 최고라는 절대적 비교 표현이 불분명한 기준으로 사용됨",
+          "latency_ms": 950.63
+        },
+        {
+          "id": "G_DEV_009",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "피부과 전문의 개발 표현은 소비자에게 오인 가능성을 초래함",
+          "latency_ms": 952.7
+        },
+        {
+          "id": "G_DEV_010",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "'피부과 테스트 완료'는 소비자에게 오인할 수 있는 표현으로, 실제 시험 결과와 관련이 없음",
+          "latency_ms": 1072.55
+        },
+        {
+          "id": "G_DEV_011",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "'無 스테로이드'는 배합금지 원료 무첨가를 암시하여 화장품 범위를 벗어남",
+          "latency_ms": 1046.47
+        },
+        {
+          "id": "G_DEV_012",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "사용감 표현으로 효능 주장이 아님",
+          "latency_ms": 1020.66
+        },
+        {
+          "id": "G_DEV_013",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "피부 진정은 실증대상인데 보유 시험이 없어 직접 입증 자료가 필요",
+          "latency_ms": 976.62
+        },
+        {
+          "id": "G_DEV_014",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "홍조 개선은 의약품으로 오인될 수 있는 표현으로, 화장품으로 사용할 수 없음",
+          "latency_ms": 979.67
+        },
+        {
+          "id": "G_DEV_015",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "여드름 흔적 제거는 의약품으로 오인될 수 있는 표현",
+          "latency_ms": 953.86
+        },
+        {
+          "id": "G_DEV_016",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "여드름성 피부에 적합하다는 표현은 실증대상이나 보유 시험이 없음",
+          "latency_ms": 949.45
+        },
+        {
+          "id": "G_DEV_017",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "피부 나이를 수치로 줄이는 표현은 사실과 다른 과장으로 소비자 오인 가능성 있음",
+          "latency_ms": 1057.68
+        },
+        {
+          "id": "G_DEV_018",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'상처 난 피부 회복'은 의약품으로 오인될 수 있는 표현",
+          "latency_ms": 904.05
+        },
+        {
+          "id": "G_DEV_019",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "식약처 인증을 받았다는 표현은 소비자에게 오인 가능성을 초래함",
+          "latency_ms": 901.85
+        },
+        {
+          "id": "G_DEV_020",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "피지 분비 조절은 실증대상인데 보유 시험이 없어 직접 입증 자료가 필요",
+          "latency_ms": 1655.1
+        },
+        {
+          "id": "G_DEV_021",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 0,
+          "violation_type": "없음",
+          "rationale": "일반적인 세정 및 사용감 표현으로 문제 없음",
+          "latency_ms": 1016.21
+        },
+        {
+          "id": "G_DEV_022",
+          "truth": 2,
+          "truth_type": "기능성오인",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "탈모 증상 완화는 기능성 심사를 받아야 하는 표현으로 일반 제품에서 사용할 수 없음",
+          "latency_ms": 1003.45
+        },
+        {
+          "id": "G_DEV_023",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "손상된 모발 개선은 기능성 심사를 받아야 하는 표현으로 일반 제품에서 사용할 수 없음",
+          "latency_ms": 998.9
+        },
+        {
+          "id": "G_DEV_024",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "체내 노폐물 배출을 표방하여 화장품의 범위를 벗어남",
+          "latency_ms": 1443.45
+        },
+        {
+          "id": "G_DEV_025",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "비듬과 두피염 치료는 의약품으로 오인될 수 있는 표현",
+          "latency_ms": 908.2
+        },
+        {
+          "id": "G_DEV_026",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "탈모 증상 완화 표현은 실증대상인데 보유 시험이 도움을 주장하는 것으로 직접 입증 자료가 필요",
+          "latency_ms": 1337.94
+        },
+        {
+          "id": "G_DEV_027",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "탈모 증상 완화로 심사받았으나 '발모 효과'는 다른 효능을 표방함",
+          "latency_ms": 1095.78
+        },
+        {
+          "id": "G_DEV_028",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "모발 굵어짐은 탈모 증상 완화와 관련된 표현으로, 이를 입증하는 자료가 필요",
+          "latency_ms": 1041.37
+        },
+        {
+          "id": "G_DEV_029",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "탈모 증상 완화 표현은 가능하나, '감소시켜 준다'는 수치적 입증 자료가 필요",
+          "latency_ms": 1084.69
+        },
+        {
+          "id": "G_DEV_030",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "눈썹과 속눈썹 성장 표현은 탈모 증상 완화와 관련된 기능성을 넘어서는 주장",
+          "latency_ms": 1035.3
+        },
+        {
+          "id": "G_DEV_031",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "먹는 탈모약 대신 사용한다고 하여 시술 대체를 암시하는 표현은 화장품 범위를 벗어남",
+          "latency_ms": 982.77
+        },
+        {
+          "id": "G_DEV_032",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "여드름성 피부 완화 기능성 심사를 받지 않은 제품에서 해당 효능을 표방함",
+          "latency_ms": 1060.85
+        },
+        {
+          "id": "G_DEV_033",
+          "truth": 2,
+          "truth_type": "기능성오인",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "여드름성 피부 완화 기능성 심사를 받지 않은 제품이 '예방'이라는 표현을 사용함",
+          "latency_ms": 995.87
+        },
+        {
+          "id": "G_DEV_034",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "'염증 잡는' 표현은 의약품적 효과를 암시하여 화장품으로 부적합",
+          "latency_ms": 1021.37
+        },
+        {
+          "id": "G_DEV_035",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "여드름성 피부 완화 기능성 심사를 받았으나 항균 효과는 심사받지 않은 기능으로 오인 가능",
+          "latency_ms": 1193.57
+        },
+        {
+          "id": "G_DEV_036",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "여드름성 피부 완화 기능성 제품이지만 '모공 속 노폐물까지 깨끗하게 씻어낸다'는 표현은 기능성 심사와 관련 없는 주장",
+          "latency_ms": 1101.14
+        },
+        {
+          "id": "G_DEV_037",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "MTS 시술과의 연관성을 언급하여 화장품의 범위를 벗어남",
+          "latency_ms": 1021.5
+        },
+        {
+          "id": "G_DEV_038",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "주름 개선 기능성 제품이지만, 주름 개선에 대한 직접적인 시험 결과가 없음",
+          "latency_ms": 961.47
+        },
+        {
+          "id": "G_DEV_039",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "보톡스 효과를 표방하며 시술 대체를 암시하는 표현은 화장품 범위를 벗어남",
+          "latency_ms": 1035.13
+        },
+        {
+          "id": "G_DEV_040",
+          "truth": 1,
+          "truth_type": "실증필요",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "사용자 만족도 조사는 실증자료로 인정되지 않으며, 주름 개선 효과를 직접 입증하는 자료가 필요",
+          "latency_ms": 1145.32
+        },
+        {
+          "id": "G_DEV_041",
+          "truth": 2,
+          "truth_type": "범위이탈",
+          "predicted": 2,
+          "violation_type": "범위이탈",
+          "rationale": "필러 효과를 표방하여 화장품의 범위를 벗어남",
+          "latency_ms": 1071.54
+        },
+        {
+          "id": "G_DEV_042",
+          "truth": 0,
+          "truth_type": "없음",
+          "predicted": 1,
+          "violation_type": "실증필요",
+          "rationale": "탄력 개선은 실증대상인데 보유 시험은 만족도 조사로 직접 입증 자료가 필요",
+          "latency_ms": 973.08
+        },
+        {
+          "id": "G_DEV_043",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "의약품오인",
+          "rationale": "세포와 DNA 활성화는 의약품적 표현으로 주름 개선 기능성을 넘어서는 주장",
+          "latency_ms": 936.0
+        },
+        {
+          "id": "G_DEV_044",
+          "truth": 2,
+          "truth_type": "의약품오인",
+          "predicted": 2,
+          "violation_type": "기능성오인",
+          "rationale": "주름 개선 기능성 제품이지만 '얼굴 윤곽 개선'은 심사받지 않은 효능으로 기능성 오인",
+          "latency_ms": 1126.07
+        },
+        {
+          "id": "G_DEV_045",
+          "truth": 2,
+          "truth_type": "소비자오인",
+          "predicted": 2,
+          "violation_type": "소비자오인",
+          "rationale": "'완전히 되돌린다'는 과장된 표현으로 사실과 다름",
+          "latency_ms": 1196.68
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "data\\golden_set\\dev.jsonl": "d87be35e2669a40458a2c156d2dbc46392692bb611bc52e06322d7ef7d867319",
+    "data\\assets\\mock_products.json": "47f269efb1b6797a0272641448a09e742b41e4fab3eedda7fc3a49a3bf3ee7eb",
+    "src\\cosmetic_agent\\models\\judge_prompts.py": "878bc7fe8cdae938c2a964dc22bdddfca9b21903f03ce34ad9c25178e732642e",
+    "src\\cosmetic_agent\\domain\\rules.py": "4efd89f258ac096830ee9c98b0d8256f38e7dd36064e39c5f3320322636b4698"
+  }
+}

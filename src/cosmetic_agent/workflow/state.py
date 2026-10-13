@@ -13,7 +13,7 @@ class AdReviewState(TypedDict):
     owned_evidence: list[dict[str, Any]]
 
     # 2. 판정 (rule_check / judge_claim)
-    rule_level: NotRequired[int]          # 0: 가능, 2: 불가 (규칙 사전 매칭)
+    rule_level: NotRequired[int]          # 0: 가능, 1: 조건부, 2: 불가 (제품 근거 포함 규칙 판정)
     model_level: NotRequired[int]         # 0: 가능, 1: 조건부, 2: 불가 (판정 모델)
     level: NotRequired[int]               # = max(rule_level, model_level) 하한 보장
     rule_hits: NotRequired[list[dict[str, Any]]]
