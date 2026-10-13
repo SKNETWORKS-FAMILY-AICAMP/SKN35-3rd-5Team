@@ -165,20 +165,30 @@ class RuleEngine:
 
     # ------------------------------------------------------------------ 2) 수치 (보유 근거 대조)
     def _number_hits(self, text: str, evidences: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        # Separate sentences may legitimately cite different tests. Never pool their numbers.
+        fragments = re.split(r"(?<=[.!?])\s+|\n+", text)
+        return [hit for fragment in fragments for hit in self._number_claim_hits(fragment, evidences)]
+
+    def _number_claim_hits(self, text: str, evidences: list[dict[str, Any]]) -> list[dict[str, Any]]:
         tokens = _number_tokens(text)
         if not tokens:
             return []
-        valid = [e for e in evidences if not _is_survey(e) and not _is_in_house(e)]
-        valid_tokens = set().union(*(_number_tokens(_evidence_text(e)) for e in valid)) if valid else set()
-        all_tokens = set().union(*(_number_tokens(_evidence_text(e)) for e in evidences)) if evidences else set()
-        missing = sorted(tokens - valid_tokens)
-        if not missing:
+        claim = self.detect_claim_type(text)
+        relevant = [e for e in evidences if claim != "일반" and self.detect_claim_type(str(e.get("item") or "")) == claim]
+        valid = [e for e in relevant if not _is_survey(e) and not _is_in_house(e)]
+
+        def supports(evidence: dict[str, Any]) -> bool:
+            # Institution names / test labels are not measured results.
+            return tokens <= _number_tokens(str(evidence.get("value") or ""))
+
+        if any(supports(e) for e in valid):
             return []
 
-        matched = ", ".join(missing)
+        matched = ", ".join(sorted(tokens))
         # 수치가 조사(만족도·자사 조사) 자료에만 있음 → 실증자료로 인정되지 않음 (조건부)
-        if set(missing) <= all_tokens:
-            in_house = any(_is_in_house(e) for e in evidences if set(missing) & _number_tokens(_evidence_text(e)))
+        survey_sources = [e for e in evidences if (_is_survey(e) or _is_in_house(e)) and supports(e)]
+        if survey_sources:
+            in_house = any(_is_in_house(e) for e in survey_sources)
             rule = {
                 "id": "N002", "term": "조사 결과 수치", "type": "실증필요",
                 "basis_id": "NOTICE_실증규정_제5조" if in_house else "NOTICE_실증규정_제3조",
@@ -188,9 +198,7 @@ class RuleEngine:
             return [self._hit(rule, matched, 1)]
 
         # 같은 효능의 시험을 갖고 있는데 수치가 다름 → 사실과 다른 표시 (불가)
-        claim = self.detect_claim_type(text)
-        same_claim = claim != "일반" and any(self.detect_claim_type(_evidence_text(e)) == claim for e in valid)
-        if same_claim:
+        if valid:
             rule = {
                 "id": "N001", "term": "보유 시험과 다른 수치", "type": "소비자오인",
                 "basis_id": "GUIDE_관리지침_별표2_효능표현", "law_id": "LAW_시행규칙_별표5-2사",

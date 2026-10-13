@@ -104,6 +104,8 @@ def run_evaluation(split: str = "dev", backend: str = "rule", *, allow_holdout: 
             row.update(predicted=None, error_type=type(exc).__name__)
         row["latency_ms"] = round((time.perf_counter() - started) * 1000, 2)
         records.append(row)
+        if len(records) % 5 == 0 or len(records) == len(cases):
+            print(f"Progress: {backend} {len(records)}/{len(cases)}", flush=True)
     report = {
         "scope": "standalone_preliminary_judge_not_RAG",
         "backend": backend, "model": settings.OPENAI_MODEL_NAME if backend.startswith("gpt") else None,

@@ -20,6 +20,9 @@ class StubRuleEngine:
     def check_banned_terms(self, copy_text: str, category: str, functional_type=None):
         return self.level, []
 
+    def evaluate(self, copy_text: str, product: dict):
+        return {"level": self.level, "hits": []}
+
 
 class StubJudge:
     def __init__(self, level: int = 0):
