@@ -129,6 +129,33 @@ class NextTest(TypedDict):
     rung: int                   # 열리는 칸
 
 
+class Variant(TypedDict, total=False):
+    """대체 문구 후보 한 개. 백엔드 copy_suggester 의 candidates(강한→안전 순) 한 칸에 대응한다."""
+    text: str
+    tier: Literal["strong", "balanced", "safe"]   # 근거 최대 · 균형 · 가장 안전 (candidates 순서)
+    basis: str                  # 이 표현을 쓸 수 있는 근거 한 줄 (used_evidence · 사다리 칸 · 필요 자료)
+    verified: bool | None       # 역검증 통과 True · 탈락 False · 검증 안 함 None
+    note: str | None            # 탈락 사유 (rejected_notes)
+    chosen: bool                # 엔진이 고른 제안 (= result.suggestion)
+
+
+class ChartBlock(TypedDict, total=False):
+    """답변에 붙는 차트 — 데이터가 있을 때만 백엔드가 보낸다."""
+    type: Literal["chart"]
+    title: str
+    unit: str
+    data: list[dict]            # [{label, value}]
+
+
+class QuestionBlock(TypedDict, total=False):
+    """추가 질문 — 판정에 사용자 입력이 필요할 때만 백엔드가 보낸다."""
+    type: Literal["question"]
+    id: str
+    prompt: str
+    options: list[str]          # 고르면 그 답을 붙여 다시 묻는다
+    follow_up: str              # 다시 물을 문장 틀. "{answer}" 자리에 고른 답이 들어간다
+
+
 class UiExtras(TypedDict, total=False):
     highlights: list[Highlight]
     ladder: Ladder
@@ -138,6 +165,33 @@ class UiExtras(TypedDict, total=False):
     next_test: NextTest
     suggestion_source: str      # 제안 문구 뒤 출처 괄호 "(인체적용시험, 한국피부과학연구원)"
     summary: str                # 판정 한 줄 요약
+    direction: str              # 제안 방향 한 줄
+    alternatives: list[str]     # (구) 다른 표현 — variants 가 있으면 쓰지 않는다
+    variants: list[Variant]     # 대체 문구 후보 (강한 → 안전)
+    blocks: list[ChartBlock | QuestionBlock]   # 필요할 때만 붙는 확장 블록
+
+
+# ── 검토 진행 이벤트 (backend.review_events 가 내는 것) ─────────────────
+# API 에 POST /review/stream (NDJSON, 한 줄 = 이벤트 하나)이 생기면 그대로 흘려보내고, 없으면 result 하나만 낸다.
+class StageEvent(TypedDict):
+    type: Literal["stage"]
+    key: str                    # PIPELINE_STEPS 의 노드 이름
+    status: Literal["start", "done", "skip"]
+    ms: NotRequired[float | None]   # done 일 때 실제 걸린 시간
+
+
+class TokenEvent(TypedDict):
+    type: Literal["token"]
+    text: str                   # 답변 요약(review_notes) 조각 — LLM 이 실제로 흘려보낼 때만
+
+
+class WaitEvent(TypedDict):
+    type: Literal["wait"]       # 단계 정보 없이 서버 응답을 기다리는 중 (스트림이 없는 API)
+
+
+class ResultEvent(TypedDict):
+    type: Literal["result"]
+    resp: "ReviewResponse"
 
 
 class ReviewResponse(TypedDict):

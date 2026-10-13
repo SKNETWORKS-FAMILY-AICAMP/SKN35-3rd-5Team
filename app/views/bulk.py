@@ -136,13 +136,16 @@ with center, st.container(key="center"):
             else:
                 slot = st.empty()
                 try:
-                    sentences = backend.split_sentences(text)
-                    items = backend.review_page(text, product)
-                    if backend.data_mode() == "mock":
-                        for i in range(1, len(items) + 1):
-                            slot.html(f'<div class="bw">{thinking(i, len(items), f"{i}번째 문장 검토 중")}</div>')
-                            time.sleep(0.12 * MOCK_DELAY)
-                    st.session_state["bw_bulk"] = {"items": items, "ctx": ctx, "at": datetime.now(), "n": len(sentences)}
+                    items = []
+                    for event in backend.review_page_events(text, product):   # 실제로 끝낸 문장만 센다
+                        if event["type"] == "sentence":
+                            slot.html(f'<div class="bw">{thinking(event["done"], event["total"], "문장별로 검토하는 중")}</div>')
+                            time.sleep(0.05 * MOCK_DELAY)   # 데모 표시 속도 (Mock 만, 0 이면 없음)
+                        elif event["type"] == "wait":
+                            slot.html(f'<div class="bw">{thinking(0, event["total"], "서버가 문장을 검토하는 중")}</div>')
+                        elif event["type"] == "result":
+                            items = event["items"]
+                    st.session_state["bw_bulk"] = {"items": items, "ctx": ctx, "at": datetime.now(), "n": len(items)}
                     st.session_state.pop("bw_bulk_error", None)
                     st.session_state.pop("bw_bulk_hint", None)
                 except backend.BackendError as err:

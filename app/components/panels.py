@@ -37,16 +37,21 @@ def rag_header(resp: dict) -> str:
         name = AUTHORITY.get(int(c.get("authority", 4)), "사례")
         counts[name] = counts.get(name, 0) + 1
     by_kind = " · ".join(f"{k} {counts[k]}" for k in ("법령", "고시", "지침", "사례") if counts.get(k))
-    terms = [h.get("text", "") for h in resp.get("ui", {}).get("highlights", []) if h.get("kind") != "verified"]
-    query = (f'<div class="bw-rag-q"><span class="k">검색한 표현</span>'
-             f'{"".join(f"<code>{esc(t)}</code>" for t in dict.fromkeys(terms))}</div>' if terms else "")
+    terms: dict[str, list[int]] = {}
+    for h in resp.get("ui", {}).get("highlights", []):
+        if h.get("kind") != "verified" and h.get("text"):
+            terms.setdefault(h["text"], [])
+            terms[h["text"]] += [int(n) for n in h.get("cites", []) if int(n) not in terms[h["text"]]]
+    codes = "".join(f'<code data-cites="{",".join(map(str, ns))}">{esc(t)}</code>' if ns else f"<code>{esc(t)}</code>"
+                    for t, ns in terms.items())
+    query = f'<div class="bw-rag-q"><span class="k">검색한 표현</span>{codes}</div>' if terms else ""
     return (f'<div class="bw-pane-h"><h3>{icon("menu_book", 20)}근거</h3><span class="bw-pane-meta">RAG</span></div>'
             f'<p class="bw-pane-sub">이번 답변이 참고한 규정 문서입니다. 번호는 답변의 [n] 과 같습니다.</p>'
             f'<div class="bw-rag-stat"><b>{len(cites)}</b><span>건 검색{(" · " + by_kind) if by_kind else ""}</span></div>{query}')
 
 
-def ladder_block(resp: dict) -> str:
-    """표현 단계: Lv0 · Lv1 · Lv2 · 불가 네 칸에 제안·원문 위치를 표시한다."""
+def ladder_block(resp: dict, *, fresh: bool = False) -> str:
+    """표현 단계: Lv0 · Lv1 · Lv2 · 불가 네 칸에 제안·원문 위치를 표시한다. fresh 면 막대가 차오른다(처음 한 번)."""
     ladder = resp.get("ui", {}).get("ladder")
     if not ladder or not ladder.get("rungs"):
         return ""
@@ -67,11 +72,11 @@ def ladder_block(resp: dict) -> str:
     note = f"보유 실증으로 Lv{reach}까지 쓸 수 있습니다." if reach is not None else ""
     return (f'<div class="bw-block"><div class="bw-block-h"><span>표현 단계 · {esc(ladder.get("claim", ""))}</span>'
             f'<span class="bw-pane-meta">실증 기준</span></div>'
-            f'<div class="bw-ladder">{"".join(cells)}</div><p class="bw-ladder-note">{esc(note)}</p></div>')
+            f'<div class="bw-ladder{" is-arrive" if fresh else ""}">{"".join(cells)}</div><p class="bw-ladder-note">{esc(note)}</p></div>')
 
 
-def evidence_list(resp: dict) -> str:
-    """번호 붙은 근거 조항 목록 (패널의 주인공)."""
+def evidence_list(resp: dict, *, fresh: bool = False) -> str:
+    """번호 붙은 근거 조항 목록 (패널의 주인공). fresh 면 위에서부터 차례로 들어온다(처음 한 번)."""
     cites = resp["result"].get("citations", [])
     if not cites:
         return ('<div class="bw-pane-empty">이 판단에 인용한 조항이 없습니다. '
@@ -91,12 +96,12 @@ def evidence_list(resp: dict) -> str:
                 if len(snippet) > 120 else "")
         hit_html = (f'<div class="bw-hits">관련 표현 {" · ".join("‘" + esc(t) + "’" for t in hits)}</div>' if hits else "")
         items.append(
-            f'<li class="bw-cite"><span class="bw-num">{i}</span><div>'
+            f'<li class="bw-cite" data-n="{i}"><span class="bw-num">{i}</span><div>'
             f'<div class="bw-cite-t"><b>{esc(c.get("source", ""))}</b> <span class="art">{esc(c.get("article", ""))}</span>'
             f'<span class="bw-auth{" a1" if auth == 1 else ""}">{AUTHORITY.get(auth, "")}</span></div>'
             f'<p class="bw-cite-q">{_mark_terms(snippet, hits)}</p>{more}{hit_html}</div></li>'
         )
-    return f'<ol class="bw-cites">{"".join(items)}</ol>'
+    return f'<ol class="bw-cites{" is-arrive" if fresh else ""}">{"".join(items)}</ol>'
 
 
 def documents_list(docs: list[dict]) -> str:

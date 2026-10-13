@@ -6,13 +6,17 @@
 - 모드 전환: 환경변수 UI_DATA_MODE = "mock"(기본) | "api".
 - API 주소: cosmetic_agent.common.config.settings.API_BASE_URL (.env 의 API_BASE_URL). 기본 http://localhost:8000.
 - 엔드포인트: POST /review · POST /review/bulk · GET /search · GET /health — 아래 _post/_get 을 부르는 함수만 보면 된다.
+- 진행 이벤트: review_events() — POST /review/stream(NDJSON)이 있으면 단계·토큰을 그대로 흘리고, 없으면(404)
+  POST /review 결과 하나만 낸다. 화면은 받은 이벤트만 그린다(지어낸 진행률 없음).
 - API 가 실패하면 Mock 으로 바꿔치기하지 않고 BackendError 를 올린다(화면이 오류로 보여 준다).
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import httpx
@@ -113,18 +117,99 @@ def unlock_hint(product: dict, evidence: dict) -> str | None:
 
 
 # ── 검토 ────────────────────────────────────────────────────────────
+# 위험 표현 라벨 → 근거 스니펫에서 찾을 낱말 (API 모드에서 하이라이트를 실제 근거 번호에 잇는다)
+_LABEL_WORDS = {
+    "의약품 오인": ("의약품",), "기능성 오인": ("기능성",), "범위 이탈": ("범위",), "과장 표현": ("과장", "사실과 다르게"),
+    "실증 필요": ("실증",), "최상급 표현": ("최고", "배타"), "비교 표현": ("비교",), "전문가 표방": ("의사", "추천"),
+    "소비자 오인": ("소비자",),
+}
+
+
+def _link_citations(highlights: list[dict], citations: list[dict]) -> None:
+    """하이라이트마다 근거 번호(cites)를 붙인다 — 스니펫·조항에 그 표현이나 유형 낱말이 나오는 번호.
+    하나도 없으면 법령(권위 1) 첫 근거 하나. 근거가 없으면 비워 둔다."""
+    texts = [f'{c.get("source", "")} {c.get("article", "")} {c.get("content_snippet", "")}' for c in citations]
+    for h in highlights:
+        if h.get("kind") == "verified" or h.get("cites"):
+            continue
+        words = {h.get("text", "")} | {w for w in re.split(r"\s+", h.get("text", "")) if len(w) >= 2}
+        words |= set(_LABEL_WORDS.get(h.get("label", ""), ()))
+        cites = [i for i, t in enumerate(texts, start=1) if any(w and w in t for w in words)]
+        if not cites:
+            cites = [i for i, c in enumerate(citations, start=1) if int(c.get("authority", 4)) == 1][:1]
+        h["cites"] = cites
+
+
+def _variants_from(resp: dict) -> list[dict] | None:
+    """백엔드 제안 후보 → 화면 variants. ui.variants 가 오면 그대로, copy_suggester 결과
+    (candidates · rejected_notes · used_evidence)가 응답에 실려 오면 같은 뜻으로 옮긴다."""
+    ui = resp.get("ui") or {}
+    if ui.get("variants"):
+        return ui["variants"]
+    cands = resp.get("candidates") or ui.get("candidates")
+    if not cands:
+        return None
+    chosen = resp["result"].get("suggestion")
+    notes = list(resp.get("rejected_notes") or ui.get("rejected_notes") or [])
+    used = resp.get("used_evidence") or ui.get("used_evidence") or []
+    tiers = ["strong", "balanced", "safe"] if len(cands) >= 3 else ["strong", "safe"]
+    chosen_at = cands.index(chosen) if chosen in cands else 0
+    out = []
+    for i, text in enumerate(cands[:3]):
+        verified = True if i == chosen_at else (False if i < chosen_at else None)
+        note = notes[i] if verified is False and i < len(notes) else None
+        basis = ("사용한 보유 근거: " + ", ".join(used)) if i == 0 and used else ""
+        out.append({"text": text, "tier": tiers[min(i, len(tiers) - 1)], "basis": basis,
+                    "verified": verified, "note": note, "chosen": i == chosen_at})
+    return out
+
+
 def _with_rule_highlights(resp: dict, product: dict) -> dict:
-    """API 응답에 화면 확장(ui)이 없으면 규칙 자산 기반 하이라이트만 붙인다 (판정·근거는 서버 것 그대로)."""
-    if resp.get("ui"):
-        return resp
-    hits = mock.detect(resp.get("input_text", ""), product)
-    resp["ui"] = {
-        "derived": True,
-        "highlights": [{"start": h.start, "end": h.end, "text": h.text, "kind": h.kind, "label": h.label,
-                        "reason": h.reason, "violation_type": h.violation, "level": h.level,
-                        "decisive": h.decisive, "cites": []} for h in hits],
-    }
+    """API 응답에 화면 확장(ui)이 없으면 규칙 자산 기반 하이라이트를 붙이고 실제 근거 번호에 잇는다
+    (판정·근거는 서버 것 그대로). 제안 후보가 실려 오면 variants 로 옮긴다."""
+    ui = resp.setdefault("ui", {})
+    if not ui.get("highlights"):
+        hits = mock.detect(resp.get("input_text", ""), product)
+        ui["derived"] = True
+        ui["highlights"] = [{"start": h.start, "end": h.end, "text": h.text, "kind": h.kind, "label": h.label,
+                             "reason": h.reason, "violation_type": h.violation, "level": h.level,
+                             "decisive": h.decisive, "cites": []} for h in hits]
+    _link_citations(ui["highlights"], resp["result"].get("citations", []))
+    variants = _variants_from(resp)
+    if variants:
+        ui["variants"] = variants
     return resp
+
+
+def review_events(copy_text: str, product: dict) -> Iterator[dict]:
+    """검토 진행 이벤트 (contract 의 StageEvent · TokenEvent · WaitEvent · ResultEvent).
+    - Mock: 엔진이 계산하는 순서대로 단계 이벤트(시간은 실측) → result
+    - API: POST /review/stream(NDJSON)이 있으면 그 줄들을 그대로 → result. 없으면 wait → POST /review → result
+    실패는 BackendError. 화면은 이 함수가 낸 것만 그린다."""
+    if data_mode() == "mock":
+        yield from mock.review_iter(copy_text, product)
+        return
+    payload = {"copy_text": copy_text, "product": product}
+    try:
+        with httpx.stream("POST", f"{api_base_url()}/review/stream", json=payload,
+                          timeout=httpx.Timeout(300.0, connect=5.0)) as res:
+            if res.status_code not in (404, 405):
+                res.raise_for_status()
+                for line in res.iter_lines():
+                    if not line.strip():
+                        continue
+                    event = json.loads(line)
+                    if event.get("type") == "result":
+                        yield {"type": "result", "resp": _with_rule_highlights(event["resp"], product)}
+                        return
+                    yield event
+                raise BackendError("검토 서버가 결과 없이 스트림을 끝냈습니다.")
+    except httpx.HTTPStatusError as err:
+        raise BackendError(f"서버가 요청을 처리하지 못했습니다 (HTTP {err.response.status_code}).", err) from err
+    except httpx.HTTPError as err:
+        raise BackendError(f"검토 서버({api_base_url()})에 연결하지 못했습니다. 서버가 켜져 있는지 확인하세요.", err) from err
+    yield {"type": "wait"}
+    yield {"type": "result", "resp": review_copy(copy_text, product)}
 
 
 def review_copy(copy_text: str, product: dict) -> dict:
@@ -156,16 +241,29 @@ def split_sentences(full_text: str) -> list[str]:
         return out
 
 
-def review_page(full_text: str, product: dict) -> list[dict]:
-    """상세페이지 글 전체를 문장 단위로 검토 → [ReviewResponse, ...] (입력 순서)."""
+def review_page_events(full_text: str, product: dict) -> Iterator[dict]:
+    """상세페이지 일괄 검토 진행. Mock 은 문장 하나를 실제로 끝낼 때마다 {"type": "sentence", "done", "total"},
+    API(/review/bulk 는 한 번에 돌려준다)는 {"type": "wait", "total"} 하나. 마지막은 {"type": "result", "items"}."""
     sentences = split_sentences(full_text)
     if not sentences:
         raise BackendError("검토할 문장이 없습니다.")
     if len(sentences) > MAX_SENTENCES:
         raise BackendError(f"한 번에 최대 {MAX_SENTENCES}문장까지 검토할 수 있습니다. 지금은 {len(sentences)}문장입니다.")
     if data_mode() == "mock":
-        return [mock.review(s, product) for s in sentences]
-    return [_with_rule_highlights(r, product) for r in _post("/review/bulk", {"full_text": full_text, "product": product}, timeout=300.0)]
+        items = []
+        for i, sentence in enumerate(sentences, start=1):
+            items.append(mock.review(sentence, product))
+            yield {"type": "sentence", "done": i, "total": len(sentences)}
+        yield {"type": "result", "items": items}
+        return
+    yield {"type": "wait", "total": len(sentences)}
+    items = _post("/review/bulk", {"full_text": full_text, "product": product}, timeout=300.0)
+    yield {"type": "result", "items": [_with_rule_highlights(r, product) for r in items]}
+
+
+def review_page(full_text: str, product: dict) -> list[dict]:
+    """상세페이지 글 전체를 문장 단위로 검토 → [ReviewResponse, ...] (입력 순서)."""
+    return next(e for e in review_page_events(full_text, product) if e["type"] == "result")["items"]
 
 
 def search_rules(query: str, scope: str = "공통", limit: int = 8) -> list[dict]:

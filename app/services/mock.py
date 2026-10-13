@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import math
 import re
+import time
 from dataclasses import dataclass, field
 from functools import lru_cache
 
@@ -458,17 +459,6 @@ _SUMMARY = {
 }
 
 
-def _steps(status: str, level: int | None, retrieval_ms: float, llm_ms: float) -> list[dict]:
-    skip = set()
-    if status == "판단보류":
-        skip = {"organize_evidence", "suggest_copy", "verify_copy"}
-    elif level == 0:
-        skip = {"suggest_copy", "verify_copy"}
-    timed = {"retrieve_rules": retrieval_ms, "judge_claim": llm_ms}
-    return [{"key": k, "name": n, "status": "skip" if k in skip else "done", "ms": None if k in skip else timed.get(k)}
-            for k, n in PIPELINE_STEPS]
-
-
 def _validate(resp: dict) -> None:
     """팀 결과 계약(schemas.ReviewResponse) 검증. 패키지가 없으면 건너뛴다."""
     try:
@@ -479,31 +469,152 @@ def _validate(resp: dict) -> None:
 
 
 # ── 공개 함수 ────────────────────────────────────────────────────────
-def review(copy_text: str, product: dict) -> dict:
-    """광고 문구 한 개를 Mock 으로 판정한다. contract.ReviewResponse 모양 + mock=True."""
+
+
+class _Clock:
+    """단계별 실제 걸린 시간을 잰다 (Mock 의 시간도 지어내지 않는다)."""
+
+    def __init__(self) -> None:
+        self.t0 = time.perf_counter()
+        self.marks: dict[str, float] = {}
+        self.steps: dict[str, dict] = {}
+
+    def start(self, key: str) -> dict:
+        self.marks[key] = time.perf_counter()
+        return {"type": "stage", "key": key, "status": "start"}
+
+    def done(self, key: str) -> dict:
+        ms = (time.perf_counter() - self.marks.pop(key, time.perf_counter())) * 1000
+        self.steps[key] = {"status": "done", "ms": round(ms, 2)}
+        return {"type": "stage", "key": key, "status": "done", "ms": round(ms, 2)}
+
+    def skip(self, key: str) -> dict:
+        self.steps[key] = {"status": "skip", "ms": None}
+        return {"type": "stage", "key": key, "status": "skip"}
+
+    def total_ms(self) -> float:
+        return round((time.perf_counter() - self.t0) * 1000, 2)
+
+    def step_list(self) -> list[dict]:
+        return [{"key": k, "name": n, **self.steps.get(k, {"status": "pending", "ms": None})} for k, n in PIPELINE_STEPS]
+
+
+def _verify(text: str, product: dict) -> tuple[bool, str | None]:
+    """제안 후보 역검증: 금지·주의 표현이 남았는지, 숫자가 보유 실증에 있는지."""
+    risky = [h for h in detect(text, product) if h.kind == "risk"]
+    if risky:
+        h = risky[0]
+        return False, f"‘{h.text}’ — {h.label}"
+    values = [_flat(ev.get("value") or "") for ev in (product.get("owned_evidence") or [])]
+    missing = [n for n in _numbers_in(text) if not any(n in v for v in values)]
+    if missing:
+        return False, f"‘{missing[0]}’ 수치가 보유 실증에 없음"
+    return True, None
+
+
+def _rung_phrases(ladder: dict | None, below: int) -> list[tuple[int, str, str]]:
+    """사다리에서 below 칸 아래의 쓸 수 있는 표현 (칸, 문장, 필요한 근거) — 높은 칸부터."""
+    if not ladder:
+        return []
+    out = []
+    for r in sorted((r for r in ladder["rungs"] if r["lv"] != "X"), key=lambda r: -r["lv"]):
+        if r["lv"] >= below or r["lv"] > ladder["reachable"]:
+            continue
+        for part in r["text"].split(" / "):
+            phrase = _polish(part)
+            if "N" not in phrase and phrase not in [x[1] for x in out]:
+                out.append((r["lv"], phrase, r["needs"]))
+    return out
+
+
+def _variants(suggestion: str, src: str, direction: str, ladder: dict | None, product: dict) -> list[dict]:
+    """대체 문구 후보 (근거 최대 → 균형 → 가장 안전). 백엔드 candidates 와 같은 순서·의미."""
+    top = ladder["proposal"] if ladder and ladder.get("proposal") is not None else 3
+    cands = [(f"{suggestion} {src}".strip(), direction or "보유한 근거 범위 안에서 가장 강한 표현")]
+    rungs = _rung_phrases(ladder, top)
+    if rungs:
+        lv, phrase, needs = rungs[0]
+        cands.append((phrase, f"Lv{lv} 표현 · 필요한 근거: {needs}"))
+        lv0 = [x for x in rungs if x[0] == min(r[0] for r in rungs) and x[1] != phrase]
+        if lv0:
+            lv, phrase, needs = lv0[0]
+            cands.append((phrase, f"Lv{lv} 표현 · 실증 없이 쓸 수 있는 기본 표현"))
+    tiers = ["strong", "balanced", "safe"] if len(cands) == 3 else ["strong", "safe"][:len(cands)]
+    out, chosen_at = [], None
+    for i, ((text, basis), tier) in enumerate(zip(cands, tiers)):
+        ok, note = _verify(text, product)
+        if ok and chosen_at is None:
+            chosen_at = i
+        out.append({"text": text, "tier": tier, "basis": basis, "verified": ok, "note": note, "chosen": False})
+    out[chosen_at if chosen_at is not None else 0]["chosen"] = True
+    return out
+
+
+def review_iter(copy_text: str, product: dict):
+    """광고 문구 한 개를 Mock 으로 판정하며 단계마다 이벤트를 낸다 (계산 순서 그대로, 시간은 실측).
+    마지막 이벤트는 {"type": "result", "resp": ReviewResponse(+mock=True)}."""
+    clock = _Clock()
+
+    yield clock.start("parse_input")
     text = (copy_text or "").strip()
+    yield clock.done("parse_input")
+
+    yield clock.start("rule_check")
     hits = detect(text, product)
     risks = [h for h in hits if h.kind == "risk"]
+    yield clock.done("rule_check")
+
+    yield clock.start("judge_claim")
     claim = (ds.detect_claim(text, product) or ds.claim_of_product(product)
              or ds.detect_claim(product.get("name", ""), product)
              or next((ds.evidence_claim(ev, product) for ev in product.get("owned_evidence") or []
                       if ds.evidence_claim(ev, product)), None))
     ladder = ds.ladder_for(claim, product)
     novel = re.search(_NOVEL, text)
-
     if not risks and novel:
         status, level = "판단보류", None
     else:
         status, level = "판정", max((h.level or 0 for h in risks), default=0)
     decisive = next((h for h in risks if h.decisive), None)
-    citations = _assemble_citations(hits) if level else []
+    yield clock.done("judge_claim")
+
+    if level:
+        yield clock.start("build_query")
+        _ = [h.text for h in risks]                       # 검색어 = 위험 표현 (화면의 「검색한 표현」)
+        yield clock.done("build_query")
+        yield clock.start("retrieve_rules")
+        citations = _assemble_citations(hits)
+        yield clock.done("retrieve_rules")
+        yield clock.start("organize_evidence")
+        yield clock.done("organize_evidence")
+    else:
+        citations = []
+        for key in ("build_query", "retrieve_rules", "organize_evidence"):
+            yield clock.skip(key)
 
     suggestion = src = direction = None
     next_text, next_ui = None, None
     if status == "판정" and level:
+        yield clock.start("suggest_copy")
         suggestion, src, direction = _suggestion(claim, ladder, product, text, hits)
         next_text, next_ui = _next_test(claim, ladder, hits, level)
+        yield clock.done("suggest_copy")
+    else:
+        yield clock.skip("suggest_copy")
 
+    reverify = None
+    if suggestion:
+        yield clock.start("verify_copy")
+        nums = _numbers_in(suggestion)
+        values = [_flat(ev.get("value") or "") for ev in (product.get("owned_evidence") or [])]
+        ok = sum(1 for n in nums if any(n in v for v in values))
+        banned = sum(1 for h in detect(suggestion, product) if h.kind == "risk" and h.level == 2)
+        reverify = {"numbers_ok": ok, "numbers_total": len(nums), "banned": banned}
+        yield clock.done("verify_copy")
+    else:
+        yield clock.skip("verify_copy")
+
+    yield clock.start("finalize")
     if ladder:
         if decisive and decisive.level == 2 and decisive.group in ("medical", "scope", "doctor", "consumer"):
             original = "X"
@@ -525,11 +636,6 @@ def review(copy_text: str, product: dict) -> dict:
         summary = _SUMMARY.get(decisive.group, _SUMMARY["medical"]) if decisive else ""
         notes = f"'{decisive.text}' — {decisive.reason}" if decisive else None
 
-    seed = int(hashlib.sha1(f"{text}|{product.get('product_id')}|{len(product.get('owned_evidence') or [])}".encode()).hexdigest()[:8], 16)
-    retrieval_ms = float(260 + min(len(text), 120) * 3 + seed % 90)
-    llm_ms = float(820 + min(len(text), 120) * 11 + seed % 240)
-    total_ms = retrieval_ms + llm_ms + 110 + (seed % 60)
-
     diff = []
     if suggestion:
         for h in risks:
@@ -540,14 +646,6 @@ def review(copy_text: str, product: dict) -> dict:
         else:
             diff.append({"op": "+", "text": suggestion, "why": "근거 범위 안의 표현으로 교체"})
 
-    reverify = None
-    if suggestion:
-        nums = _numbers_in(suggestion)
-        values = [_flat(ev.get("value") or "") for ev in (product.get("owned_evidence") or [])]
-        ok = sum(1 for n in nums if any(n in v for v in values))
-        banned = sum(1 for h in detect(suggestion, product) if h.kind == "risk" and h.level == 2)
-        reverify = {"numbers_ok": ok, "numbers_total": len(nums), "banned": banned}
-
     ui = {
         "summary": summary,
         "highlights": [
@@ -555,18 +653,23 @@ def review(copy_text: str, product: dict) -> dict:
              "violation_type": h.violation, "level": h.level, "decisive": h.decisive, "cites": h.cites}
             for h in hits
         ],
-        "steps": _steps(status, level, retrieval_ms, llm_ms),
     }
     if ladder:
         ui["ladder"] = ladder
     if suggestion:
         ui.update(diff=diff, reverify=reverify, suggestion_source=src or "", direction=direction,
-                  alternatives=_alternatives(ladder, suggestion))
+                  alternatives=_alternatives(ladder, suggestion),
+                  variants=_variants(suggestion, src or "", direction or "", ladder, product))
     elif level == 0 and ladder:
         ui["alternatives"] = _alternatives(ladder, None)
     if next_ui:
         ui["next_test"] = next_ui
+    yield clock.done("finalize")
 
+    steps = clock.step_list()
+    ui["steps"] = steps
+    by_key = {st["key"]: st for st in steps}
+    seed = int(hashlib.sha1(f"{text}|{product.get('product_id')}|{len(product.get('owned_evidence') or [])}".encode()).hexdigest()[:8], 16)
     resp = {
         "request_id": f"MOCK_{seed:08x}",
         "input_text": text,
@@ -580,12 +683,23 @@ def review(copy_text: str, product: dict) -> dict:
             "next_test": next_text,
             "review_notes": notes,
         },
-        "timing": {"retrieval_ms": retrieval_ms, "llm_ms": llm_ms, "total_ms": total_ms},
+        # 실측값 (Mock 계산 시간 — 실제 AI 응답 시간이 아니다)
+        "timing": {"retrieval_ms": by_key["retrieve_rules"]["ms"] or 0.0,
+                   "llm_ms": (by_key["judge_claim"]["ms"] or 0.0) + (by_key["suggest_copy"]["ms"] or 0.0),
+                   "total_ms": clock.total_ms()},
         "ui": ui,
         "mock": True,
     }
     _validate(resp)
-    return resp
+    yield {"type": "result", "resp": resp}
+
+
+def review(copy_text: str, product: dict) -> dict:
+    """광고 문구 한 개를 Mock 으로 판정한다. contract.ReviewResponse 모양 + mock=True."""
+    last = None
+    for event in review_iter(copy_text, product):
+        last = event
+    return last["resp"]
 
 
 @lru_cache(maxsize=1)

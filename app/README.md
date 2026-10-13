@@ -58,6 +58,10 @@ app/
     styles/pages.css      상세페이지 · 라이브러리 전용 CSS
     cards.py              가운데 답변 블록 (데이터 → HTML 순수 함수)
     panels.py             오른쪽 근거 · RAG 패널 (데이터 → HTML 순수 함수)
+    suggest.py            최신 답변의 수정 제안 — 후보 고르기(근거 최대 · 균형 · 가장 안전) · 복사 · 이 문구로 다시 검토
+    progress.py           검토 진행 카드 — backend.review_events() 가 실제로 낸 이벤트만 그린다
+    interact.py           위험 표현 ↔ 오른쪽 근거 연동 (브라우저 스크립트)
+    blocks.py             확장 블록 (차트 · 추가 질문) — 응답에 ui.blocks 가 있을 때만
     sidebar.py            왼쪽 탐색 · 프로젝트 · 최근 대화
     context.py            프로젝트(검토 기준) 위젯과 current() — 화면들은 current() 로 읽기만 한다
     threads.py            대화 기록 (세션 안에서만 유지)
@@ -83,6 +87,9 @@ COOA 의 도메인 구조(위험도 · 권장 문구 · RA 검토 권고), 팀 �
   굵기 400 · 600 · 700. 숫자 · 조항 번호는 IBM Plex Mono. 보조 글자 대비 4.5:1 이상.
 - **캐릭터**: 로고 마크 · AI 아바타 · 첫 화면(빈 상태) 세 곳에만. 장식으로 늘리지 않는다.
 - **예시**: 첫 화면 시작 문구 3개(판정 셋이 하나씩 나오게)뿐.
+- **움직임**: 뜻이 있는 것만 — 새 답변이 처음 도착할 때 한 번(판정 → 검토한 문구에 밑줄이 그어짐 → 문제 표현 → 수정 제안 → 출처,
+  오른쪽은 표현 단계 막대 → 근거 조항), 강도를 바꾼 직후 문구 교체, 근거 번호를 누르면 그 조항에 형광펜.
+  다시 그릴 때는 반복하지 않고(`is-arrive` 는 처음 한 번만 붙는다), 시스템 "동작 줄이기"면 전부 멈춘다. 가짜 진행률 · 가짜 타이핑은 없다.
 - Streamlit 내부 구조에 기대는 CSS 는 `data-testid` 두 개(메인 여백 · 헤더)와 키 컨테이너 안의 위젯 라벨 숨김뿐이고,
   나머지는 `st.container(key=…)` 가 붙이는 `.st-key-*` 클래스로만 꾸민다.
 
@@ -92,6 +99,7 @@ COOA 의 도메인 구조(위험도 · 권장 문구 · RA 검토 권고), 팀 �
 
 | 함수 | API | 비고 |
 |---|---|---|
+| `review_events(copy_text, product)` | `POST /review/stream` (있으면) → 없으면 `POST /review` | 검토 진행 이벤트 + 결과. 아래 「진행 이벤트」 |
 | `review_copy(copy_text, product)` | `POST /review` | `ReviewResponse` 그대로 |
 | `review_page(full_text, product)` | `POST /review/bulk` | 문장 분할은 `api/text.py` 와 같은 규칙 |
 | `search_rules(query, scope)` | `GET /search` | `[{content, metadata}]` |
@@ -119,6 +127,29 @@ API 모드에서 `ui` 가 없으면 `backend._with_rule_highlights` 가 규칙 �
 | `diff` · `reverify` | 수정 제안의 고친 곳 · 역검증 | `suggest_copy` · `verify_copy` |
 | `steps` (노드별 상태 · 시간) | 오른쪽 「검토 과정」 탭 | LangGraph 노드 실행 기록 |
 | `summary` · `direction` · `alternatives` · `suggestion_source` | 한 줄 요약 · 제안 방향 · 다른 표현 · 출처 | `suggest_copy` 프롬프트 출력 |
+
+| `variants` (대체 문구 후보 · 강한 → 안전) | 수정 제안의 강도 고르기 · 역검증 상태 | `copy_suggester` — 아래 「제안 후보」 |
+| `blocks` (`chart` · `question`) | 답변 아래 확장 블록 — **있을 때만** 뜬다 | 데이터가 있거나 사용자 입력이 필요할 때만 보낸다 |
+
+**제안 후보** — `copy_suggester` v6 결과를 `ReviewResponse` 에 그대로 실어 주면 화면이 후보로 옮긴다(`backend._variants_from`).
+
+| 응답 필드 (최상위 또는 `ui` 안) | 뜻 |
+|---|---|
+| `candidates: list[str]` | 후보 문구, **강한 → 안전 순** 최대 3개 (근거 최대 · 균형 · 가장 안전) |
+| `rejected_notes: list[str]` | 역검증에서 탈락한 후보의 사유 (앞에서부터) |
+| `used_evidence: list[str]` | 가장 강한 후보가 쓴 보유 실증 |
+| `result.suggestion` | 엔진이 고른 후보 — `candidates` 중 하나면 그 칸이 "추천"으로 표시된다 |
+
+`ui.variants` 를 직접 보내도 된다: `{text, tier: strong|balanced|safe, basis, verified: true|false|null, note, chosen}`.
+
+**진행 이벤트** — `POST /review/stream` 이 생기면 NDJSON(한 줄 = 이벤트 하나)으로 받은 것만 진행 카드에 그린다.
+없으면(404) 단계 목록 없이 "서버가 검토하는 중 · 경과 n초"(실측)만 보이고 `POST /review` 결과를 기다린다. 퍼센트 막대는 없다.
+
+| 이벤트 | 모양 | 화면 |
+|---|---|---|
+| 단계 | `{"type": "stage", "key": "rule_check", "status": "start"\|"done"\|"skip", "ms": 12.5}` | 단계 줄 (✓ + 실측 시간). `key` 는 `contract.PIPELINE_STEPS` 의 노드 이름 |
+| 조각 | `{"type": "token", "text": "…"}` | LLM 이 요약을 실제로 흘려보낼 때만, 받은 글자를 이어 붙인다 |
+| 결과 | `{"type": "result", "resp": ReviewResponse}` | 마지막 한 줄 — 답변으로 바뀐다 |
 
 **화면을 바꾸고 싶을 때**: 레이아웃은 `views/*.py`, 블록의 생김새는 `components/cards.py`·`panels.py` 의 함수 하나,
 색·글자·간격은 `styles/base.css` 맨 위 `:root` 토큰. 새 블록을 만들 때도 "데이터 dict → HTML 문자열" 함수로 만든다.
