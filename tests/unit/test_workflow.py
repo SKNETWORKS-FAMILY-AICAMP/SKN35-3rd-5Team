@@ -32,6 +32,9 @@ class StubJudge:
             "claim_type": "보습",
         }
 
+    def judge_product(self, copy_text: str, product: dict):
+        return self.judge(copy_text, product.get("category", "일반"), product.get("functional_type"))
+
 
 class RecordingRewriter:
     def __init__(self):

@@ -7,6 +7,10 @@ from typing import Any
 
 
 class BaseJudgeModel(ABC):
+    def judge_product(self, copy_text: str, product: dict[str, Any]) -> dict[str, Any]:
+        """Product-aware entry point, compatible with legacy Rule/FT adapters."""
+        return self.judge(copy_text, product.get("category", "일반"), product.get("functional_type"))
+
     @abstractmethod
     def judge(
         self,
@@ -24,4 +28,3 @@ class BaseJudgeModel(ABC):
                 "confidence": float
             }
         """
-        pass
