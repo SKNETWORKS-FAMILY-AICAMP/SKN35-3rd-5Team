@@ -8,10 +8,12 @@ Beaurette — 화장품 광고 문구 검토 AI 의 Streamlit 진입 파일.
 import sys
 from pathlib import Path
 
-# `streamlit run app/streamlit_app.py` 는 app/ 만 sys.path 에 넣는다. 저장소 루트를 넣어 app.* 로 import 한다.
+# `streamlit run app/streamlit_app.py` 는 app/ 만 sys.path 에 넣는다. 저장소 루트(app.*)와 src(cosmetic_agent,
+# 패키지를 설치하지 않은 실행·Docker)를 넣는다 — 팀 dev 의 같은 수정(9b4f4e1)과 합침.
 ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+for p in (ROOT, ROOT / "src"):
+    if str(p) not in sys.path:
+        sys.path.insert(0, str(p))
 
 import streamlit as st  # noqa: E402
 
