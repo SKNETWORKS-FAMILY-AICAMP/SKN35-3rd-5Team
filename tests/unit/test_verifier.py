@@ -122,3 +122,16 @@ def test_survey_number_must_stay_with_surveyed_item(verifier):
     kwargs = {"product_category": "기능성", "functional_type": "주름 개선"}
     assert "조사결과오용" in codes(verifier, "주름 개선에 도움, 만족도 77%", [survey], **kwargs)
     assert not codes(verifier, "주름 개선에 도움, 2주차 탄력감 만족도 77%", [survey], **kwargs)
+
+
+def test_banned_engine_receives_functional_type(verifier):
+    class FunctionalAwareEngine:
+        def check_banned_terms(self, text, category, functional_type=None):
+            # 심사받은 기능성 효능이면 금지어가 아니다
+            if functional_type and "탈모" in functional_type:
+                return 0, []
+            return 2, [{"term": "탈모", "basis_id": "TEST_ID"}]
+
+    kwargs = {"product_category": "기능성", "functional_type": "탈모 증상 완화"}
+    passed, note = verifier.verify_suggestion("탈모 증상의 완화에 도움을 주는 샴푸", [], FunctionalAwareEngine(), **kwargs)
+    assert passed, note

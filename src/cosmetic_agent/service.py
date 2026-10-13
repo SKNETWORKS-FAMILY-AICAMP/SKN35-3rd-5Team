@@ -36,6 +36,10 @@ class ReviewService:
         self.dense_retriever = VectorStoreRetriever(
             collection_name=settings.QDRANT_COLLECTION_NAME,
             url=settings.QDRANT_URL,
+            qdrant_api_key=settings.QDRANT_API_KEY,
+            openai_api_key=settings.OPENAI_API_KEY,
+            openai_base_url=settings.OPENAI_BASE_URL,
+            embedding_model=settings.OPENAI_EMBEDDING_MODEL,
         )
         self.sparse_retriever = SparseBM25Retriever(index_path=settings.BM25_INDEX_PATH)
         self.hybrid_retriever = HybridRetriever(
@@ -71,13 +75,28 @@ class ReviewService:
         # 결과 계약 모델 조립
         status = final_state.get("status", "판단보류")
         level = final_state.get("level") if status == "판정" else None
+        citation_rows = []
+        for document in final_state.get("documents", []):
+            metadata = document.metadata
+            authority = int(metadata.get("authority", 4))
+            if authority not in (1, 2, 3, 4):
+                authority = 4
+            citation_rows.append(
+                {
+                    "chunk_id": metadata.get("chunk_id") or metadata.get("id", ""),
+                    "source": metadata.get("source", ""),
+                    "article": metadata.get("article", ""),
+                    "authority": authority,
+                    "content_snippet": document.page_content[:300],
+                }
+            )
 
         result = ReviewResult(
             status=status,
             level=level,
             violation_type=final_state.get("violation_type", "없음"),
             claim_type=final_state.get("claim_type"),
-            citations=[],  # TODO: final_state['citations'] 복원
+            citations=citation_rows,
             suggestion=final_state.get("suggestion"),
             next_test=final_state.get("next_test"),
             review_notes=final_state.get("review_notes"),

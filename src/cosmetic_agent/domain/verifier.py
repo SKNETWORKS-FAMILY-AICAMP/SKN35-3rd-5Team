@@ -115,7 +115,7 @@ class CopyVerifier:
         issues += self._check_functional(text, product_category, own_types)
         issues += self._check_substantiation(text, evidences, own_types)
         issues += self._check_numbers(text, evidences)
-        issues += self._check_banned_engine(text, product_category, banned_engine)
+        issues += self._check_banned_engine(text, product_category, functional_type, banned_engine)
         return issues
 
     # ------------------------------------------------------------------ 개별 검사
@@ -237,11 +237,19 @@ class CopyVerifier:
         return not words or any(_compact(w) in compact_text for w in words)
 
     @staticmethod
-    def _check_banned_engine(text: str, category: str, banned_engine: Any) -> list[VerifyIssue]:
-        """규칙 엔진(rules.py)이 있으면 같은 사전으로 한 번 더 검사한다."""
+    def _check_banned_engine(
+        text: str, category: str, functional_type: str | None, banned_engine: Any
+    ) -> list[VerifyIssue]:
+        """규칙 엔진(rules.py)이 있으면 같은 사전으로 한 번 더 검사한다.
+
+        기능성 유형을 함께 넘겨야 심사받은 효능 문구(예: 탈모 증상 완화)를 금지어로 오탐하지 않는다.
+        """
         if banned_engine is None or not hasattr(banned_engine, "check_banned_terms"):
             return []
-        level, hits = banned_engine.check_banned_terms(text, category)
+        try:
+            level, hits = banned_engine.check_banned_terms(text, category, functional_type)
+        except TypeError:  # 기능성 유형을 받지 않는 예전 엔진
+            level, hits = banned_engine.check_banned_terms(text, category)
         if level < 2:
             return []
         return [
