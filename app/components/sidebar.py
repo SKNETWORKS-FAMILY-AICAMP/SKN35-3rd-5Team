@@ -7,7 +7,7 @@ from __future__ import annotations
 import streamlit as st
 
 from app.components import threads
-from app.components.brand import TAGLINE, lockup_img
+from app.components.brand import BRAND_NAME, TAGLINE, lockup_img, scene_img
 from app.components.icons import icon
 from app.components.layout import ago, esc, html
 
@@ -18,17 +18,18 @@ def render_sidebar(pages: dict[str, st.Page], health: dict) -> None:
     """pages: {"review": Page, "bulk": Page, "library": Page}."""
     with st.sidebar:
         tagline = esc(TAGLINE).replace("\n", "<br>")
-        html(f'<div class="bw-brand">{lockup_img(34)}<p>{tagline}</p></div>')
+        html(f'<div class="bw-brand">{lockup_img(42)}<p>{tagline}</p></div>')
 
         if st.button("새 검토", icon=":material/add:", icon_position="right", key="new_review", width="stretch"):
             threads.start_new()
             st.switch_page(pages["review"])
 
-        for page in pages.values():
-            st.page_link(page, width="stretch")
+        with st.container(key="nav", gap=None):
+            for page in pages.values():
+                st.page_link(page, width="stretch")
 
-        html('<div class="bw-side-h" style="margin-top:14px;border-top:1px solid var(--bw-line);padding-top:16px">'
-             f'<span>최근 검토</span>{icon("history", 15)}</div>')
+        html('<div class="bw-side-h" style="margin-top:12px;border-top:1px solid var(--bw-line);padding-top:18px">'
+             f'<span>최근 검토</span>{icon("history", 17)}</div>')
         recent = threads.all_threads()[:MAX_RECENT]
         if not recent:
             html('<div class="bw-side-empty">아직 검토한 문구가 없습니다.</div>')
@@ -43,10 +44,11 @@ def render_sidebar(pages: dict[str, st.Page], health: dict) -> None:
                 html(f'<span class="bw-recent-time">{ago(t["created"])}</span>', inline=True)
 
         if health.get("mode") == "mock":
-            title, body, name = "데모 데이터로 동작 중", "백엔드 연결 전입니다. 판정과 제안은 Mock 응답이며 실제 AI 결과가 아닙니다.", "database"
+            cls, title, body = "", "데모 데이터로 동작 중", "판정과 제안은 Mock 응답이며 실제 AI 결과가 아닙니다."
         elif health.get("ok"):
-            title, body, name = "API 연결됨", health.get("detail", ""), "check_circle_outline"
+            cls, title, body = "is-live", "API 연결됨", health.get("detail", "")
         else:
-            title, body, name = "API 연결 실패", health.get("detail", ""), "cloud_off"
-        html(f'<div class="bw-side-foot" style="margin-top:18px">{icon(name, 16)}'
-             f'<div><b>{esc(title)}</b>{esc(body)}</div></div>')
+            cls, title, body = "is-down", "API 연결 실패", health.get("detail", "")
+        html(f'<div class="bw-promo" style="margin-top:20px"><p>근거 있는 문구로<br>더 안전한<br>뷰티 마케팅을<br>'
+             f'<b>{BRAND_NAME}</b>가<br>함께합니다.</p>{scene_img(136)}</div>'
+             f'<div class="bw-side-status {cls}"><span><b>{esc(title)}</b> — {esc(body)}</span></div>')

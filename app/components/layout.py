@@ -33,14 +33,13 @@ def iga(word: str) -> str:
 
 
 def mode_badge(health: dict) -> str:
-    """데이터 상태 표시. Mock 이면 점선 '데모 데이터', API 모드면 연결 상태."""
+    """데이터 상태 표시 (점 색 + 글자). Mock 이면 '데모 데이터', API 모드면 연결 상태."""
     if health.get("mode") == "mock":
         return (f'<span class="bw-mode" title="{esc(health.get("detail", ""))}">'
-                f'{icon("database", 15)}{esc(health.get("label", "데모 데이터"))}</span>')
+                f'{esc(health.get("label", "데모 데이터"))}</span>')
     cls = "is-live" if health.get("ok") else "is-down"
-    name = "check_circle_outline" if health.get("ok") else "cloud_off"
     return (f'<span class="bw-mode {cls}" title="{esc(health.get("detail", ""))}">'
-            f'{icon(name, 15)}{esc(health.get("label", "API"))}</span>')
+            f'{esc(health.get("label", "API"))}</span>')
 
 
 def page_header(title: str, desc: str, *, health: dict | None = None, beta: bool = False) -> None:

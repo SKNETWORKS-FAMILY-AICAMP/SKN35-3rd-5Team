@@ -40,6 +40,11 @@ def _ctx_label(ctx: dict) -> str:
     return f'{ctx["product_name"]} · 실증 {ctx["evidence_on"]}건'
 
 
+def _bubble_label(ctx: dict) -> str:
+    """말풍선 아래 한 마디 — 같은 문구를 다른 실증 기준으로 다시 물은 것이 보이게."""
+    return f'실증 {ctx["evidence_on"]}건 기준'
+
+
 def _run(thread: dict, message: dict, slot) -> None:
     """대기 중인 질문에 답한다. Mock 이면 결과의 단계를 따라 진행을 보여 준다."""
     total = len(PIPELINE_STEPS)
@@ -79,7 +84,7 @@ with center, st.container(key="center"):
         else:
             for m in thread["messages"]:
                 if m["role"] == "user":
-                    html(user_message(m["text"], m["at"], _ctx_label(m["ctx"])))
+                    html(user_message(m["text"], m["at"], _bubble_label(m["ctx"])))
                 elif m["role"] == "assistant":
                     html(assistant_message(m["resp"], m["at"]), js=True)
                 else:
@@ -94,8 +99,8 @@ with center, st.container(key="center"):
                  js=True)
 
     last = threads.last_assistant(thread)
+    changed = bool(last) and last["ctx"]["signature"] != ctx["signature"]
     if last and not pending:
-        changed = last["ctx"]["signature"] != ctx["signature"]
         last_user = next(m for m in reversed(thread["messages"]) if m["role"] == "user")
         if changed:
             with st.container(horizontal=True, key="ctxnote", vertical_alignment="center"):
@@ -104,6 +109,13 @@ with center, st.container(key="center"):
                 if st.button("이 기준으로 다시 검토", key="rerun_ctx", icon=":material/refresh:"):
                     threads.ask(last_user["text"], ctx, product)
                     st.rerun()
+    prompt = st.chat_input("검토할 광고 문구를 입력하거나 붙여 넣으세요", key="bw_chat", max_chars=5000)
+    if prompt and prompt.strip():
+        threads.ask(prompt.strip(), ctx, product)
+        st.rerun()
+
+    # 후속 질문 칩은 입력창 아래 (대화 내용을 가리지 않게). 기준이 바뀌었으면 "이 기준으로 다시 검토" 하나만 남긴다
+    if last and not pending and not changed:
         result = last["resp"]["result"]
         with st.container(horizontal=True, key="followups", gap="small"):
             if result.get("suggestion") and verdict_of(result) in ("불가", "조건부"):
@@ -111,11 +123,6 @@ with center, st.container(key="center"):
                     threads.ask(result["suggestion"], ctx, product)
                     st.rerun()
             st.page_link(pages["library"], label="근거 원문 찾아보기", icon=":material/menu_book:")
-
-    prompt = st.chat_input("검토할 광고 문구를 입력하거나 붙여 넣으세요", key="bw_chat", max_chars=5000)
-    if prompt and prompt.strip():
-        threads.ask(prompt.strip(), ctx, product)
-        st.rerun()
 
 with right:
     with st.container(key="aside"):

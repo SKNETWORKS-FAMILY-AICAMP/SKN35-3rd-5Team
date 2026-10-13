@@ -15,11 +15,11 @@ gatherUsageStats = false
 [theme]
 base = "light"
 primaryColor = "#2F5D4B"              # accent (딥 세이지)
-backgroundColor = "#F7F6F3"           # bg (오프화이트)
+backgroundColor = "#FBFAF7"           # bg (오프화이트 — 레퍼런스 실측 #FCFBF8)
 secondaryBackgroundColor = "#FFFFFF"  # 입력칸 바탕
 textColor = "#1E2320"                 # ink
 linkColor = "#2B5845"
-borderColor = "#E2E0DA"
+borderColor = "#E4E1DA"
 showWidgetBorder = true
 baseRadius = "8px"
 buttonRadius = "8px"
@@ -31,17 +31,17 @@ headingFontWeights = [700, 700, 650, 650, 600, 600]
 showSidebarBorder = true
 
 # 상태 색 (st.badge 등). 수정 필요 = 로즈, 실증 필요 = 앰버, 사용 가능 = 세이지, 전문가 검토 = 중성 회색
-redColor = "#B23B35"
-redBackgroundColor = "#FBEDEB"
-redTextColor = "#A3352F"
+redColor = "#B3302A"
+redBackgroundColor = "#FDE9E7"
+redTextColor = "#A3241E"
 orangeColor = "#B97A17"
-orangeBackgroundColor = "#FAF1E1"
-orangeTextColor = "#8A5A0E"
+orangeBackgroundColor = "#FEEEDB"
+orangeTextColor = "#8F4A12"
 yellowColor = "#B97A17"
-yellowBackgroundColor = "#FAF1E1"
-yellowTextColor = "#8A5A0E"
+yellowBackgroundColor = "#FEEEDB"
+yellowTextColor = "#8F4A12"
 greenColor = "#2F5D4B"
-greenBackgroundColor = "#EBF1ED"
+greenBackgroundColor = "#E8EDE3"
 greenTextColor = "#2B5845"
 grayColor = "#7A7F7B"
 grayBackgroundColor = "#F0F0ED"
@@ -76,8 +76,8 @@ style = "normal"
 unicodeRange = "U+0000-00FF, U+2000-206F, U+2212"
 
 [theme.sidebar]
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F4F3EF"
+backgroundColor = "#F6F4EF"             # 레퍼런스 실측 #F6F4F0 — 가운데보다 한 톤 따뜻하게
+secondaryBackgroundColor = "#FFFFFF"
 textColor = "#1E2320"
 primaryColor = "#2F5D4B"
-borderColor = "#E7E5E0"
+borderColor = "#E9E6DF"

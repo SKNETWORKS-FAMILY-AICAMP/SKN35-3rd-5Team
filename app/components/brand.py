@@ -3,7 +3,7 @@
 브랜드 자산(새싹 마스코트 · 워드마크 로고)을 st.html 에 넣을 수 있는 <img> 로 돌려준다.
 
 - st.html 은 인라인 <svg> 를 지우므로 data URI 이미지로 넣는다. 파일 원본은 app/static/brand/.
-- 마스코트는 로고 · AI 답변 아바타 · 첫 화면에만 쓴다. 장식으로 늘리지 않는다.
+- 마스코트는 로고 · AI 답변 아바타 · 첫 화면 · 사이드바 아래 카드 한 곳에만 쓴다. 장식으로 늘리지 않는다.
 """
 from __future__ import annotations
 
@@ -29,6 +29,11 @@ def mascot_img(size: int = 64, *, tight: bool = False, alt: str = "") -> str:
     """마스코트 <img>. tight=True 면 몸통이 꽉 차게 잘린 아바타용."""
     src = _data_uri("mascot-tight.svg" if tight else "mascot.svg")
     return f'<img src="{src}" width="{size}" height="{size}" alt="{alt}">'
+
+
+def scene_img(width: int = 150) -> str:
+    """사이드바 아래 카드의 마스코트 장면 <img> (잎 장식 포함)."""
+    return f'<img src="{_data_uri("mascot-scene.svg")}" width="{width}" alt="">'
 
 
 def lockup_img(height: int = 34) -> str:

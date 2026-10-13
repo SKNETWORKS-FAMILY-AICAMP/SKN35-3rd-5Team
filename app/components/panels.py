@@ -61,7 +61,7 @@ def summary_card(resp: dict, context: dict) -> str:
     if not labels and result.get("violation_type") not in (None, "없음"):
         labels.append((VIOLATION_LABEL.get(result["violation_type"], result["violation_type"]),
                        "risk" if result.get("level") == 2 else "caution"))
-    issues = "".join(tag(l, t, small=True) for l, t in labels) or '<span class="bw-muted">없음</span>'
+    issues = "".join(tag(l, t) for l, t in labels) or '<span class="bw-muted">없음</span>'
 
     if verdict == "판단보류":
         direction = "관련 근거를 보강하거나 RA 담당자의 검토를 받은 뒤 다시 판단합니다."
@@ -75,7 +75,7 @@ def summary_card(resp: dict, context: dict) -> str:
     rows = [("전반적 판단", esc(summary)), ("주요 이슈", f'<div class="bw-tags">{issues}</div>'), ("제안 방향", esc(direction))]
     ladder = _ladder(ui.get("ladder"))
     if ladder:
-        rows.append((f'표현 단계<br><span class="bw-muted" style="font-size:11.5px">{esc(ui["ladder"].get("claim", ""))}</span>', ladder))
+        rows.append((f'표현 단계<small>{esc(ui["ladder"].get("claim", ""))}</small>', ladder))
     ev = context.get("evidence_on", 0)
     rows.append(("검토 기준", f'{esc(context.get("product_name", ""))}<br><span class="bw-muted">'
                              f'{esc(context.get("category_label", ""))} · 실증 {ev}건 반영</span>'))

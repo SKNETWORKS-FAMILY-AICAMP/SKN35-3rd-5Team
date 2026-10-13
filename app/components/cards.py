@@ -31,9 +31,11 @@ COPY_SCRIPT = """<script>
     b.addEventListener('click', function () {
       var t = b.getAttribute('data-copy');
       var lbl = b.querySelector('.lbl');
+      var orig = b.getAttribute('data-label') || lbl.textContent;
+      b.setAttribute('data-label', orig);
       var done = function () {
         b.classList.add('is-done'); lbl.textContent = '복사됨';
-        setTimeout(function () { b.classList.remove('is-done'); lbl.textContent = '복사'; }, 1600);
+        setTimeout(function () { b.classList.remove('is-done'); lbl.textContent = orig; }, 1600);
       };
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(t).then(done, function () { fallback(t); done(); });
@@ -44,10 +46,10 @@ COPY_SCRIPT = """<script>
 </script>"""
 
 
-def tag(text: str, tone: str, *, icon_name: str | None = None, small: bool = False) -> str:
-    """상태·이슈 태그. tone: risk · caution · pass · hold · plain."""
-    ic = icon(icon_name, 14) if icon_name else ""
-    size = " is-sm" if small else ""
+def tag(text: str, tone: str, *, icon_name: str | None = None, small: bool = False, large: bool = False) -> str:
+    """상태·이슈 태그. tone: risk · caution · pass · hold · plain. large=True 는 이슈 칩(36px)."""
+    ic = icon(icon_name, 16) if icon_name else ""
+    size = " is-sm" if small else (" is-lg" if large else "")
     return f'<span class="bw-tag is-{tone}{size}">{ic}{esc(text)}</span>'
 
 
@@ -59,10 +61,10 @@ def status_tag(verdict: str, *, small: bool = False) -> str:
 
 
 def refs(numbers: list[int]) -> str:
-    """근거 번호 위첨자 (오른쪽 근거 패널 번호와 같다). 여러 개면 1·4·5."""
+    """근거 번호 동그라미 (오른쪽 근거 패널의 번호와 같다)."""
     if not numbers:
         return ""
-    return f'<sup class="bw-ref" title="오른쪽 근거 {", ".join(str(int(n)) for n in numbers)}번">{"·".join(str(int(n)) for n in numbers)}</sup>'
+    return "".join(f'<span class="bw-cn" title="오른쪽 근거 {int(n)}번">{int(n)}</span>' for n in numbers)
 
 
 def _tone_of(h: dict) -> str:
@@ -84,24 +86,24 @@ def highlighted(text: str, highlights: list[dict]) -> str:
         if h.get("kind") == "verified":
             out.append(f'<span class="bw-mark is-verified" title="{esc(h.get("reason", ""))}">{piece}</span>')
         else:
-            out.append(f'<span class="bw-mark is-{_tone_of(h)}" title="{esc(h.get("reason", ""))}">{piece}{refs(h.get("cites", []))}</span>')
+            out.append(f'<span class="bw-mark is-{_tone_of(h)}" title="{esc(h.get("reason", ""))}">{piece}</span>')
         pos = h["end"]
     out.append(esc(text[pos:]))
     return "".join(out)
 
 
 def user_message(text: str, at: datetime, context: str = "") -> str:
-    """사용자 말풍선 (오른쪽)."""
-    ctx = f'<span class="bw-bubble-ctx">{esc(context)}</span>' if context else ""
-    return (f'<div class="bw-msg is-user"><div class="bw-bubble">{esc(text)}</div>'
-            f'<div class="bw-msg-time">{ctx}{" · " if ctx else ""}{clock(at)}</div></div>')
+    """사용자 말풍선 (오른쪽 + 아바타). context 는 그때의 검토 기준 한 마디(예: '실증 1건 기준')."""
+    meta = f'{esc(context)} · {clock(at)}' if context else clock(at)
+    return (f'<div class="bw-msg is-user bw-user"><div class="bw-user-body"><div class="bw-bubble">{esc(text)}</div>'
+            f'<div class="bw-msg-time">{meta}</div></div>'
+            f'<span class="bw-uavatar">{icon("person", 22)}</span></div>')
 
 
-def _ai_shell(inner: str, *, meta: str = "", foot: str = "") -> str:
-    meta_html = f'<span class="bw-rag">{meta}</span>' if meta else ""
+def _ai_shell(inner: str, *, foot: str = "") -> str:
     foot_html = f'<div class="bw-ai-foot">{foot}</div>' if foot else ""
-    return (f'<div class="bw-ai"><div class="bw-avatar">{mascot_img(30, tight=True)}</div>'
-            f'<div class="bw-ai-body"><div class="bw-ai-name">{BRAND_NAME}{meta_html}</div>{inner}{foot_html}</div></div>')
+    return (f'<div class="bw-ai"><div class="bw-avatar">{mascot_img(40, tight=True, alt=BRAND_NAME)}</div>'
+            f'<div class="bw-ai-body">{inner}{foot_html}</div></div>')
 
 
 def _issues(highlights: list[dict], result: dict) -> str:
@@ -111,20 +113,20 @@ def _issues(highlights: list[dict], result: dict) -> str:
     for h in risks:
         reason = esc(h.get("reason", ""))
         rows.append(
-            f'<div class="bw-issue">{tag(h.get("label") or VIOLATION_LABEL.get(h.get("violation_type") or "", "확인 필요"), _tone_of(h), icon_name="error" if h.get("level") == 2 else "warning_outline")}'
+            f'<div class="bw-issue">{tag(h.get("label") or VIOLATION_LABEL.get(h.get("violation_type") or "", "확인 필요"), _tone_of(h), icon_name="error" if h.get("level") == 2 else "warning_outline", large=True)}'
             f'<p><b>‘{esc(h.get("text", ""))}’</b> — {reason}{refs(h.get("cites", []))}</p></div>'
         )
     if not rows and result.get("violation_type") not in (None, "없음"):
         # ui 확장이 없을 때: 위반 유형과 검토 메모만으로 한 줄
         label = VIOLATION_LABEL.get(result["violation_type"], result["violation_type"])
         tone = "risk" if result.get("level") == 2 else "caution"
-        rows.append(f'<div class="bw-issue">{tag(label, tone)}<p>{esc(result.get("review_notes") or "")}</p></div>')
+        rows.append(f'<div class="bw-issue">{tag(label, tone, large=True)}<p>{esc(result.get("review_notes") or "")}</p></div>')
     verified = [h for h in highlights if h.get("kind") == "verified"]
     note = ""
     if verified:
         words = " · ".join(esc(h["text"]) for h in verified)
-        note = (f'<div class="bw-verified-note">{icon("check_circle_outline", 15)}'
-                f'<span><b>{words}</b>은(는) 보유한 실증 자료와 일치합니다.</span></div>')
+        note = (f'<div class="bw-verified-note">{icon("check_circle_outline", 18)}'
+                f'<span>‘<b>{words}</b>’ 수치는 보유한 실증 자료와 일치합니다.</span></div>')
     if not rows and not note:
         return ""
     return (f'<section><div class="bw-sec-h"><h4>발견된 이슈</h4></div>'
@@ -153,12 +155,13 @@ def _suggestion(resp: dict) -> str:
             f'<span class="t">{esc(d["text"])}</span><span class="why">{esc(d.get("why", ""))}</span></li>'
             for d in ui["diff"]
         )
-        diff = f'<div class="bw-diff"><span class="bw-diff-h">고친 곳</span><ul>{items}</ul></div>'
+        diff = (f'<details class="bw-diff"><summary>{icon("chevron_right", 16)}고친 곳 {len(ui["diff"])}군데 보기</summary>'
+                f'<ul>{items}</ul></details>')
     return (
-        '<section><div class="bw-sec-h"><h4>더 안전한 대체 문구</h4></div>'
-        f'<div class="bw-suggest">{icon("check_circle", 20)}'
+        '<section><div class="bw-sec-h"><h4>더 안전한 대체 문구 제안</h4></div>'
+        f'<div class="bw-suggest">{icon("check_circle", 28)}'
         f'<div class="bw-suggest-text">“{esc(text)}”</div>'
-        f'<button type="button" class="bw-copy" data-copy="{esc(full)}" aria-label="대체 문구 복사">{icon("content_copy", 15)}<span class="lbl">복사</span></button>'
+        f'<button type="button" class="bw-copy" data-copy="{esc(full)}" aria-label="대체 문구 복사">{icon("content_copy", 16)}<span class="lbl">복사</span></button>'
         f'<div class="bw-suggest-src">{esc(direction)}</div>'
         f'{"<div class=bw-suggest-check>" + "".join(checks) + "</div>" if checks else ""}'
         f'{diff}</div></section>'
@@ -169,8 +172,10 @@ def _alternatives(resp: dict) -> str:
     alts = [a for a in resp.get("ui", {}).get("alternatives", []) if a and a != resp["result"].get("suggestion")]
     if not alts:
         return ""
-    chips = "".join(f'<span class="bw-alt">{esc(a)}</span>' for a in alts[:4])
-    return f'<section><div class="bw-sec-h"><h4>이런 표현도 쓸 수 있어요</h4></div><div class="bw-alts">{chips}</div></section>'
+    chips = "".join(f'<button type="button" class="bw-alt bw-copy" data-copy="{esc(a)}" title="눌러서 복사">'
+                    f'<span class="lbl">{esc(a)}</span></button>' for a in alts[:4])
+    return (f'<section><div class="bw-sec-h"><h4>이런 표현도 고려해 보세요</h4></div><div class="bw-alts">{chips}</div>'
+            f'<div class="bw-alts-note">누르면 복사됩니다.</div></section>')
 
 
 def _next_test(resp: dict) -> str:
@@ -182,7 +187,7 @@ def _next_test(resp: dict) -> str:
         body = esc(result["next_test"])
     else:
         return ""
-    return f'<div class="bw-next">{icon("lock", 16)}<div>{body}</div></div>'
+    return f'<div class="bw-next">{icon("lock", 17)}<div>{body}</div></div>'
 
 
 def assistant_message(resp: dict, at: datetime) -> str:
@@ -191,36 +196,32 @@ def assistant_message(resp: dict, at: datetime) -> str:
     verdict = verdict_of(result)
     highlights = ui.get("highlights", [])
     summary = ui.get("summary") or result.get("review_notes") or ""
-    intro = {
-        "불가": "검토를 마쳤습니다. ",
-        "조건부": "검토를 마쳤습니다. ",
-        "가능": "검토를 마쳤습니다. ",
-        "판단보류": "",
-    }[verdict] + summary
+    lead = "검토를 마쳤습니다." if verdict != "판단보류" else "근거가 부족해 판단을 보류했습니다."
+    intro = f'<span class="lead">{lead}</span>{esc(summary)}'
+    _, tone = status_of(verdict)
 
-    quote = (f'<section><div class="bw-sec-h"><h4>검토한 문구</h4>{status_tag(verdict, small=True)}</div>'
-             f'<div class="bw-quote">“{highlighted(resp["input_text"], highlights)}”</div></section>')
+    quote = (f'<section><div class="bw-sec-h"><h4>검토한 광고 문구</h4>{status_tag(verdict, small=True)}</div>'
+             f'<div class="bw-quote is-{tone}">“{highlighted(resp["input_text"], highlights)}”</div></section>')
 
     if verdict == "판단보류":
-        body = (f'<section><div class="bw-sec-h"><h4>판단을 보류했습니다</h4></div>'
-                f'<p class="bw-muted" style="font-size:13.5px">{esc(result.get("review_notes") or "")} '
-                '근거가 부족한 상태에서 판정하지 않습니다.</p></section>')
+        body = (f'<section><div class="bw-sec-h"><h4>판단을 보류한 이유</h4></div>'
+                f'<p style="font-size:var(--fs-small);color:var(--bw-ink-2)">{esc(result.get("review_notes") or "")} '
+                '근거가 부족한 상태에서 판정하지 않고, RA 담당자 검토를 권합니다.</p></section>')
     elif verdict == "가능":
         body = ('<section><div class="bw-sec-h"><h4>검토 결과</h4></div>'
-                '<p style="font-size:13.5px;color:var(--bw-ink-2)">위반 소지가 있는 표현을 찾지 못했습니다. 그대로 사용할 수 있습니다.</p></section>'
+                '<p style="font-size:var(--fs-small);color:var(--bw-ink-2)">위반 소지가 있는 표현을 찾지 못했습니다. 그대로 사용할 수 있습니다.</p></section>'
                 + _alternatives(resp))
     else:
         body = _issues(highlights, result) + _suggestion(resp) + _alternatives(resp) + _next_test(resp)
 
     n = len(result.get("citations", []))
-    meta = f'{icon("travel_explore", 14)}근거 {n}건 검색' if n else ""
     t = resp.get("timing", {})
-    foot = (f'<span>{clock(at)}</span>'
-            f'<span>검색 <span class="bw-mono">{seconds(t.get("retrieval_ms"))}</span></span>'
-            f'<span>판정 <span class="bw-mono">{seconds(t.get("llm_ms"))}</span></span>'
-            f'<span>총 <span class="bw-mono">{seconds(t.get("total_ms"))}</span></span>')
-    inner = f'<p class="bw-ai-text">{esc(intro)}</p><div class="bw-answer">{quote}{body}</div>'
-    return _ai_shell(inner, meta=meta, foot=foot) + COPY_SCRIPT
+    dot = '<span class="dot"></span>'
+    rag = f'{dot}<span class="rag">{icon("travel_explore", 15)}근거 {n}건 검색</span>' if n else ""
+    foot = (f'<span>{clock(at)}</span>{rag}'
+            f'{dot}<span>응답 <span class="bw-mono">{seconds(t.get("total_ms"))}</span></span>')
+    inner = f'<div class="bw-ai-card"><p class="bw-ai-text">{intro}</p><div class="bw-answer">{quote}{body}</div></div>'
+    return _ai_shell(inner, foot=foot) + COPY_SCRIPT
 
 
 def thinking(step: int, total: int, label: str) -> str:
@@ -240,6 +241,6 @@ def error_message(message: str, at: datetime) -> str:
 
 def welcome(product_name: str) -> str:
     """대화가 없을 때 첫 화면."""
-    return (f'<div class="bw-welcome">{mascot_img(64)}<h2>어떤 광고 문구를 검토할까요?</h2>'
+    return (f'<div class="bw-welcome">{mascot_img(96)}<h2>어떤 광고 문구를 검토할까요?</h2>'
             f'<p>문구를 입력하면 화장품법·식약처 고시·관리지침·적발 사례에서 근거를 찾아 판단하고, '
             f'<b>{esc(product_name)}</b>의 보유 실증 범위 안에서 더 안전한 문구를 제안합니다.</p></div>')
