@@ -2,7 +2,16 @@
 [app/streamlit_app.py]
 Streamlit 프론트엔드 메인 대시보드.
 """
+import sys
 from pathlib import Path
+
+# 프로젝트 루트 및 src 디렉토리를 sys.path에 추가 (Streamlit 실행 시 경로 문제 해결)
+ROOT_DIR = Path(__file__).resolve().parent.parent
+SRC_DIR = ROOT_DIR / "src"
+for p in [ROOT_DIR, SRC_DIR]:
+    if str(p) not in sys.path:
+        sys.path.insert(0, str(p))
+
 import json
 import streamlit as st
 import httpx
