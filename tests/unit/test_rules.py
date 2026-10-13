@@ -10,6 +10,7 @@ import pytest
 from cosmetic_agent.common.config import settings
 from cosmetic_agent.domain.rules import VIOLATION_TYPES, RuleEngine
 from cosmetic_agent.models.rule_judge import RuleJudgeModel
+from cosmetic_agent.workflow.nodes import judge_claim_node, rule_check_node
 
 GENERAL = {"category": "일반", "functional_type": None, "owned_evidence": []}
 MOIST = {"category": "일반", "functional_type": None, "owned_evidence": [
@@ -94,6 +95,58 @@ def test_numbers_against_evidence(engine):
     assert none["level"] == 1 and none["violation_type"] == "실증필요" and none["next_test"]
     survey = engine.evaluate("사용자 88%가 만족 (2주)", SURVEY)  # 자사 조사 수치 → 조건부
     assert survey["level"] == 1 and "NOTICE_실증규정_제5조" in survey["basis_ids"]
+
+
+def test_numbers_cannot_be_borrowed_from_another_effect(engine):
+    product = {**GENERAL, "owned_evidence": [
+        *MOIST["owned_evidence"],
+        {"test_type": "인체적용시험", "item": "탄력 개선", "value": "2주 탄력 70% 개선", "institute": "외부기관"},
+    ]}
+    assert engine.evaluate("2주 보습력 70% 개선", product)["level"] == 2
+    assert engine.evaluate("4주 보습력 35% 개선", product)["level"] == 0
+    # Same numerical values in an unrelated test do not substantiate a new effect.
+    assert engine.evaluate("2주 피지 70% 개선", product)["level"] == 1
+
+
+def test_numbers_cannot_be_pooled_even_for_same_effect(engine):
+    product = {**GENERAL, "owned_evidence": [
+        *MOIST["owned_evidence"],
+        {"test_type": "인체적용시험", "item": "피부 보습 개선", "value": "2주 보습력 70% 개선", "institute": "외부기관"},
+    ]}
+    assert engine.evaluate("2주 보습력 35% 개선", product)["level"] == 2
+    assert engine.evaluate("2주 보습력 70% 개선", product)["level"] == 0
+
+
+def test_independent_sentences_can_reference_independent_tests(engine):
+    product = {**GENERAL, "owned_evidence": [
+        *MOIST["owned_evidence"],
+        {"test_type": "인체적용시험", "item": "탄력 개선", "value": "2주 탄력 70% 개선", "institute": "외부기관"},
+    ]}
+    assert engine.evaluate("4주 보습력 35% 개선. 2주 탄력 70% 개선.", product)["level"] == 0
+
+
+def test_institution_numbers_are_not_trial_results(engine):
+    product = {**GENERAL, "owned_evidence": [
+        {"test_type": "인체적용시험", "item": "피부 보습 개선", "value": "4주 보습력 35% 개선", "institute": "70% 연구기관"},
+    ]}
+    assert engine.evaluate("4주 보습력 70% 개선", product)["level"] == 2
+
+
+def test_workflow_floor_includes_numeric_contradictions(engine):
+    class PermissiveJudge:
+        def judge_product(self, copy_text, product):
+            return {"model_level": 0, "violation_type": "없음", "claim_type": "보습"}
+
+    state = {"copy_text": "4주 보습력 70% 개선", "product": MOIST}
+    state.update(rule_check_node(state, engine))
+    result = judge_claim_node(state, PermissiveJudge())
+    assert state["rule_level"] == result["level"] == 2
+    assert result["model_level"] == 0 and result["violation_type"] == "소비자오인"
+
+
+def test_workflow_floor_marks_missing_numeric_evidence_conditional(engine):
+    state = {"copy_text": "보습력 70% 개선", "product": GENERAL}
+    assert rule_check_node(state, engine)["rule_level"] == 1
 
 
 def test_substantiation_targets(engine):

@@ -24,14 +24,13 @@ def parse_input_node(state: AdReviewState) -> dict[str, Any]:
 
 
 def rule_check_node(state: AdReviewState, rule_engine: RuleEngine) -> dict[str, Any]:
-    """2. rule_check: 금지 표현 사전 매칭 (LLM 호출 없음)"""
-    category = state["product"].get("category", "일반")
-    # 기능성 유형을 넘겨야 심사받은 효능 문구(예: 탈모 증상 완화)가 금지어로 오탐되지 않는다
-    functional_type = state["product"].get("functional_type")
-    rule_level, hits = rule_engine.check_banned_terms(state["copy_text"], category, functional_type)
+    """2. rule_check: 제품 근거를 포함한 규칙 판정 (LLM 호출 없음)"""
+    # Numerical contradictions must reach the production floor gate too,
+    # rather than only being detected in the standalone rule evaluation.
+    report = rule_engine.evaluate(state["copy_text"], state["product"])
     return {
-        "rule_level": rule_level,
-        "rule_hits": hits,
+        "rule_level": report["level"],
+        "rule_hits": report["hits"],
     }
 
 
