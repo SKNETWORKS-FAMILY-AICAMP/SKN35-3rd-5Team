@@ -1,9 +1,11 @@
 """
 [app/components/brand.py]
-브랜드 자산(새싹 마스코트 · 워드마크 로고)을 st.html 에 넣을 수 있는 <img> 로 돌려준다.
+브랜드 자산(팀 캐릭터 · 워드마크 로고)을 st.html 에 넣을 수 있는 <img> 로 돌려준다.
 
-- st.html 은 인라인 <svg> 를 지우므로 data URI 이미지로 넣는다. 파일 원본은 app/static/brand/.
-- 마스코트는 로고 · AI 답변 아바타 · 첫 화면 · 사이드바 아래 카드 한 곳에만 쓴다. 장식으로 늘리지 않는다.
+- 캐릭터: 5팀 메인 캐릭터(실험복 토끼 연구원). 원본은 팀 공유 PNG(1254px, 투명) — 여기엔 화면용으로
+  자른 WebP 만 둔다 (app/static/brand/rabbit-*.webp).
+- 쓰는 곳은 세 군데뿐이다: 로고 옆 마크 · AI 답변 아바타 · 첫 화면(빈 상태). 장식으로 늘리지 않는다.
+- st.html 은 인라인 <svg> 를 지우고 상대 경로가 페이지마다 달라지므로 data URI 로 넣는다.
 """
 from __future__ import annotations
 
@@ -13,29 +15,29 @@ from pathlib import Path
 
 BRAND_NAME = "Beaurette"
 BRAND_NAME_KO = "뷰렛"
-TAGLINE = "근거로 검토하고,\n쓸 수 있는 문구로 고쳐 드립니다."
+ASSISTANT_NAME = "뷰렛 AI"
+TAGLINE = "규정 문서를 근거로 광고 문구를 검토하는 AI"
 
 _BRAND_DIR = Path(__file__).resolve().parents[1] / "static" / "brand"
+_MIME = {".svg": "image/svg+xml", ".png": "image/png", ".webp": "image/webp"}
 
 
 @lru_cache(maxsize=8)
 def _data_uri(filename: str) -> str:
     path = _BRAND_DIR / filename
-    mime = "image/svg+xml" if path.suffix == ".svg" else "image/png"
-    return f"data:{mime};base64,{base64.b64encode(path.read_bytes()).decode('ascii')}"
+    return f"data:{_MIME[path.suffix]};base64,{base64.b64encode(path.read_bytes()).decode('ascii')}"
 
 
-def mascot_img(size: int = 64, *, tight: bool = False, alt: str = "") -> str:
-    """마스코트 <img>. tight=True 면 몸통이 꽉 차게 잘린 아바타용."""
-    src = _data_uri("mascot-tight.svg" if tight else "mascot.svg")
-    return f'<img src="{src}" width="{size}" height="{size}" alt="{alt}">'
+def avatar_img(size: int = 32, *, alt: str = "") -> str:
+    """AI 답변 아바타 — 캐릭터 얼굴 (원형 자르기는 CSS .bw-avatar)."""
+    return f'<img src="{_data_uri("rabbit-avatar.webp")}" width="{size}" height="{size}" alt="{alt}">'
 
 
-def scene_img(width: int = 150) -> str:
-    """사이드바 아래 카드의 마스코트 장면 <img> (잎 장식 포함)."""
-    return f'<img src="{_data_uri("mascot-scene.svg")}" width="{width}" alt="">'
+def character_img(height: int = 200, *, alt: str = "") -> str:
+    """빈 상태용 캐릭터 전신."""
+    return f'<img src="{_data_uri("rabbit-full.webp")}" style="height:{height}px;width:auto" alt="{alt}">'
 
 
-def lockup_img(height: int = 34) -> str:
-    """마스코트 + Beaurette 워드마크 로고 <img> (2배 해상도 PNG)."""
+def lockup_img(height: int = 36) -> str:
+    """캐릭터 마크 + Beaurette 워드마크 로고 <img> (2배 해상도 PNG)."""
     return f'<img src="{_data_uri("beaurette-lockup.png")}" style="height:{height}px;width:auto" alt="{BRAND_NAME}">'

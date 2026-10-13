@@ -37,9 +37,9 @@ def _health() -> dict:
 
 
 PAGES = {
-    "review": st.Page(str(APP_DIR / "views" / "review.py"), title="문구 검토", icon=":material/chat_bubble:", default=True),
+    "review": st.Page(str(APP_DIR / "views" / "review.py"), title="검토 대화", icon=":material/forum:", default=True),
     "bulk": st.Page(str(APP_DIR / "views" / "bulk.py"), title="상세페이지 검토", icon=":material/article:"),
-    "library": st.Page(str(APP_DIR / "views" / "library.py"), title="규정 라이브러리", icon=":material/menu_book:"),
+    "library": st.Page(str(APP_DIR / "views" / "library.py"), title="규정 · 가이드라인", icon=":material/menu_book:"),
 }
 st.session_state["bw_pages"] = PAGES
 st.session_state["bw_health"] = _health()

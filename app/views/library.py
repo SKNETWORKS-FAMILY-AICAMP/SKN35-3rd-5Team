@@ -126,7 +126,7 @@ def _cases_tab() -> None:
 center, right = st.columns([1.72, 1], gap="large")
 
 with center, st.container(key="center"):
-    page_header("규정 라이브러리", "검토 근거로 쓰는 법령·고시·관리지침·적발 사례를 찾아봅니다. 답변의 근거 번호도 여기 있는 원문에서 나옵니다.",
+    page_header("규정 · 가이드라인", "검토 근거로 쓰는 법령·고시·관리지침·적발 사례를 찾아봅니다. 답변의 근거 번호도 여기 있는 원문에서 나옵니다.",
                 health=health)
     with st.container(key="pagebody"):
         tab_search, tab_banned, tab_cases = st.tabs(["조항 검색", "금지 표현 사전", "적발 사례"], key="bw_lib_tab")

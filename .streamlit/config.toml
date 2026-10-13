@@ -1,4 +1,4 @@
-# Beaurette Streamlit 설정 — 클린 뷰티 워크스페이스 테마
+# Beaurette Streamlit 설정 — 종이·숲색 "근거 편집실" 테마
 # 색 값은 app/components/styles/base.css 의 :root 토큰과 같다. 한쪽을 바꾸면 다른 쪽도 바꾼다.
 
 [server]
@@ -14,12 +14,12 @@ gatherUsageStats = false
 
 [theme]
 base = "light"
-primaryColor = "#2F5D4B"              # accent (딥 세이지)
-backgroundColor = "#FBFAF7"           # bg (오프화이트 — 레퍼런스 실측 #FCFBF8)
-secondaryBackgroundColor = "#FFFFFF"  # 입력칸 바탕
-textColor = "#1E2320"                 # ink
-linkColor = "#2B5845"
-borderColor = "#E4E1DA"
+primaryColor = "#1F5A47"              # accent (숲색)
+backgroundColor = "#F6F3EC"           # bg (종이)
+secondaryBackgroundColor = "#FFFDF9"  # 입력칸 바탕
+textColor = "#17201B"                 # ink
+linkColor = "#1B4D3C"
+borderColor = "#E4DED2"
 showWidgetBorder = true
 baseRadius = "8px"
 buttonRadius = "8px"
@@ -31,28 +31,28 @@ headingFontWeights = [700, 700, 650, 650, 600, 600]
 showSidebarBorder = true
 
 # 상태 색 (st.badge 등). 수정 필요 = 로즈, 실증 필요 = 앰버, 사용 가능 = 세이지, 전문가 검토 = 중성 회색
-redColor = "#B3302A"
-redBackgroundColor = "#FDE9E7"
-redTextColor = "#A3241E"
-orangeColor = "#B97A17"
-orangeBackgroundColor = "#FEEEDB"
-orangeTextColor = "#8F4A12"
-yellowColor = "#B97A17"
-yellowBackgroundColor = "#FEEEDB"
-yellowTextColor = "#8F4A12"
-greenColor = "#2F5D4B"
-greenBackgroundColor = "#E8EDE3"
-greenTextColor = "#2B5845"
+redColor = "#A8471F"
+redBackgroundColor = "#F6E8DF"
+redTextColor = "#A8471F"
+orangeColor = "#B07A1E"
+orangeBackgroundColor = "#F4ECD9"
+orangeTextColor = "#865B10"
+yellowColor = "#B07A1E"
+yellowBackgroundColor = "#F4ECD9"
+yellowTextColor = "#865B10"
+greenColor = "#1F5A47"
+greenBackgroundColor = "#E4ECE5"
+greenTextColor = "#1B4D3C"
 grayColor = "#7A7F7B"
 grayBackgroundColor = "#F0F0ED"
 grayTextColor = "#5D615E"
-blueColor = "#2F5D4B"
-blueBackgroundColor = "#EBF1ED"
-blueTextColor = "#2B5845"
-violetColor = "#2F5D4B"
-violetBackgroundColor = "#EBF1ED"
-violetTextColor = "#2B5845"
-chartCategoricalColors = ["#2F5D4B", "#8DB59A", "#C9D9CE"]
+blueColor = "#1F5A47"
+blueBackgroundColor = "#E4ECE5"
+blueTextColor = "#1B4D3C"
+violetColor = "#1F5A47"
+violetBackgroundColor = "#E4ECE5"
+violetTextColor = "#1B4D3C"
+chartCategoricalColors = ["#1F5A47", "#8DB59A", "#C9D9CE"]
 
 # 글꼴은 저장소 안에 둔다 (발표장 인터넷이 불안해도 동작). 라이선스: app/static/fonts/LICENSE-*.txt (OFL-1.1)
 [[theme.fontFaces]]
@@ -76,8 +76,8 @@ style = "normal"
 unicodeRange = "U+0000-00FF, U+2000-206F, U+2212"
 
 [theme.sidebar]
-backgroundColor = "#F6F4EF"             # 레퍼런스 실측 #F6F4F0 — 가운데보다 한 톤 따뜻하게
-secondaryBackgroundColor = "#FFFFFF"
-textColor = "#1E2320"
-primaryColor = "#2F5D4B"
-borderColor = "#E9E6DF"
+backgroundColor = "#EFEBE2"             # 종이보다 한 톤 짙게 — 작업 공간과 탐색을 나눈다
+secondaryBackgroundColor = "#FFFDF9"
+textColor = "#17201B"
+primaryColor = "#1F5A47"
+borderColor = "#E0D9CC"

@@ -1,7 +1,7 @@
 # Beaurette — Streamlit UI
 
-화장품 광고 문구 판정·교정 에이전트의 화면입니다. 화면 담당 파일은 `app/` 와 `.streamlit/` 에만 있고,
-백엔드(`src/`·`api/`)는 건드리지 않습니다.
+화장품 광고 문구를 **규정 문서를 근거로** 검토하고 더 안전한 문구를 제안하는 RAG 챗봇의 화면입니다.
+화면 담당 파일은 `app/` 와 `.streamlit/` 에만 있고, 백엔드(`src/`·`api/`)는 건드리지 않습니다.
 
 ## 실행
 
@@ -18,60 +18,77 @@ uv run streamlit run app/streamlit_app.py      # 저장소 루트에서 실행 (
 API 모드: `uv run uvicorn api.main:app --port 8000` 을 띄운 뒤 `UI_DATA_MODE=api` 로 실행합니다.
 연결 상태는 화면 오른쪽 위와 사이드바 아래에 표시됩니다. API 가 실패하면 Mock 으로 바꿔치기하지 않고 오류를 보여 줍니다.
 
-## 화면
+## 화면 구조
+
+```
+┌ 왼쪽 (탐색) ────────┬ 가운데 (대화) ─────────────────────────┬ 오른쪽 (근거 · RAG) ─────┐
+│ 로고                │ 대화 제목 · 데이터 상태                 │ 근거 n건 · 법령/지침/사례 │
+│ [새 대화]           │                                       │ 검색한 표현              │
+│ 작업                │  사용자 문구 ───────────────▶ (오른쪽)  │ 표현 단계 (실증 기준)     │
+│  검토 대화          │  뷰렛 AI · 규정 문서 n건을 근거로        │ ┌ 근거 │ 원문 문서 │ 과정 ┐│
+│  상세페이지 검토     │  [판정] 한 줄 요약                     │ │ [1] 화장품법 제13조 …   ││
+│  규정 · 가이드라인   │  ┌ 답변 문서 ──────────────────────┐  │ │   스니펫 (관련 표현 표시) ││
+│ 프로젝트 (검토 기준) │  │ 검토한 문구 · 문제 표현 [1][2]   │  │ │ [2] 시행규칙 별표5 …     ││
+│  제품 ▾             │  │ 수정 제안 [복사] · 다른 표현      │  │ └────────────────────────┘│
+│  ☑ 실증 자료        │  │ 출처 [1][2][3]                  │  │                          │
+│ 최근 대화           │  └────────────────────────────────┘  │                          │
+│ ● 데모 데이터        │ 검토 기준 줄 · [입력창]                 │                          │
+└────────────────────┴───────────────────────────────────────┴──────────────────────────┘
+```
 
 | 화면 | 파일 | 내용 |
 |---|---|---|
-| 문구 검토 (첫 화면) | `views/review.py` | 대화형 검토. 가운데 질문 → AI 검토 답변(검토한 문구 · 발견된 이슈 · 대체 문구 · 다른 표현), 오른쪽 검토 요약 · 근거 · 참조 문서 · 검토 과정 |
+| 검토 대화 (첫 화면) | `views/review.py` | 질문 → AI 답변(판정 · 검토한 문구 · 문제 표현 · 수정 제안 · 다른 표현 · 출처), 오른쪽 근거 · 원문 문서 · 검토 과정 |
 | 상세페이지 검토 | `views/bulk.py` | 긴 글을 문장 단위로 검토, 문장별 결과 · 교정본 복사/내려받기 |
-| 규정 라이브러리 | `views/library.py` | 조항 검색(하이브리드 검색 결과) · 관리지침 금지 표현 · 식약처 적발 사례 |
+| 규정 · 가이드라인 | `views/library.py` | 조항 검색(하이브리드 검색 결과) · 관리지침 금지 표현 · 식약처 적발 사례 |
 
-- 3단 구조: 왼쪽 사이드바(브랜드 · 새 검토 · 화면 이동 · 최근 검토) / 가운데 대화 / 오른쪽 근거 패널.
-- 답변 속 위첨자 번호(예: `1·4·5`)는 오른쪽 근거 패널의 번호와 같습니다 — 답이 어떤 조항에서 나왔는지 바로 찾게 했습니다.
-- **검토 기준**(제품 · 실증 자료)은 가운데 위에서 바꿉니다. 실증 자료를 해제하면 "검토 기준이 바뀌었습니다" 안내가 뜨고,
-  다시 검토하면 그 자료 없이 쓸 수 있는 단계까지만 제안합니다(발표 데모 핵심 장면).
-- Mock 응답은 화면에 항상 "데모 데이터"로 표시하고, 성능 수치는 보여 주지 않습니다.
+- 답변의 `[n]` 번호 = 오른쪽 근거 번호. 답이 어떤 조항에서 나왔는지 바로 찾게 했다.
+- **프로젝트**(검토 기준 = 제품 · 보유 실증 자료)는 왼쪽에서 바꾼다. 실증 자료를 해제하면 "검토 기준이 바뀌었습니다" 안내가 뜨고,
+  다시 검토하면 그 자료 없이 쓸 수 있는 단계까지만 제안한다 (발표 데모 핵심 장면: Lv2 → Lv1).
+- Mock 응답은 화면에 항상 "데모 데이터"로 표시하고, 성능 수치는 보여 주지 않는다.
 
 ## 폴더
 
 ```
 app/
   streamlit_app.py        진입 파일 (경로 처리 · 페이지 설정 · CSS 주입 · 사이드바 · 내비게이션)
-  views/                  화면 3개 (review · bulk · library)
+  views/                  화면 3개 (review · bulk · library) — 레이아웃과 위젯만, HTML 은 components 가 만든다
   components/
-    styles/base.css       디자인 토큰 + 공통 컴포넌트 CSS (색은 여기와 .streamlit/config.toml 두 곳만)
+    styles/base.css       디자인 토큰(:root) + 공통 컴포넌트 CSS — 색·글자·반경은 여기서만 바꾼다
     styles/pages.css      상세페이지 · 라이브러리 전용 CSS
+    cards.py              가운데 답변 블록 (데이터 → HTML 순수 함수)
+    panels.py             오른쪽 근거 · RAG 패널 (데이터 → HTML 순수 함수)
+    sidebar.py            왼쪽 탐색 · 프로젝트 · 최근 대화
+    context.py            프로젝트(검토 기준) 위젯과 current() — 화면들은 current() 로 읽기만 한다
+    threads.py            대화 기록 (세션 안에서만 유지)
     theme.py              CSS 주입, 판정 → 상태 이름(수정 필요 · 실증 필요 · 사용 가능 · 전문가 검토)
-    cards.py              가운데 답변 블록 (HTML 문자열을 만드는 순수 함수)
-    panels.py             오른쪽 근거 패널 카드
-    context.py            검토 기준 바 (제품 · 실증 자료)
-    sidebar.py, threads.py  사이드바 · 대화 기록(세션 안에서만 유지)
-    brand.py, icons.py, layout.py  마스코트 · 아이콘 · 공통 도우미
+    brand.py, icons.py, layout.py  캐릭터·로고 · 아이콘 · 공통 도우미
   services/
     backend.py            화면이 부르는 유일한 데이터 함수 (Mock / API 전환)
     mock.py               데모용 Mock 판정 엔진 (응답에 mock=True)
     data_sources.py       data/ 원문(법령 XML · 관리지침 · 적발 사례 · 규칙 자산) 읽기
     contract.py           화면이 받는 데이터 모양(TypedDict)과 예시 응답
-  static/                 글꼴(Pretendard · IBM Plex Mono, OFL) · 로고 · 마스코트
+  static/                 글꼴(Pretendard · IBM Plex Mono, OFL) · 로고 · 캐릭터(rabbit-*.webp)
 ```
 
 ## 디자인 원칙
 
-기준은 레퍼런스 시안(3단 워크스페이스)이다. 같은 폭(1440px)으로 축척을 맞춰 글자 크기·칩 높이·여백·색 면적을 재서 맞췄다.
+방향: **"근거 편집실"** — 문서를 근거로 답하는 LLM 챗봇. 참고: DietCheck 의 제품감(종이색 · 숲색 하나 · 장식 절제),
+COOA 의 도메인 구조(위험도 · 권장 문구 · RA 검토 권고), 팀 캐릭터(실험복 토끼 연구원).
 
-- 색: 오프화이트 바탕(`#FBFAF7`, 사이드바 `#F6F4EF`) + 잉크 글자 + 강조색 딥 세이지(`#2F5D4B`) 하나.
-  판정은 칩과 함께 **"검토한 광고 문구" 상자의 바탕색**으로도 보인다 — 수정 필요(로즈) · 실증 필요(앰버) · 사용 가능(세이지) · 전문가 검토(회색).
-- 형태: 카드 반경 16px, 안쪽 패널·상자 12px, 버튼 8~10px, 1px 선 + 아주 옅은 그림자.
-- 글자: Pretendard 여섯 단계 — 페이지 제목 22 · 카드 제목 19 · 섹션 제목·핵심 문구 17 · 본문 15 · 보조 13.5 · 메타 12.5px. 굵기 400 · 600 · 700. 숫자·조항 ID 는 IBM Plex Mono.
-- 컴포넌트 높이: 이슈 칩 36 · 상태 칩 30 · 내비 항목 44 · 새 검토 46 · 후속 질문 칩 36px.
-- 근거 번호: 이슈 문장 끝의 동그라미 번호가 오른쪽 "근거" 카드의 번호와 같다.
-- 마스코트(새싹)는 로고 · 답변 아바타 · 첫 화면 · 사이드바 아래 카드 네 곳에만 쓴다. 원본 SVG 는 `static/brand/`.
+- **색**: 종이색 바탕 `#F6F3EC` · 사이드바 `#EFEBE2` · 면 `#FFFDF9` + 잉크 `#17201B` + 강조색 숲색 `#1F5A47` 하나.
+  판정 색은 채도를 낮춰(테라코타 `#A8471F` · 황토 `#865B10`) **점 · 왼쪽 선 · 밑줄**로만 쓴다. 넓은 색 면 · 큰 경고 박스는 쓰지 않는다.
+- **형태**: 반경 6 · 8 · 10 · 12px, 1px 선, 그림자 없음. 오른쪽 패널만 한 장의 면으로 묶고, 그 안은 상자 대신 선으로 나눈다.
+- **글자**: Pretendard 여섯 단계 — 첫 화면 24 · 페이지 제목 20 · 핵심 문구 17 · 본문 15 · 보조 13.5 · 메타 12.5px.
+  굵기 400 · 600 · 700. 숫자 · 조항 번호는 IBM Plex Mono. 보조 글자 대비 4.5:1 이상.
+- **캐릭터**: 로고 마크 · AI 아바타 · 첫 화면(빈 상태) 세 곳에만. 장식으로 늘리지 않는다.
+- **예시**: 첫 화면 시작 문구 3개(판정 셋이 하나씩 나오게)뿐.
 - Streamlit 내부 구조에 기대는 CSS 는 `data-testid` 두 개(메인 여백 · 헤더)와 키 컨테이너 안의 위젯 라벨 숨김뿐이고,
   나머지는 `st.container(key=…)` 가 붙이는 `.st-key-*` 클래스로만 꾸민다.
 
-## 백엔드 연결 지점
+## 팀원 연결 지점
 
-화면은 `app/services/backend.py` 의 함수만 부릅니다. 함수 본문의 API 호출부만 보면 됩니다.
+**데이터는 `app/services/backend.py` 한 곳만 바꾸면 된다.** 화면은 이 함수들만 부른다.
 
 | 함수 | API | 비고 |
 |---|---|---|
@@ -81,17 +98,27 @@ app/
 | `health()` | `GET /health` | 연결 상태 표시 |
 | `list_products()` · `kb_stats()` · `enforcement_trends()` 등 | (없음) | `data/` 파일을 직접 읽음 |
 
-`product` 는 `schemas.ProductCard` 모양이고, `owned_evidence` 에는 화면에서 체크한 실증만 담아 보냅니다.
+`product` 는 `schemas.ProductCard` 모양이고, `owned_evidence` 에는 왼쪽 「프로젝트」에서 체크한 실증만 담아 보낸다.
 
-응답의 필수 부분은 `src/cosmetic_agent/domain/schemas.py` 의 `ReviewResponse` 와 같습니다. 화면은 아래 **선택 확장 `ui`** 가 있으면
-더 많이 보여 주고, 없으면 해당 블록만 생략합니다(모양은 `services/contract.py` 의 `UiExtras`).
+**응답 필드 → 화면 위치** (필수 부분은 `src/cosmetic_agent/domain/schemas.py` 의 `ReviewResponse`):
+
+| 응답 필드 | 화면 | 그리는 함수 |
+|---|---|---|
+| `result.status` · `level` · `violation_type` | 판정 태그 · 한 줄 요약 | `cards.assistant_message` |
+| `result.citations[]` (source · article · authority · content_snippet) | 오른쪽 근거 목록 · 답변 아래 출처 줄 · 「근거 n건」 | `panels.evidence_list` · `cards._sources` · `panels.rag_header` |
+| `result.suggestion` · `next_test` · `review_notes` | 수정 제안 · "더 강하게 쓰려면" · 요약 | `cards._suggestion` · `cards._next_test` |
+| `timing.total_ms` | 응답 시간 | `cards.assistant_message` |
+
+선택 확장 **`ui`** 가 있으면 더 많이 보여 주고, 없으면 해당 블록만 생략한다(모양은 `services/contract.py` 의 `UiExtras`).
+API 모드에서 `ui` 가 없으면 `backend._with_rule_highlights` 가 규칙 자산으로 하이라이트만 붙인다.
 
 | `ui` 필드 | 화면에서 쓰는 곳 | 백엔드에서 만들 수 있는 곳 |
 |---|---|---|
-| `highlights` (위험 표현 위치 · 이유 · 근거 번호) | 검토한 문구 하이라이트, 발견된 이슈 | `rule_check` 의 `rule_hits` + `judge_claim` |
-| `ladder` (표현 단계 · 도달 칸) | 검토 요약의 표현 단계 | `RuleEngine.get_ladder_ceiling` |
-| `diff` · `reverify` | 대체 문구의 고친 곳 · 역검증 | `suggest_copy` · `verify_copy` |
-| `steps` (노드별 상태 · 시간) | 검토 과정 | LangGraph 노드 실행 기록 |
-| `summary` · `direction` · `alternatives` · `suggestion_source` | 답변 첫 문장 · 제안 방향 · 다른 표현 · 출처 | `suggest_copy` 프롬프트 출력 |
+| `highlights` (위험 표현 위치 · 이유 · 근거 번호 `cites`) | 검토한 문구 밑줄, 문제 표현 목록과 `[n]`, 오른쪽 「검색한 표현」 | `rule_check` 의 `rule_hits` + `judge_claim` |
+| `ladder` (표현 단계 · 도달 칸) | 오른쪽 표현 단계 | `RuleEngine.get_ladder_ceiling` |
+| `diff` · `reverify` | 수정 제안의 고친 곳 · 역검증 | `suggest_copy` · `verify_copy` |
+| `steps` (노드별 상태 · 시간) | 오른쪽 「검토 과정」 탭 | LangGraph 노드 실행 기록 |
+| `summary` · `direction` · `alternatives` · `suggestion_source` | 한 줄 요약 · 제안 방향 · 다른 표현 · 출처 | `suggest_copy` 프롬프트 출력 |
 
-`citations` 는 이미 계약에 있습니다(현재 `service.py` 가 빈 목록을 돌려줘 근거 패널이 비어 보입니다 — `TODO: final_state['citations'] 복원`).
+**화면을 바꾸고 싶을 때**: 레이아웃은 `views/*.py`, 블록의 생김새는 `components/cards.py`·`panels.py` 의 함수 하나,
+색·글자·간격은 `styles/base.css` 맨 위 `:root` 토큰. 새 블록을 만들 때도 "데이터 dict → HTML 문자열" 함수로 만든다.

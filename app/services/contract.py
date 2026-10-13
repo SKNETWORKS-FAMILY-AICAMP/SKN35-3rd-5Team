@@ -360,7 +360,8 @@ EXAMPLE_REVIEW_PASS: ReviewResponse = {
 
 EXAMPLE_REVIEW_HOLD: ReviewResponse = {
     "request_id": "REQ_DEMO_004",
-    "input_text": "엑소좀이 피부 속 깊이 전달되는 신개념 앰플",
+    # 2026-10-13: '엑소좀'은 팀 금지 표현 사전 B091(인체유래 표방)로 판정이 생겨 보류 예시를 PDRN 으로 바꿨다
+    "input_text": "PDRN 성분이 피부 속 깊이 전달되는 신개념 앰플",
     "result": {
         "status": "판단보류",
         "level": None,
