@@ -22,6 +22,7 @@ finetune/adapters/*
 .pytest_cache/
 .coverage
 htmlcov/
+output/eval/
 
 # IDE & OS
 .vscode/
