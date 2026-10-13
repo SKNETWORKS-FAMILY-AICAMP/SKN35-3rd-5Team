@@ -19,6 +19,12 @@ def _section(title: str, right: str = "") -> None:
     html(f'<div class="bw-side-h"><span>{esc(title)}</span>{right}</div>')
 
 
+def _delete(tid: str, title: str) -> None:
+    """최근 대화의 × — 지우고 짧게 알린다 (보고 있던 대화면 새 대화 화면으로)."""
+    if threads.delete(tid):
+        st.toast(f"‘{title}’ 대화를 삭제했습니다", icon=":material/delete:")
+
+
 def render_sidebar(pages: dict[str, st.Page], health: dict) -> None:
     """pages: {"review": Page, "bulk": Page, "library": Page}."""
     with st.sidebar:
@@ -49,6 +55,8 @@ def render_sidebar(pages: dict[str, st.Page], health: dict) -> None:
                     threads.set_active(t["id"])
                     st.switch_page(pages["review"])
                 html(f'<span class="bw-recent-time">{ago(t["created"])}</span>', inline=True)
+                st.button(":material/close:", key=f'del_{t["id"]}', type="tertiary", help="대화 삭제",
+                          on_click=_delete, args=(t["id"], t["title"]))
 
         if health.get("mode") == "mock":
             cls, title, body = "", "데모 데이터", "판정과 제안은 Mock 응답입니다. 실제 AI 결과가 아닙니다."

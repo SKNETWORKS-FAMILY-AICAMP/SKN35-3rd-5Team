@@ -545,8 +545,14 @@
 [class*="st-key-recent_on_"], [class*="st-key-recent_on_"]:hover { background: var(--bw-nav-on); }
 [class*="st-key-recent_on_"] button { color: var(--bw-ink); }
 [class*="st-key-recent_on_"] button p { font-weight: 600; }
-.bw-recent-time { font-size: var(--fs-meta); color: var(--bw-faint); white-space: nowrap; padding-right: 10px; }
+.bw-recent-time { font-size: var(--fs-meta); color: var(--bw-faint); white-space: nowrap; padding-right: 2px; }
 [class*="st-key-recent_on_"] .bw-recent-time { color: var(--bw-muted); }
+/* 대화 삭제(×) — 평소엔 옅게, 줄에 올리거나 키보드로 닿으면 또렷하게. 터치 기기는 늘 보인다 */
+[class*="st-key-del_"] button { min-height: 28px; width: 28px; padding: 0; border-radius: var(--bw-r-sm); color: var(--bw-muted); opacity: .45; }
+[class*="st-key-recent_"]:hover [class*="st-key-del_"] button,
+[class*="st-key-del_"] button:focus-visible { opacity: 1; }
+[class*="st-key-del_"] button:hover { color: var(--bw-risk); background: var(--bw-risk-bg); }
+@media (hover: none) { [class*="st-key-del_"] button { opacity: 1; } }
 
 .bw-side-status { display: flex; align-items: flex-start; gap: 8px; margin-top: 16px; padding: 12px 6px 0; border-top: 1px solid var(--bw-line); font-size: var(--fs-meta); line-height: 1.5; color: var(--bw-muted); }
 .bw-side-status::before { content: ""; flex: none; width: 7px; height: 7px; margin-top: 6px; border-radius: 50%; background: #B9862F; }

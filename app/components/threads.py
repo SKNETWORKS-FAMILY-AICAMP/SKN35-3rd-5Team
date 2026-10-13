@@ -38,6 +38,20 @@ def start_new() -> None:
     st.session_state.pop(_PENDING, None)
 
 
+def delete(tid: str) -> bool:
+    """대화를 지운다. 보고 있던 대화면 빈 화면(새 대화)으로 돌아간다. 지웠으면 True."""
+    threads = all_threads()
+    for i, t in enumerate(threads):
+        if t["id"] == tid:
+            del threads[i]
+            if st.session_state.get(_ACTIVE) == tid:
+                set_active(None)
+            if st.session_state.get(_PENDING) == tid:
+                st.session_state.pop(_PENDING, None)
+            return True
+    return False
+
+
 def _title(text: str) -> str:
     one = " ".join(text.split())
     return one if len(one) <= 20 else one[:20].rstrip() + "…"
