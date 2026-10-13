@@ -54,7 +54,7 @@ class StubVerifier:
         self.passed = passed
         self.calls = 0
 
-    def verify_suggestion(self, suggestion, evidences, rule_engine):
+    def verify_suggestion(self, suggestion, evidences, rule_engine, **kwargs):
         self.calls += 1
         return self.passed, "검증 완료" if self.passed else "재제안 필요"
 
