@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-PROMPT_VERSION = "suggest-v4"
+PROMPT_VERSION = "suggest-v8"
 
 SUGGEST_SYSTEM_PROMPT = """\
 너는 화장품 회사의 표시·광고 심의(RA) 담당자다.
@@ -29,18 +29,36 @@ SUGGEST_SYSTEM_PROMPT = """\
    만족도·설문 같은 조사 결과는 효능 수치처럼 쓰지 말고 '만족도'임을 분명히 밝히며, 조사한 항목(예: 사용감)과 다른 효능 옆에 붙여 쓰지 않는다 (실증규정 제3조 제3항).
    회사가 직접 한 조사(자사·사내 설문 등)의 수치는 실증자료로 인정되지 않으므로 쓰지 않는다 (실증규정 제5조 제1호: 조사기관은 사업자와 독립적이어야 함).
    '바르는 순간', '즉시', '단 하루 만에' 같은 시간·속도 표현도 그 시간을 입증한 근거가 없으면 쓰지 않는다.
-5. 마케팅 의도 유지: 원문의 강조점과 말투는 살리되, 위 원칙 안에서 가장 센 표현을 고른다. 한두 문장으로 쓴다.
-   원문이 강조한 효능과 같은 범주의 보유 근거(예: 원문이 수분을 말하고 근거가 보습 시험)가 있으면, 그 시험 종류·기간·수치를 넣은 문구를 우선 제안한다.
-   근거를 놔두고 막연한 표현으로만 낮추지 않는다.
-6. next_test: 원문 수준의 주장을 하려면 무엇을 입증하는 어떤 시험이 더 필요한지, 원문의 구체적인 효능 이름을 넣어 한 문장으로 적는다.
-   이미 원문 주장이 보유 근거로 충분히 뒷받침되면 null.
+5. 표현 사다리: 같은 효능도 근거에 따라 쓸 수 있는 강도가 다르다. [쓸 수 있는 표현 상한]에 코드가 미리 계산한
+   이 제품의 상한(보유 시험 수치, 기능성 심사 효능 문구, 효능별 단계)이 있다. 그 상한까지는 최대한 끌어올려 쓴다.
+   - 원문 효능과 같은 범주의 '효능 수치 표현 가능' 근거가 있으면, 그 수치·기간·시험 종류를 넣은 문구를 가장 강한 후보로 낸다.
+   - 기능성 제품은 심사 효능 문구를 그대로 살려 쓰고, 보유 시험이 있으면 시험 기간·종류를 덧붙인다.
+   - 근거가 없는 효능은 근거가 필요 없는 단계(사용감·제형·관리·케어 표현)로 낮추되, 원문의 강조점(효능 범주, 제품 특징, 말투)은 살린다.
+   - 원문 의도와 무관한 막연한 문구('좋은 제품입니다' 등)로 도망가지 않는다.
+   - 카피라이터처럼 쓴다: 효능 강도를 낮춰야 할 때는 근거가 필요 없는 요소로 설득력을 채운다.
+     사용감·제형·향·사용 장면(아침 세안, 샤워 후 등)·제품명·함유 사실('OO 함유')·감각 표현(산뜻한, 쫀쫀한, 개운한)을 활용하고,
+     원문의 리듬(감탄, 짧은 문장, 숫자 강조 등)을 살린다. 단, 원료의 효능을 완제품 효능처럼 쓰지는 않는다 (관리지침 별표1 원료 관련 표현).
+   - 기능성 심사 문구만 한 줄 덩그러니 쓰지 말고, 위 요소와 결합해 광고 문구답게 완성한다.
+6. next_test: 원문 수준의 주장을 하려면 무엇이 더 필요한지 원문의 구체적인 효능 이름을 넣어 한 문장으로 적는다.
+   - 실증대상 효능이면: 그 효능을 직접 입증하는 인체 적용시험(또는 인체 외 시험) 결과보고서
+   - 일반 화장품이 기능성 효능(미백·주름·자외선·탈모·여드름성 피부 등)을 말하려면: 시험이 아니라 기능성화장품 심사(보고)가 필요하다고 적는다
+   - 질병 치료·재생 등 화장품으로는 어떤 근거로도 쓸 수 없는 표현이면: 그 사실을 적는다
+   - 원문 주장이 이미 보유 근거로 충분하면 null
 
 [출력]
-- suggestion: 고친 광고 문구
-- next_test: 더 센 표현을 위해 필요한 실증자료 (없으면 null)
-- used_evidence: 문구에 사용한 보유 근거 항목 (없으면 빈 목록)
+- candidates: 고친 광고 문구 후보 3개. 가장 강한(근거를 최대한 살린) 후보부터 가장 안전한 후보 순서로. 각각 한두 문장.
+  세 후보 모두 위 원칙을 지켜야 하며, 마지막 후보는 근거 없이도 확실히 쓸 수 있는 표현으로 한다.
+- next_test: 더 센 표현을 위해 필요한 것 (없으면 null)
+- used_evidence: 후보에 사용한 보유 근거 항목 (없으면 빈 목록)
 - cited_ids: 참고한 [관련 규정] 번호 (예: L1)
 - rationale: 무엇을 왜 바꿨는지 한두 문장
+- candidate_notes: candidates 와 같은 순서로, 후보마다
+  - changes: 원문 대비 바꾼 점을 '구절 단위'로 최대 3개. 각 항목은 "원문 구절 → 바꾼 구절 (이유)" 또는 "원문 구절 → 삭제 (이유)"
+  - hypothesis: A/B 테스트 가설 한 문장. 원문은 위반이라 비교군이 될 수 없으므로 마지막 후보(가장 안전)를 대조군으로 둔다.
+    첫째·둘째 후보: "대조군 대비 [이 후보의 차별점] 때문에 [primary_metric]이 높을 것이다"
+    마지막 후보: "대조군"
+    효과 크기(몇 % 상승 등)는 근거가 없으므로 쓰지 않는다.
+- primary_metric: 세 후보를 비교할 지표 하나 (클릭률 / 전환율 / 장바구니 담기율 중). 원문의 목적(관심 끌기·구매 설득)에 맞게 고른다.
 """
 
 
@@ -63,6 +81,7 @@ def build_suggest_user_prompt(
     violation_type: str | None,
     evidence_text: str = "",
     functional_ceiling: str | None = None,
+    claim_menu: str = "",
     previous_suggestion: str | None = None,
     verify_note: str | None = None,
 ) -> str:
@@ -86,6 +105,9 @@ def build_suggest_user_prompt(
         "[보유 근거]",
         _format_evidence(owned_evidence),
         "",
+        "[쓸 수 있는 표현 상한 - 코드가 보유 근거로 계산]",
+        claim_menu.strip() or "- (계산된 상한 없음)",
+        "",
         "[판정 결과]",
         f"- 판정: {level_name} ({level})",
         f"- 위반 유형: {violation_type or '없음'}",
@@ -100,4 +122,45 @@ def build_suggest_user_prompt(
             f"- 이전 제안: {previous_suggestion}",
             f"- 탈락 사유: {verify_note}",
         ]
+    return "\n".join(lines)
+
+
+SURVEY_WORDS = ("만족", "설문", "선호", "응답", "소비자 조사")
+IN_HOUSE_WORDS = ("자사", "사내", "자체")
+
+
+def build_claim_menu(
+    *,
+    copy_text: str,
+    product: dict[str, Any],
+    owned_evidence: list[dict[str, Any]],
+    claim_ladder: list[dict[str, Any]],
+    functional_ceiling: str | None = None,
+) -> str:
+    """보유 근거·기능성 심사·표현 사다리로 이 제품이 쓸 수 있는 표현 상한을 계산해 글로 만든다."""
+    lines: list[str] = []
+    if product.get("category") == "기능성" and functional_ceiling:
+        lines.append(f"- 기능성 심사 효능 문구 (그대로 사용 가능): {functional_ceiling}")
+    elif product.get("category") != "기능성":
+        lines.append("- 일반 화장품: 기능성 효능(미백·주름 개선·자외선 차단·탈모 증상 완화·여드름성 피부 완화 등) 표현 불가")
+
+    for e in owned_evidence:
+        test_type, item, value = e.get("test_type", ""), e.get("item", ""), e.get("value", "")
+        body = " ".join(str(e.get(k) or "") for k in ("test_type", "item", "value", "institute"))
+        if any(w in body for w in SURVEY_WORDS) and any(w in body for w in IN_HOUSE_WORDS):
+            lines.append(f"- [광고 사용 불가] {item}: {value} - 회사가 직접 한 조사 (실증규정 제5조 제1호)")
+        elif any(w in body for w in SURVEY_WORDS):
+            lines.append(f"- [만족도 표현으로만 사용] '{item}'에 대해 {value} (조사기관·조사 항목을 함께 밝힘)")
+        else:
+            lines.append(f"- [효능 수치 표현 가능] '{item}': {value} ({test_type}) → 기간·수치·시험 종류를 함께 쓰면 가장 강한 표현")
+
+    text = f"{copy_text} {product.get('functional_type') or ''}"
+    for entry in claim_ladder:
+        if not any(k and k in text for k in entry.get("keywords", [entry.get("claim", "")])):
+            continue
+        steps = []
+        for level in entry.get("levels", []):
+            mark = "금지" if level.get("lv", 0) >= 9 else f"{level.get('lv')}단계"
+            steps.append(f"{mark}: {level.get('text')} (필요: {level.get('needs')})")
+        lines.append(f"- '{entry['claim']}' 효능 사다리: " + " / ".join(steps))
     return "\n".join(lines)

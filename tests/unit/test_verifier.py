@@ -135,3 +135,10 @@ def test_banned_engine_receives_functional_type(verifier):
     kwargs = {"product_category": "기능성", "functional_type": "탈모 증상 완화"}
     passed, note = verifier.verify_suggestion("탈모 증상의 완화에 도움을 주는 샴푸", [], FunctionalAwareEngine(), **kwargs)
     assert passed, note
+
+
+def test_reversed_word_order_and_sensitive_skin_claims_need_evidence(verifier):
+    assert "실증필요" in codes(verifier, "손상된 모발을 부드럽게 가꿔요")
+    assert "실증필요" in codes(verifier, "민감한 피부도 안심하고 쓰는 크림")
+    patch = {"test_type": "인체적용시험", "item": "피부 자극 (첩포 시험)", "value": "무자극 판정"}
+    assert "실증필요" not in codes(verifier, "민감한 피부도 안심하고 쓰는 크림", [patch])
