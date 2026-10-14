@@ -117,7 +117,7 @@ def test_sunscreen_request_generates_without_asking_for_ingredients(intent, ques
 
 
 def test_short_followup_defaults_to_first_candidate_without_clarification():
-    svc = service(ChatPlan(intent="generate", context=ChatContext(tone="유머러스한", length="한 줄")))
+    svc = service(ChatPlan(intent="generate", needs_history=True, context=ChatContext(tone="유머러스한", length="한 줄")))
     svc.generator.generate.return_value = GenerateResponse(
         request_id="followup", status="생성완료", product_id="chat_draft", timing=ExecutionTiming())
     svc.chat(ChatRequest(message="더 짧고 웃기게", context=ChatContext(last_copies=["이전 후보", "다른 후보"])))
@@ -143,7 +143,7 @@ def test_new_topic_with_same_placeholder_name_does_not_reuse_old_copy():
     sent = svc.generator.generate.call_args.args[0]
     assert sent.reference_copy == ""
     assert sent.ingredients == []
-    assert sent.product_description == "립밤"
+    assert sent.product_description == "이번엔 립밤 소개 글을 써줘"
     assert "선크림" not in sent.instruction
 
 
@@ -152,6 +152,7 @@ def test_new_topic_then_followup_works_without_resetting_conversation():
     svc._llm.invoke.side_effect = [
         ChatPlan(intent="generate", new_topic=True, context=ChatContext(product_name="선크림", product_description="선크림")),
         ChatPlan(intent="generate", new_topic=True, context=ChatContext(product_name="립밤", product_description="립밤")),
+        ChatPlan(intent="generate", needs_history=True, context=ChatContext(product_name="립밤", product_description="립밤", length="한 줄")),
         ChatPlan(intent="generate", context=ChatContext(product_name="립밤", product_description="립밤", length="한 줄")),
     ]
     svc.generator.generate.side_effect = [
@@ -171,6 +172,7 @@ def test_new_product_and_followup_do_not_reuse_selected_product_evidence(sample_
     svc = service(None)
     svc._llm.invoke.side_effect = [
         ChatPlan(intent="generate", new_topic=True, context=ChatContext(product_name="립밤", product_description="립밤")),
+        ChatPlan(intent="generate", needs_history=True, context=ChatContext(product_name="립밤", product_description="립밤", tone="재치 있는")),
         ChatPlan(intent="generate", context=ChatContext(product_name="립밤", product_description="립밤", tone="재치 있는")),
     ]
     svc.generator.generate.return_value = GenerateResponse(
@@ -183,3 +185,66 @@ def test_new_product_and_followup_do_not_reuse_selected_product_evidence(sample_
         assert call.args[0].product.name == "립밤"
         assert call.args[0].product.owned_evidence == []
         assert call.args[0].product.functional_type is None
+
+
+@pytest.mark.parametrize("needs_history", [False, True])
+def test_pdrn_to_sunscreen_request_is_isolated_from_old_product(needs_history):
+    svc = service(ChatPlan(intent="generate", needs_history=needs_history, context=ChatContext(
+        product_name="선크림", product_description="PDRN 함유, 촉촉함을 더하고 피부를 보호하는 선크림",
+        brief="이전 PDRN 크림처럼 보습과 피부 보호를 강조")))
+    svc.generator.generate.return_value = GenerateResponse(
+        request_id="sun", status="생성완료", product_id="chat_draft", timing=ExecutionTiming(),
+        candidates=[GeneratedCandidate(text="오늘의 외출 준비, 선케어 루틴과 함께.", tier="safe", status="검토통과")])
+    old = ChatContext(product_name="PDRN 크림", product_source="conversation", ingredients=["PDRN"],
+                      product_description="PDRN 함유 크림", brief="PDRN 크림 배너 광고",
+                      channel="배너", tone="재치 있는", last_copies=["PDRN 함유 크림과 함께"])
+    response = svc.chat(ChatRequest(message="선크림 광고문도 만들어줘", context=old,
+                                   history=[{"role": "assistant", "content": "PDRN 함유 크림과 함께"}]))
+    assert svc._llm.invoke.call_count == 1
+    assert "PDRN" not in svc._llm.invoke.call_args.args[0][1][1]
+    sent = svc.generator.generate.call_args.args[0]
+    assert sent.product.name == "선크림"
+    assert sent.ingredients == [] and sent.reference_copy == ""
+    assert "PDRN" not in sent.instruction + sent.product_description
+    assert sent.product_description == sent.instruction == "선크림 광고문도 만들어줘"
+    assert "촉촉" not in sent.product_description and "피부 보호" not in sent.instruction
+    assert sent.channel == "SNS" and sent.tone == "담백한"
+    assert response.context.last_copies == ["오늘의 외출 준비, 선케어 루틴과 함께."]
+
+
+def test_followup_loads_history_after_reading_latest_request():
+    svc = service(None)
+    old = ChatContext(product_name="PDRN 크림", ingredients=["PDRN"], last_copies=["PDRN 함유 크림과 함께"])
+    svc._llm.invoke.side_effect = [
+        ChatPlan(intent="generate", needs_history=True, context=ChatContext(length="한 줄")),
+        ChatPlan(intent="generate", context=old.model_copy(update={"length": "한 줄"})),
+    ]
+    svc.generator.generate.return_value = GenerateResponse(
+        request_id="short", status="생성완료", product_id="chat_draft", timing=ExecutionTiming())
+    svc.chat(ChatRequest(message="방금 문구를 한 줄로 줄여줘", context=old))
+    first, second = [call.args[0][1][1] for call in svc._llm.invoke.call_args_list]
+    assert "PDRN" not in first and "PDRN" in second
+    sent = svc.generator.generate.call_args.args[0]
+    assert sent.product.name == "PDRN 크림" and sent.ingredients == ["PDRN"]
+    assert sent.reference_copy == "PDRN 함유 크림과 함께" and sent.length == "한 줄"
+
+
+def test_new_product_only_reuses_explicit_style_and_not_product_facts():
+    svc = service(ChatPlan(intent="generate", new_topic=True, reuse_style=["tone", "channel"],
+                           context=ChatContext(product_name="선크림", product_description="선크림")))
+    svc.generator.generate.return_value = GenerateResponse(
+        request_id="style", status="생성완료", product_id="chat_draft", timing=ExecutionTiming())
+    old = ChatContext(product_name="PDRN 크림", ingredients=["PDRN"], tone="재치 있는", channel="배너",
+                      length="한 줄", last_copies=["이전 PDRN 문구"])
+    svc.chat(ChatRequest(message="같은 톤과 채널로 선크림 광고도 만들어줘", context=old))
+    sent = svc.generator.generate.call_args.args[0]
+    assert sent.tone == "재치 있는" and sent.channel == "배너"
+    assert sent.length == "짧은 문단"
+    assert sent.ingredients == [] and sent.reference_copy == ""
+
+
+def test_general_answer_preserves_current_product_and_ad_reference():
+    svc = service(ChatPlan(intent="answer", context=ChatContext(), question="계속 다른 광고를 요청하셔도 됩니다."))
+    old = ChatContext(product_name="PDRN 크림", ingredients=["PDRN"], last_copies=["이전 PDRN 문구"])
+    response = svc.chat(ChatRequest(message="새 채팅 안 눌러도 되지?", context=old))
+    assert response.context == old

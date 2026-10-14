@@ -118,7 +118,23 @@ def test_generation_rewrites_failed_review_with_bounded_retries():
         "channel": "SNS", "tone": "재치 있는", "length": "한 줄", "keywords": []})
     assert len(calls) == 3
     assert state["status"] == "생성보류"
+    assert len(state["candidates"]) == 1
     assert all(not c["verified"] and c["status"] == "확인필요" for c in state["candidates"])
+
+
+def test_generation_returns_specific_rejection_reasons_without_approving_unsafe_copy():
+    class UnsafeGenerator:
+        def generate(self, **kwargs):
+            return [{"text": "SPF50 PA++++ 피부를 보호하는 선크림", "tier": "safe"}]
+
+    graph = build_generation_graph(rule_engine=RuleEngine(), rewriter=QueryRewriter(),
+                                   retriever=FakeRetriever(), verifier=CopyVerifier(), generator=UnsafeGenerator())
+    state = graph.invoke({"instruction": "선크림 광고문도 만들어줘", "product": {
+        "product_id": "sun", "name": "선크림", "category": "일반", "owned_evidence": []},
+        "channel": "SNS", "tone": "담백한", "length": "한 줄", "keywords": []})
+    assert state["status"] == "생성보류" and state["candidates"] == []
+    assert any("SPF/PA" in warning for warning in state["warnings"])
+    assert any("피부 보호" in warning for warning in state["warnings"])
 
 
 def test_generation_passes_product_concept_and_previous_copy_to_model():

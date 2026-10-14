@@ -55,6 +55,6 @@ st.session_state["bw_health"] = _health(backend.data_mode())
 page = st.navigation([HOME, *PAGES.values(), MARKET], position="hidden")
 inject_base_css()
 if page.url_path != HOME.url_path:
-    render_sidebar(PAGES, st.session_state["bw_health"])
+    render_sidebar(PAGES, st.session_state["bw_health"], home=HOME)
 page.run()
 render_launcher(PAGES)
