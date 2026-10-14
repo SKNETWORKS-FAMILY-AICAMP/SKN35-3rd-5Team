@@ -1,0 +1,459 @@
+[
+  {
+    "product_id": "OY_A000000222698",
+    "brand": "아누아",
+    "product_name": "[수지세럼] 아누아 피디알엔 히알루론산 캡슐 100 세럼 30mL 기획 (+30mL 리필팩)",
+    "market_observed_date": "2026-10-13",
+    "market_source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000222698",
+    "market_conditions": {
+      "ranking": "3",
+      "ranking_type": "오늘의 랭킹 / 스킨케어",
+      "ranking_period": "페이지 명칭: 오늘의 랭킹; 실제 산정 기간 미공개",
+      "sale_price_krw": "27500",
+      "discount_percent_displayed": "52",
+      "bundle": "본품 30mL + 리필 30mL",
+      "sale_event": "세일 표시; 올영세일 행사로 확정하지 않음",
+      "review_count": "14035",
+      "rating": "4.8",
+      "celebrity_badge_exposed": "true",
+      "functional_type_status": "브랜드 공식 제품 고시 확인"
+    },
+    "observed_copies": [
+      {
+        "copy_id": "OY_A000000222698_C01",
+        "copy_text": "피디알엔 히알루론산 캡슐 100 세럼",
+        "위치": "상품명",
+        "문구 유형": [
+          "성분 소구형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000222698"
+      },
+      {
+        "copy_id": "OY_A000000222698_C02",
+        "copy_text": "(+30mL 리필팩)",
+        "위치": "상품명",
+        "문구 유형": [
+          "구성·혜택형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000222698"
+      },
+      {
+        "copy_id": "OY_A000000222698_C03",
+        "copy_text": "새로운 장르의 수분광채",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "효능 서술형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000222698"
+      },
+      {
+        "copy_id": "OY_A000000222698_C04",
+        "copy_text": "피디알엔 #수지세럼",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "성분 소구형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000222698"
+      }
+    ],
+    "comparison_status": "cosmetics_copy_effect_not_measured",
+    "hypothesis": "동일 SKU·가격·구성·이미지·타깃·기간을 고정하고, 승인된 문구의 소구 방식만 바꿔 CTR을 비교한다.",
+    "required_controls": [
+      "SKU",
+      "price",
+      "discount",
+      "bundle",
+      "image",
+      "placement",
+      "audience",
+      "period",
+      "attribution_window"
+    ],
+    "required_observations_per_arm": [
+      "copy_text",
+      "impressions",
+      "clicks",
+      "orders",
+      "units",
+      "net_revenue",
+      "ad_cost"
+    ],
+    "upworthy_link_type": "comparison_method_only; no transferred_uplift",
+    "predicted_revenue": null,
+    "predicted_units": null,
+    "copy_uplift": null,
+    "judge_level": null
+  },
+  {
+    "product_id": "OY_A000000231293",
+    "brand": "프리메라",
+    "product_name": "[10월 올영픽/탄력광채세럼] 프리메라 비타티놀 바운시 리프트 세럼 25g 기획/단품",
+    "market_observed_date": "2026-10-13",
+    "market_source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000231293",
+    "market_conditions": {
+      "ranking": "8",
+      "ranking_type": "오늘의 랭킹 / 스킨케어",
+      "ranking_period": "페이지 명칭: 오늘의 랭킹; 실제 산정 기간 미공개",
+      "sale_price_krw": "23200",
+      "discount_percent_displayed": "28",
+      "bundle": "기획 이미지:25g+리필25g+겔마스크1매;단품 옵션도 포함",
+      "sale_event": "10월 올영픽;세일",
+      "review_count": "6194",
+      "rating": "4.8",
+      "celebrity_badge_exposed": "미확인",
+      "functional_type_status": "공식 바운시 리프트 제품 설명 기능성 아이콘 확인"
+    },
+    "observed_copies": [
+      {
+        "copy_id": "OY_A000000231293_C01",
+        "copy_text": "[10월 올영픽/탄력광채세럼]",
+        "위치": "상품명",
+        "문구 유형": [
+          "구성·혜택형",
+          "효능 서술형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000231293"
+      },
+      {
+        "copy_id": "OY_A000000231293_C02",
+        "copy_text": "비타티놀 세럼 최다 구성 기획",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "구성·혜택형",
+          "비교·순위형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000231293"
+      },
+      {
+        "copy_id": "OY_A000000231293_C03",
+        "copy_text": "세럼 리필 25G + 겔마스크 1매",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "구성·혜택형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000231293"
+      },
+      {
+        "copy_id": "OY_A000000231293_C04",
+        "copy_text": "단독 사용보다 더욱 강해지는 탄력 2배* 시너지",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "효능 수치형",
+          "비교·순위형"
+        ],
+        "시험 조건 표기 여부": "일부 확인",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000231293"
+      }
+    ],
+    "comparison_status": "cosmetics_copy_effect_not_measured",
+    "hypothesis": "동일 SKU·가격·구성·이미지·타깃·기간을 고정하고, 승인된 문구의 소구 방식만 바꿔 CTR을 비교한다.",
+    "required_controls": [
+      "SKU",
+      "price",
+      "discount",
+      "bundle",
+      "image",
+      "placement",
+      "audience",
+      "period",
+      "attribution_window"
+    ],
+    "required_observations_per_arm": [
+      "copy_text",
+      "impressions",
+      "clicks",
+      "orders",
+      "units",
+      "net_revenue",
+      "ad_cost"
+    ],
+    "upworthy_link_type": "comparison_method_only; no transferred_uplift",
+    "predicted_revenue": null,
+    "predicted_units": null,
+    "copy_uplift": null,
+    "judge_level": null
+  },
+  {
+    "product_id": "OY_A000000265385",
+    "brand": "온그리디언츠",
+    "product_name": "[NEW] 온그리디언츠 바쿠글로우 레티날 부스터 샷 0.2퍼센트 30ml",
+    "market_observed_date": "2026-10-13",
+    "market_source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000265385",
+    "market_conditions": {
+      "ranking": "9",
+      "ranking_type": "오늘의 랭킹 / 스킨케어",
+      "ranking_period": "페이지 명칭: 오늘의 랭킹; 실제 산정 기간 미공개",
+      "sale_price_krw": "25000",
+      "discount_percent_displayed": "21",
+      "bundle": "본품30ml;기간 한정 증정 조건은 별도 안내 확인 필요",
+      "sale_event": "세일 표시; 올영세일 행사로 확정하지 않음",
+      "review_count": "339",
+      "rating": "5",
+      "celebrity_badge_exposed": "true",
+      "functional_type_status": "기능성 표시 확인;주름 개선 유형의 명시적 표시 추가 확인 필요"
+    },
+    "observed_copies": [
+      {
+        "copy_id": "OY_A000000265385_C01",
+        "copy_text": "레티날 부스터 샷 0.2퍼센트",
+        "위치": "상품명",
+        "문구 유형": [
+          "성분 소구형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000265385"
+      },
+      {
+        "copy_id": "OY_A000000265385_C02",
+        "copy_text": "세븐틴 에스쿱스 pick",
+        "위치": "상세 상단",
+        "문구 유형": [],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000265385"
+      },
+      {
+        "copy_id": "OY_A000000265385_C03",
+        "copy_text": "프로바이오틱스 유래 유산균 PDRN",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "성분 소구형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000265385"
+      },
+      {
+        "copy_id": "OY_A000000265385_C04",
+        "copy_text": "미간 주름 완화\n14.03% 개선",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "효능 수치형"
+        ],
+        "시험 조건 표기 여부": "확인",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000265385"
+      }
+    ],
+    "comparison_status": "cosmetics_copy_effect_not_measured",
+    "hypothesis": "동일 SKU·가격·구성·이미지·타깃·기간을 고정하고, 승인된 문구의 소구 방식만 바꿔 CTR을 비교한다.",
+    "required_controls": [
+      "SKU",
+      "price",
+      "discount",
+      "bundle",
+      "image",
+      "placement",
+      "audience",
+      "period",
+      "attribution_window"
+    ],
+    "required_observations_per_arm": [
+      "copy_text",
+      "impressions",
+      "clicks",
+      "orders",
+      "units",
+      "net_revenue",
+      "ad_cost"
+    ],
+    "upworthy_link_type": "comparison_method_only; no transferred_uplift",
+    "predicted_revenue": null,
+    "predicted_units": null,
+    "copy_uplift": null,
+    "judge_level": null
+  },
+  {
+    "product_id": "OY_A000000250199",
+    "brand": "셀리맥스",
+    "product_name": "[단독기획/모공탄력] 셀리맥스 더 비타 A 레티날 샷 타이트닝 부스터 15ml 기획(+3ml)",
+    "market_observed_date": "2026-10-13",
+    "market_source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000250199",
+    "market_conditions": {
+      "ranking": "10",
+      "ranking_type": "오늘의 랭킹 / 스킨케어",
+      "ranking_period": "페이지 명칭: 오늘의 랭킹; 실제 산정 기간 미공개",
+      "sale_price_krw": "23100",
+      "discount_percent_displayed": "23",
+      "bundle": "본품15ml + 추가3ml",
+      "sale_event": "세일 표시; 올영세일 행사로 확정하지 않음",
+      "review_count": "5487",
+      "rating": "4.8",
+      "celebrity_badge_exposed": "미확인",
+      "functional_type_status": "브랜드 공식 기능성여부 고시 확인"
+    },
+    "observed_copies": [
+      {
+        "copy_id": "OY_A000000250199_C01",
+        "copy_text": "모공탄력",
+        "위치": "상품명",
+        "문구 유형": [
+          "효능 서술형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000250199"
+      },
+      {
+        "copy_id": "OY_A000000250199_C02",
+        "copy_text": "(+3ml)",
+        "위치": "상품명",
+        "문구 유형": [
+          "구성·혜택형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000250199"
+      },
+      {
+        "copy_id": "OY_A000000250199_C03",
+        "copy_text": "판매랭킹 TOP.1",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "비교·순위형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000250199"
+      },
+      {
+        "copy_id": "OY_A000000250199_C04",
+        "copy_text": "892% 흡수 기술",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "효능 수치형"
+        ],
+        "시험 조건 표기 여부": "미확인",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000250199"
+      },
+      {
+        "copy_id": "OY_A000000250199_C05",
+        "copy_text": "팔자 주름\n-18.49%",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "효능 수치형"
+        ],
+        "시험 조건 표기 여부": "확인",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000250199"
+      }
+    ],
+    "comparison_status": "cosmetics_copy_effect_not_measured",
+    "hypothesis": "동일 SKU·가격·구성·이미지·타깃·기간을 고정하고, 승인된 문구의 소구 방식만 바꿔 CTR을 비교한다.",
+    "required_controls": [
+      "SKU",
+      "price",
+      "discount",
+      "bundle",
+      "image",
+      "placement",
+      "audience",
+      "period",
+      "attribution_window"
+    ],
+    "required_observations_per_arm": [
+      "copy_text",
+      "impressions",
+      "clicks",
+      "orders",
+      "units",
+      "net_revenue",
+      "ad_cost"
+    ],
+    "upworthy_link_type": "comparison_method_only; no transferred_uplift",
+    "predicted_revenue": null,
+    "predicted_units": null,
+    "copy_uplift": null,
+    "judge_level": null
+  },
+  {
+    "product_id": "OY_A000000268161",
+    "brand": "아이오페",
+    "product_name": "아이오페 레티놀 레티젝션 세럼 기획 20ml (+10ml)",
+    "market_observed_date": "2026-10-13",
+    "market_source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000268161",
+    "market_conditions": {
+      "ranking": "30",
+      "ranking_type": "오늘의 랭킹 / 스킨케어",
+      "ranking_period": "페이지 명칭: 오늘의 랭킹; 실제 산정 기간 미공개",
+      "sale_price_krw": "29900",
+      "discount_percent_displayed": "23",
+      "bundle": "본품20ml + 추가10ml",
+      "sale_event": "세일 표시; 올영세일 행사로 확정하지 않음",
+      "review_count": "3087",
+      "rating": "4.8",
+      "celebrity_badge_exposed": "미확인",
+      "functional_type_status": "기능성 표시 확인;주름 개선 유형의 명시적 표시 추가 확인 필요"
+    },
+    "observed_copies": [
+      {
+        "copy_id": "OY_A000000268161_C01",
+        "copy_text": "(+10ml)",
+        "위치": "상품명",
+        "문구 유형": [
+          "구성·혜택형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000268161"
+      },
+      {
+        "copy_id": "OY_A000000268161_C02",
+        "copy_text": "탄력 효과",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "효능 서술형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000268161"
+      },
+      {
+        "copy_id": "OY_A000000268161_C03",
+        "copy_text": "레티놀 RX™ 2%",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "성분 소구형"
+        ],
+        "시험 조건 표기 여부": "해당 없음",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000268161"
+      },
+      {
+        "copy_id": "OY_A000000268161_C04",
+        "copy_text": "피부 속4) 46% 더 깊숙하게5)",
+        "위치": "상세 상단",
+        "문구 유형": [
+          "효능 수치형",
+          "비교·순위형"
+        ],
+        "시험 조건 표기 여부": "일부 확인",
+        "source_url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000268161"
+      }
+    ],
+    "comparison_status": "cosmetics_copy_effect_not_measured",
+    "hypothesis": "동일 SKU·가격·구성·이미지·타깃·기간을 고정하고, 승인된 문구의 소구 방식만 바꿔 CTR을 비교한다.",
+    "required_controls": [
+      "SKU",
+      "price",
+      "discount",
+      "bundle",
+      "image",
+      "placement",
+      "audience",
+      "period",
+      "attribution_window"
+    ],
+    "required_observations_per_arm": [
+      "copy_text",
+      "impressions",
+      "clicks",
+      "orders",
+      "units",
+      "net_revenue",
+      "ad_cost"
+    ],
+    "upworthy_link_type": "comparison_method_only; no transferred_uplift",
+    "predicted_revenue": null,
+    "predicted_units": null,
+    "copy_uplift": null,
+    "judge_level": null
+  }
+]

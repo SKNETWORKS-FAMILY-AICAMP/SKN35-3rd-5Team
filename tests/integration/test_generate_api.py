@@ -4,6 +4,8 @@ from fastapi.testclient import TestClient
 
 from api.main import create_app
 from cosmetic_agent.domain.generation import GenerateResponse
+from cosmetic_agent.domain.schemas import ExecutionTiming
+from cosmetic_agent.domain.schemas import GenerateResponse as ProjectGenerateResponse
 from cosmetic_agent.models.copy_generator import GenerationUnavailable
 
 
@@ -24,3 +26,18 @@ def test_generation_api_contract_and_failure():
         generator.generate.assert_not_called()
         generator.generate.side_effect = GenerationUnavailable("모델 연결 실패")
         assert client.post("/generate", json=payload).status_code == 503
+
+
+def test_both_generation_contracts_coexist_in_one_app():
+    reviewer, generator = Mock(), Mock()
+    generator.generate.return_value = GenerateResponse()
+    reviewer.generate_copy.return_value = ProjectGenerateResponse(
+        request_id="project", status="생성완료", product_id="P1", timing=ExecutionTiming())
+    product = {"product_id": "P1", "name": "크림", "category": "일반"}
+    with TestClient(create_app(lambda: reviewer, lambda service: generator)) as client:
+        ingredient = client.post("/generate", json={"ingredients": ["판테놀"], "product": product})
+        project = client.post("/generate", json={"instruction": "제품 기준 광고문", "product": product})
+    assert ingredient.status_code == project.status_code == 200
+    assert "disclaimer" in ingredient.json()
+    assert project.json()["status"] == "생성완료"
+    assert generator.generate.call_count == reviewer.generate_copy.call_count == 1

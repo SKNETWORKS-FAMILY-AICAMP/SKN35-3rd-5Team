@@ -1,0 +1,47 @@
+{
+  "record_kind": "scenario_assumptions_not_observed",
+  "status": "awaiting_explicit_assumptions",
+  "product_id": null,
+  "copy_id": null,
+  "period_start": null,
+  "period_end": null,
+  "forecast_population": "planned_clicks",
+  "planned_clicks": null,
+  "purchase_probability": {
+    "low": null,
+    "central": null,
+    "high": null,
+    "denominator": "clicks",
+    "basis_source": null
+  },
+  "orders_per_buyer": null,
+  "units_per_order": null,
+  "net_revenue_per_order_krw": null,
+  "price_krw": null,
+  "bundle": null,
+  "discount_pct": null,
+  "audience": null,
+  "placement": null,
+  "copy_lift": {
+    "value": null,
+    "identified": false
+  },
+  "expected_buyers": null,
+  "expected_orders": null,
+  "expected_units": null,
+  "expected_net_revenue_krw": null,
+  "display_label": "가정 기반 시나리오;학습된 화장품 문구 성과 예측이 아님",
+  "formulas": {
+    "expected_buyers": "planned_clicks * purchase_probability",
+    "expected_orders": "expected_buyers * orders_per_buyer",
+    "expected_units": "expected_orders * units_per_order",
+    "expected_net_revenue_krw": "expected_orders * net_revenue_per_order_krw"
+  },
+  "guardrails": [
+    "미확인 값은0으로 채우지 않음",
+    "구매자 수·주문 수·상품 개수 구분",
+    "ROAS 상대 개선율을 CVR로 바꾸지 않음",
+    "다른 업종 실험의 구매율을 자사 제품에 전용하지 않음",
+    "미식별 문구별 증가율을 만들지 않음"
+  ]
+}

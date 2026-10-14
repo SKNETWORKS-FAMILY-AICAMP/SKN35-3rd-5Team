@@ -18,3 +18,18 @@ def test_process_environment_overrides_dotenv(tmp_path, monkeypatch):
     assert backend.data_mode() == "mock"
     monkeypatch.setenv("UI_DATA_MODE", " API ")
     assert backend.data_mode() == "api"
+
+
+def test_local_mode_routes_chat_and_ingredient_generation_through_embedded_app(monkeypatch):
+    monkeypatch.setenv("UI_DATA_MODE", "local")
+    calls = []
+
+    def post(path, payload, *, timeout):
+        calls.append(path)
+        return {"ok": True}
+
+    monkeypatch.setattr(backend, "_post", post)
+    assert backend.data_mode() == "local"
+    assert backend.chat({"message": "광고 생성"}) == {"ok": True}
+    assert backend.generate_copy({"ingredients": ["판테놀"]}) == {"ok": True}
+    assert calls == ["/chat", "/generate"]

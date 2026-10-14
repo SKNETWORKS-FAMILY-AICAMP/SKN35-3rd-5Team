@@ -9,6 +9,11 @@ from ..common.config import settings
 from ..domain.generation import GeneratedCandidate, GenerateRequest, GenerateResponse
 from ..domain.rules import RuleEngine
 from ..domain.verifier import CopyVerifier
+from .project_copy_generator import (  # noqa: F401 — dev 생성 엔진의 기존 import 유지
+    CopyGenerator,
+    GeneratedDraft,
+    GenerationOutput,
+)
 
 
 class GenerationUnavailable(RuntimeError):

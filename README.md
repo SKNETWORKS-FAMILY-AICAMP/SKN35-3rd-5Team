@@ -8,6 +8,8 @@
 
 ### 통합 챗봇
 
+최신 `dev`의 홈·시장 비교·제품 등록 기능과 함께 사용할 수 있습니다. 기존 **성분으로 문구 만들기**와 **통합 챗봇**은 유지하고, `dev`의 생성 화면은 **제품 기준 광고문 생성** 메뉴(`app/views/project_generate.py`)로 제공합니다. `POST /generate`는 성분 기반 요청(`ingredients`)과 제품·실증 기반 요청(`instruction`)을 모두 지원하며 각 요청에 맞는 기존 응답 계약을 반환합니다. 챗봇은 `api` 또는 별도 백엔드 없이 FastAPI를 내장 실행하는 `local` 모드에서 실제 서비스에 연결됩니다.
+
 기존 검토·생성 화면과 함께 왼쪽 작업 메뉴의 **통합 챗봇** 또는 화면 왼쪽 하단의 동그란 채팅 버튼을 사용할 수 있습니다. 작은 팝업과 전체 챗봇 화면은 같은 대화를 공유합니다. `“이 광고 문구를 검토하고 고쳐줘”`, `“판테놀과 히알루론산이 들어간 크림의 SNS 광고문 만들어줘”`, `“두 번째 후보를 더 발랄하게 바꿔줘”`처럼 요청하면 모델이 의도와 필요한 정보를 추출하고 기존 검토·생성 서비스를 실행합니다. 정보가 부족하면 추가 질문을 합니다.
 
 챗봇은 기본적으로 일반 화장품·실증 없는 새 제품 기준이며, 전체 챗봇 화면에서 프로젝트 제품·실증 자료 사용을 선택할 수 있습니다. 제품/실증 기준을 바꾸면 이전 성분이 다른 제품에 적용되지 않도록 새 대화를 시작합니다. 대화는 현재 Streamlit 세션 안에서 유지되며 새로 연결하거나 서버를 재시작하면 사라질 수 있습니다. 실제 사용에는 `UI_DATA_MODE=api`, 모델 API 키, 검토 서버와 검색 인프라가 필요합니다. 데모 모드에서 챗봇 결과를 만들어 보여주지 않습니다.
@@ -31,18 +33,18 @@
 │   ├── 02_processed/   # 정제된 청크 및 BM25 인덱스 파일
 │   ├── assets/         # 금지어 사전, 표현 사다리, 가상 제품 카드 JSON
 │   └── golden_set/     # Dev / Holdout 평가 벤치마크 데이터
-├── docker/             # Qdrant 등 인프라 컨테이너 설정
+├── docker/             # 선택 사항: 로컬 개발용 Qdrant 컨테이너 설정
 ├── eval/               # R0~R4 베이스라인 평가 파이프라인
 ├── finetune/           # QLoRA 기반 판정 모델 독립 학습 파이프라인
 ├── indexing/           # 오프라인 데이터 파이프라인 (01~05)
 ├── src/cosmetic_agent/ # 핵심 비즈니스 로직 (Clean Architecture & LangGraph)
 │   ├── common/         # 환경변수, 로깅, 커스텀 예외
 │   ├── domain/         # Pydantic 결과 계약, 규칙 엔진, 문구 검증기
-│   ├── rag/            # Qdrant + BM25 RRF 하이브리드 검색, 질의 변환
+│   ├── rag/            # Qdrant Cloud + BM25 RRF 하이브리드 검색, 질의 변환
 │   ├── models/         # Rule / GPT Few-shot / QLoRA 판정 모델 인터페이스
 │   ├── workflow/       # LangGraph 9단계 StateGraph 노드/엣지
 │   └── service.py      # 싱글톤 파사드 서비스
-├── api/                # FastAPI 서빙 레이어 (/health, /review, /search)
+├── api/                # FastAPI 서빙 레이어 (/health, /review, /generate, /search)
 ├── app/                # Streamlit 사용자 대시보드
 └── tests/              # 단위 테스트 및 계약 검증 테스트
 ```
@@ -56,7 +58,7 @@
 | 역할 | 맡는 폴더 및 파일 | 주요 작업 내용 |
 | :--- | :--- | :--- |
 | **팀장 · 통합** | • `src/cosmetic_agent/workflow/graph.py`<br>• `src/cosmetic_agent/workflow/edges.py`<br>• `src/cosmetic_agent/service.py`<br>• `api/` 전체<br>• `configs/base.yaml`, `README.md` | • LangGraph 전체 노드·엣지 연결 및 루프 조건 완성<br>• FastAPI 엔드포인트 연동 및 문장 분할 배치 처리<br>• 전체 모듈 통합 및 일정/품질 관리 |
-| **데이터 · 규칙** | • `data/01_raw/`, `data/02_processed/`<br>• `data/assets/*.json` (4종 + 제품카드)<br>• `indexing/` (01~05 스크립트)<br>• `src/cosmetic_agent/rag/` 전체 | • 법령/고시 PDF 수집 및 조(Article) 단위 정규식 청킹<br>• Qdrant + BM25 인덱스 생성 파이프라인 완성<br>• `banned_terms.json`, `claim_ladder.json` 실제 데이터 채우기<br>• RRF 하이브리드 검색 알고리즘 구현 |
+| **데이터 · 규칙** | • `data/01_raw/`, `data/02_processed/`<br>• `data/assets/*.json` (4종 + 제품카드)<br>• `indexing/` (01~05 스크립트)<br>• `src/cosmetic_agent/rag/` 전체 | • 법령/고시 PDF 수집 및 조(Article) 단위 정규식 청킹<br>• Qdrant Cloud + BM25 인덱스 생성 파이프라인 완성<br>• `banned_terms.json`, `claim_ladder.json` 실제 데이터 채우기<br>• RRF 하이브리드 검색 알고리즘 구현 |
 | **프롬프트 · 판정** | • `src/cosmetic_agent/workflow/prompts.py`<br>• `src/cosmetic_agent/workflow/nodes.py`<br>• `src/cosmetic_agent/models/gpt_judge.py`<br>• `src/cosmetic_agent/domain/schemas.py`<br>• `src/cosmetic_agent/domain/verifier.py` | • GPT 판정 및 대안 문구 생성 프롬프트 엔지니어링<br>• Pydantic `ReviewResult` 계약 검증 규칙 추가<br>• 제안 문구의 숫자 날조 및 금지어 역검증(`verifier.py`) 로직 구현<br>• 혼동쌍 분석을 통한 Few-shot 예시 튜닝 |
 | **평가** | • `data/golden_set/` (dev, holdout)<br>• `eval/metrics/eval_metrics.py`<br>• `eval/run_eval.py`<br>• `tests/` 단위/통합 테스트 | • 30~50건 골든셋(Dev/Holdout) 정답 라벨링<br>• R0(규칙) → R1(Zero-shot) → R2(Few-shot) → R4(최종) 비교 평가 실행기 작성<br>• 단위 테스트(`test_rules`, `test_schemas`) 확장 |
 | **파인튜닝** | • `finetune/dataset/`<br>• `finetune/recipes/qlora_qwen.py`<br>• `src/cosmetic_agent/models/ft_judge.py`<br>• `finetune/MODEL_CARD.md` | • GPT 활용 300~500건 판정 학습 데이터 증강 및 수동 검수<br>• Train/Dev 데이터 누수(Leakage) 점검<br>• Colab T4 기반 Qwen-3B 4-bit QLoRA 학습 실행<br>• 서빙 어댑터 연동 및 모델 카드 작성 |
@@ -107,26 +109,54 @@
 
 ## 4. 개발 및 실행 가이드
 
-### 1) 환경 변수 설정
+### 1) Qdrant Cloud 준비
+
+이 프로젝트의 기본 벡터 데이터베이스는 로컬 Docker가 아닌 **Qdrant Cloud**입니다.
+
+1. Qdrant Cloud에서 클러스터를 생성합니다.
+2. 클러스터의 HTTPS Endpoint와 API Key를 발급받습니다.
+3. API Key는 저장소에 커밋하지 말고 로컬 `.env` 또는 배포 서비스의 Secret 환경변수로 관리합니다.
+
+Qdrant 컬렉션은 별도로 수동 생성하지 않아도 됩니다. `indexing/05_build_indexes.py`가 컬렉션이 없으면 생성하고, 기존 컬렉션이 있으면 청크를 멱등적으로 upsert합니다.
+
+### 2) 환경 변수 설정
 ```bash
 cp .env.example .env
-# .env 파일을 열어 OPENAI_API_KEY 등을 입력합니다.
+# .env 파일에 OpenAI 및 Qdrant Cloud 접속 정보를 입력합니다.
 ```
 
-### 2) 패키지 설치
+필수 설정 예시:
+
+```dotenv
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+
+QDRANT_URL=https://your-cluster-id.region.cloud.qdrant.io
+QDRANT_API_KEY=your_qdrant_cloud_api_key_here
+QDRANT_COLLECTION_NAME=cosmetic_ad_rules_v2
+```
+
+### 3) 패키지 설치
 `uv`를 사용하여 가상환경 및 의존성을 동기화합니다:
 ```bash
 uv sync --extra dev
 ```
 
-### 3) 로컬 인프라 (Qdrant) 실행
+### 4) 데이터 파이프라인 실행 (오프라인 1회)
+
+청킹 결과를 만든 뒤 OpenAI 임베딩을 생성하여 Qdrant Cloud에 저장하고, BM25 인덱스를 로컬 파일로 생성합니다.
+
 ```bash
-docker compose -f docker/docker-compose.yml up -d
+uv run python indexing/03_chunk_articles.py
+uv run python indexing/05_build_indexes.py
 ```
 
-### 4) 데이터 파이프라인 실행 (오프라인 1회)
+> `data/02_processed/bm25_index.pkl`은 실행 환경에 필요한 검색 인덱스입니다. 배포 시 파일을 함께 제공하거나 배포 빌드 과정에서 다시 생성해야 합니다.
+
+인덱싱 결과 검증:
+
 ```bash
-uv run python indexing/run_pipeline.py
+uv run python scripts/validate_rag.py
 ```
 
 ### 5) 서버 및 대시보드 실행
