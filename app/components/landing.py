@@ -17,7 +17,7 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-from app.components.brand import avatar_img, character_img, lockup_img
+from app.components.brand import avatar_img, lockup_img
 from app.components.cards import highlighted, tag
 from app.components.icons import icon
 from app.components.layout import esc
@@ -61,6 +61,11 @@ def _image_uri(filename: str) -> str:
     """st.html 은 페이지마다 상대 경로가 달라지므로 data URI 로 넣는다 (brand.py 와 같은 이유)."""
     path = _LANDING_DIR / filename
     return f"data:image/webp;base64,{base64.b64encode(path.read_bytes()).decode('ascii')}"
+
+
+def _rabbit(height: int) -> str:
+    """팀 캐릭터 전신 — 원본(app/assets/rabbit-lab-scientist-v1.png, 1254px)에서 홈용으로 잘라 둔 600px 판."""
+    return f'<img src="{_image_uri("rabbit-hero.webp")}" style="height:{height}px;width:auto" alt="">'
 
 
 def _cite_label(c: dict) -> str:
@@ -167,7 +172,7 @@ def demo(exs: list[dict], product_name: str, n_evidence: int) -> str:
     dots = "".join(f'<i{" class=on" if i == 0 else ""}></i>' for i in range(len(exs)))
     first = SAY["fix"] if exs and exs[0]["fix"] else SAY["nofix"]   # 스크립트가 없을 때 = 첫 예시의 마지막 말
     buddy = (f'<div class="buddy" aria-hidden="true"><span class="say">{esc(first)}</span>'
-             f'<span class="pic">{character_img(228)}</span></div>')
+             f'<span class="pic">{_rabbit(228)}</span></div>')
     return ('<div class="bw-h bw-h-demo" aria-label="검토 예시">' + buddy + '<div class="card">'
             f'<div class="bar"><span class="live">{avatar_img(22)}뷰렛 AI · 검토 예시</span>'
             f'<span class="who">{esc(product_name)} · 실증 {n_evidence}건</span>'
@@ -300,7 +305,7 @@ def sources(stats: dict, docs: list[dict]) -> str:
 
 # ── 마지막 안내 · 푸터 ──────────────────────────────────────────────
 def cta_text() -> str:
-    return (f'<div class="bw-h bw-h-cta"><span class="pic">{character_img(136, alt="")}</span>'
+    return (f'<div class="bw-h bw-h-cta"><span class="pic">{_rabbit(136)}</span>'
             '<div>' + _display("검토할 문구가 있나요?") +
             '<p>가입 없이 바로 써 볼 수 있습니다. 문구를 붙여 넣거나 시작 문구 하나를 눌러 보세요.</p></div></div>')
 
