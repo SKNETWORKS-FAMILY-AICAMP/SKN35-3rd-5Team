@@ -46,6 +46,7 @@ INGREDIENT_GROUPS: dict[str, list[str]] = {
     "세라마이드": ["세라마이드", "ceramide"],
     "시카(병풀)": ["시카", "병풀", "마데카", "센텔라", "cica"],
     "판테놀": ["판테놀", "panthenol"],
+    "어성초(약모밀)": ["어성초", "약모밀", "houttuynia"],
 }
 
 # 제형: 세럼·앰플·에센스·부스터는 같은 묶음으로 본다
@@ -179,7 +180,8 @@ def load_market_products() -> tuple[dict, ...]:
         pid = p["product_id"]
         offer = next((o for o in offers if o["product_id"] == pid and o.get("displayed_price_krw")), {})
         copies = copies_by.get(pid, [])
-        all_text = " ".join([p["name"], " ".join(p.get("ingredient_tags", []))] + [c["copy_text"] for c in copies])
+        # 광고에 등장한 성분명을 실제 배합 성분으로 간주하지 않는다.
+        all_text = " ".join(p.get("ingredient_tags", []))
         products.append({
             "product_id": pid, "brand": BRAND_KO.get(p["brand"], p["brand"]), "name": p["name"],
             "form": CATEGORY_FORM.get(p.get("category")) or form_of(p["name"]),
@@ -192,6 +194,20 @@ def load_market_products() -> tuple[dict, ...]:
             "volume": offer.get("bundle_note"), "channel": {"brand_store": "공식몰", "oliveyoung": "올리브영"}.get(offer.get("channel"), offer.get("channel")), "url": None,
             "copies": copies,
             "signals": signals(pid, {p["brand"]}),
+        })
+    for p in _json(MARKET / "supplemental_products.json", {}).get("products", []):
+        products.append({
+            "product_id": p["product_id"], "brand": p["brand"], "name": p["name"],
+            "form": p["form"], "functions": functions_of(p.get("functional_type") or ""),
+            "ingredients": ingredient_groups(p["ingredient_text"]),
+            "ingredient_text": p["ingredient_text"],
+            "price_krw": p.get("price_krw"), "list_price_krw": p.get("list_price_krw"),
+            "discount_pct": None, "ranking": None, "ranking_label": None,
+            "review_count": None, "rating": None, "volume": p.get("volume"),
+            "channel": "공식몰", "url": p["source_url"], "signals": [],
+            "copies": [{"copy_id": c["copy_id"], "copy_text": c["copy_text"],
+                        "types": c["types"], "level": None, "label": "미판정",
+                        "placement": c["placement"]} for c in p["copies"]],
         })
     return tuple(products)
 
@@ -229,7 +245,7 @@ def find_peers(product: dict, limit: int = 8) -> list[dict]:
         shared_ing = sorted(me["ingredients"] & p["ingredients"])
         shared_fn = sorted(me["functions"] & p["functions"])
         same_form = bool(me["form"]) and me["form"] == p["form"]
-        if not shared_ing and not (shared_fn and same_form):
+        if not same_form or not (shared_ing or shared_fn):
             continue
         score = 3 * len(shared_ing) + 2 * len(shared_fn) + (1 if same_form else 0)
         reasons = ([f"같은 성분 · {', '.join(shared_ing)}"] if shared_ing else []) + \

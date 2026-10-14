@@ -22,11 +22,11 @@ import streamlit as st
 
 from app.components.context import current, open_register, register_product
 from app.components.layout import page_header
-from app.components.market_reference import render_public_experiments
+from app.components.market_reference import render_public_experiments, render_reference_guide
 from app.components.performance import render_performance
 from app.components.theme import inject_css
 from app.services.peer_market import (appeal_summary, candidate_copies, find_peers,
-                                      judge_candidates, price_benchmark, product_profile)
+                                      judge_candidates, price_benchmark, product_profile, FORMS, form_of, load_market_products)
 from app.services.product_market import latest_review_pair
 from app.services.revenue_scenario import DISPLAY_LABEL, build_scenario
 
@@ -114,6 +114,19 @@ page_header(
 )
 
 with st.container(key="pagebody"):
+    # 기존 등록 세션도 재등록 없이 잘못 선택된 제형을 바로잡을 수 있다.
+    inferred_form = form_of(product.get("name", ""))
+    if pid.startswith("CUSTOM_"):
+        default_form = inferred_form or product.get("form")
+        selected_form = st.selectbox(
+            "시장 비교 제형", FORMS,
+            index=FORMS.index(default_form) if default_form in FORMS else None,
+            key=f"fc_match_form_{pid}",
+            help="등록한 제품의 제형을 확인하세요. 토너는 토너끼리 비교합니다.",
+        )
+        if inferred_form and product.get("form") and inferred_form != product["form"]:
+            st.caption(f"등록 제형은 {product['form']}이지만 제품명은 {inferred_form}로 읽힙니다. 위 선택값으로 비교합니다.")
+        product = dict(product, form=selected_form)
     # ------------------------------------------------------------------ 우리 제품
     me = product_profile(product)
     is_custom = pid.startswith("CUSTOM_")
@@ -140,7 +153,9 @@ with st.container(key="pagebody"):
     peers = find_peers(product)
 
     # ------------------------------------------------------------------ ① 비슷한 시장 제품
-    step("1", f"비슷한 시장 제품 {len(peers)}개", "성분 · 기능성 · 제형이 겹치는 제품만 골랐어요. 겹치는 게 없으면 억지로 채우지 않아요.")
+    step("1", f"비슷한 시장 제품 {len(peers)}개", "같은 제형 중 주요 성분 또는 기능성이 겹치는 제품만 비교합니다.")
+    same_form_count = sum(p["form"] == me["form"] for p in load_market_products())
+    st.caption(f"수집 자료 중 {me['form'] or '선택 제형'} {same_form_count}행 → 성분·기능성 조건에 맞는 비교 제품 {len(peers)}개. 주요 성분 키워드 비교이며 배합·함량·효능 동등성은 확인하지 않았습니다.")
     if not peers:
         st.info("수집한 시장 자료에서 성분·기능·제형이 겹치는 제품을 찾지 못했습니다. "
                 "주요 성분과 제형을 입력했는지 확인해 주세요. (현재 시장 자료: 올리브영 랭킹 세럼·앰플, 공식몰 크림·토너·마스크 등)")
@@ -264,7 +279,7 @@ with st.container(key="pagebody"):
         st.caption("보유 실증(시험 수치)을 등록하면 ‘효능 수치형’ 후보가 추가돼요. 경쟁 상위 제품들이 가장 많이 쓰는 강한 표현이에요.")
 
     # ------------------------------------------------------------------ ④ 예상 매출
-    step("4", "이 문구로 기대할 수 있는 매출", "지금 쓰려는 문구(원문)와 추천 문구를 비교해요. " + DISPLAY_LABEL + ".")
+    step("4", "문구를 바꿨을 때의 매출 시나리오", "지금 쓰려는 문구(원문)와 추천 문구를 비교해요. " + DISPLAY_LABEL + ".")
     review = latest_review_pair(st.session_state.get("bw_threads"), pid)
     default_orig = (review or {}).get("original") or f"바르는 순간 주름이 사라지는 {product['name']}"
     c1, c2 = st.columns(2)
@@ -362,20 +377,43 @@ with st.container(key="pagebody"):
                "‘바꾸면 이 정도 범위에서 움직일 수 있다’는 뜻이에요. 확실히 하려면 실제 A/B 테스트가 필요해요.")
 
     # ------------------------------------------------------------------ ⑤ 참고 자료
-    step("참고", "시장 근거 · 문구 비교 자료", "계산에 직접 쓰지 않는 참조용 자료예요.")
-    t1, t2, t3 = st.tabs(["공개 A/B 실험", "우리 문구 A/B 성과 입력", "계산 가정 · 출처"])
+    step("참고", "자료와 계산, 한눈에 이해하기", "시장 문구는 표현 참고에, 공개 실험은 변화 폭 가정에 사용합니다.")
+    t1, t2, t3 = st.tabs(["쉬운 설명 · 현재 계산 예시", "실제 성과 비교", "출처 · 자세한 자료"])
     with t1:
-        render_public_experiments()
+        render_reference_guide(
+            product_name=product["name"], base_revenue=base,
+            exposed_share=exposed / 100, change_pct=pct,
+            change_amount=delta, peer_count=len(peers),
+            market_example=next((
+                {"brand": p["brand"], "name": p["name"], "copy": p["copies"][0]["copy_text"]}
+                for p in peers if p.get("copies")
+            ), None),
+            own_copy=recommended,
+        )
     with t2:
-        render_performance(pid)
+        st.info("문구별 실측 자료가 있을 때 사용하는 비교 도구입니다. 아직 자료가 없다면 입력하지 않아도 됩니다. 위 매출 시나리오에는 자동 반영되지 않습니다.")
+        with st.expander("문구 A/B 데이터 입력하기"):
+            render_performance(pid)
     with t3:
-        st.write({
-            "가정": before["assumptions"], "제공하지 않는 값": before["not_provided"],
-            "원문 위반 조항(law_id)": before["inputs"]["law_ids"],
-            "비교한 시장 제품": [f"{p['brand']} · {short(p['name'])}" for p in peers],
-            "근거 파일": ["data/top_product_copies/wrinkle_serum_sample/products.csv",
-                      "data/market_reference/ (products · offers · public_outcomes · platform_expansion)",
-                      "data/sales_forecast_reference/copy_comparison/market_copy_judgements.jsonl",
-                      "data/sales_forecast_reference/penalty_schedule.json",
-                      "data/sales_forecast_reference/copy_effect_size_distribution.json"],
-        })
+        st.markdown("#### 사용한 자료와 역할")
+        st.markdown("""| 자료 | 화면에서 쓰이는 곳 | 해석할 때 주의할 점 |
+|---|---|---|
+| 유사 제품의 공개 성분·문구·가격·순위 | 시장 비교와 표현 유형 참고 | 순위·리뷰는 매출이 아님 |
+| 우리 제품 정보·시험 자료와 규정 | 문구 후보 생성과 규칙 검토 | 다른 제품의 실증을 대신 쓰지 않음 |
+| 처분 기준표 | 처분이 적용될 경우의 기간 비교 | 적발 확률·확정 손실이 아님 |
+| 뉴스 제목 A/B 실험 148건 | 매출 변화 폭에 넣은 가정의 참고값 | 화장품 매출 효과가 아님 |
+| 판매가·월 판매량 입력값 | 기준 월 매출 계산 | 계획 수량을 사용한 가정 |""")
+        render_public_experiments()
+        with st.expander("현재 계산 가정 · 연결 파일 확인"):
+            st.markdown("**계산에 사용한 가정**")
+            for assumption in before["assumptions"]:
+                st.write(f"• {assumption}")
+            st.caption("제공하지 않는 값: " + " · ".join(before["not_provided"]))
+            st.caption("원문 규칙 검토에서 연결된 조항: " + (", ".join(before["inputs"]["law_ids"]) or "없음"))
+            st.code("\n".join([
+                "data/top_product_copies/wrinkle_serum_sample/products.csv",
+                "data/market_reference/",
+                "data/sales_forecast_reference/copy_comparison/market_copy_judgements.jsonl",
+                "data/sales_forecast_reference/penalty_schedule.json",
+                "data/sales_forecast_reference/copy_effect_size_distribution.json",
+            ]), language=None)

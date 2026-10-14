@@ -1,0 +1,37 @@
+{
+  "collected_on": "2026-10-14",
+  "scope": "공식 페이지 직접 확인. 시장 표현 참고용이며 자사 효능·매출 근거로 전용하지 않음.",
+  "products": [
+    {
+      "product_id": "MKT_ANUA_HEARTLEAF_HA_TONER_250_RENEWAL",
+      "brand": "아누아",
+      "name": "어성초 77 히알루론산 수분 진정 토너",
+      "form": "토너",
+      "volume": "250 mL",
+      "functional_type": null,
+      "functional_status": "공식 상품정보 제공고시: 해당 사항 없음",
+      "ingredient_text": "약모밀꽃/잎/줄기수, 정제수, 1,2-산다이올, 글리세린, 글리세레스-26, 베타인, 펜틸렌글라이콜, 소듐시트레이트, 아이소펜틸다이올, 에틸헥실글리세린, 다이포타슘글리시리제이트, 시트릭애씨드, 아크릴레이트/C10-30알킬아크릴레이트크로스폴리머, 트로메타민, 판테놀, 소듐파이테이트, 알란토인, 소듐하이알루로네이트, 약모밀소포, 하이드롤라이즈드소듐하이알루로네이트, 징크피씨에이, 하이드록시프로필트라이모늄하이알루로네이트, 락토바실러스발효물, 소듐아세틸레이티드하이알루로네이트, 하이드롤라이즈드하이알루로닉애씨드, 아이소쿼시트린, 쿼세틴, 하이알루로닉애씨드, 소듐하이알루로네이트크로스폴리머, 포타슘하이알루로네이트",
+      "complete_ingredient_list": true,
+      "ingredient_locator": "상품정보 제공고시 / 화장품법에 따라 기재해야 하는 모든 성분",
+      "source_url": "https://anua.kr/product/detail.html?cate_no=108&display_group=1&product_no=496",
+      "source_kind": "official_brand_product_page",
+      "collected_on": "2026-10-14",
+      "price_krw": 20000,
+      "list_price_krw": 25000,
+      "price_note": "수집 시점의 표시 판매가. 최종 결제가는 주문 단계 확인; SOLD OUT 표기도 관찰됨.",
+      "ranking": null,
+      "review_count": null,
+      "sales": null,
+      "copies": [
+        {
+          "copy_id": "ANUA_HA_TONER_NAME_20261014",
+          "copy_text": "[NEW/리뉴얼] 어성초 77 히알루론산 수분 진정 토너 250ml",
+          "placement": "상품명",
+          "types": ["성분 소구형", "효능 서술형"],
+          "judge_level": null,
+          "note": "상품명 원문. 77의 의미·시험 조건은 이 필드에서 추정하지 않음."
+        }
+      ]
+    }
+  ]
+}
