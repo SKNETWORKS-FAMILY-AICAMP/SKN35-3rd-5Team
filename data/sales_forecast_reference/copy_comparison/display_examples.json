@@ -1,0 +1,131 @@
+[
+  {
+    "comparison_id": "UPW_51436069220cb800020005bd_5332ba141fae79f09f002c47",
+    "experiment_id": "51436069220cb800020005bd",
+    "image_id": "5332ba141fae79f09f002c47",
+    "created_dates": [
+      "2013-02-07"
+    ],
+    "domain": "US_news_headline; not cosmetics",
+    "evidence_scope": "exploratory_same_test_same_image_click_comparison",
+    "selection": "exactly_two_packages_per_image; >=1000_impressions_each; ratio<=1.2; first_image_id_per_test",
+    "arm_order": "headline_lexicographic; not chosen by outcome",
+    "a": {
+      "copy_text": "Mr. President, I'm Not Mad. I'm Just Disappointed.",
+      "impressions": 5210,
+      "clicks": 103
+    },
+    "b": {
+      "copy_text": "Mr. President, I'm Not Mad. I'm Just Disappointed. No, Wait. I'm A Little Mad Too.",
+      "impressions": 5363,
+      "clicks": 89
+    },
+    "observed": {
+      "ctr_a": 0.019769673704414587,
+      "ctr_b": 0.016595189259742682,
+      "difference_b_minus_a_pp": -0.3174484444671905,
+      "difference_95_interval_pp": [
+        -0.8347246470249453,
+        0.19383173613673893
+      ],
+      "relative_difference": -0.16057343647320999,
+      "interval_includes_zero": true,
+      "interval_method": "Newcombe hybrid score; Wilson 95%; unadjusted exploratory interval"
+    },
+    "price": null,
+    "promotion": null,
+    "audience_details": null,
+    "orders": null,
+    "units_sold": null,
+    "revenue": null,
+    "eligible_for_cosmetics_sales_prediction": false,
+    "judge_level": null,
+    "source_url": "https://osf.io/download/3vqmp/"
+  },
+  {
+    "comparison_id": "UPW_51436074220cb800020007af_5332ba671fae79f09f003458",
+    "experiment_id": "51436074220cb800020007af",
+    "image_id": "5332ba671fae79f09f003458",
+    "created_dates": [
+      "2013-03-05"
+    ],
+    "domain": "US_news_headline; not cosmetics",
+    "evidence_scope": "exploratory_same_test_same_image_click_comparison",
+    "selection": "exactly_two_packages_per_image; >=1000_impressions_each; ratio<=1.2; first_image_id_per_test",
+    "arm_order": "headline_lexicographic; not chosen by outcome",
+    "a": {
+      "copy_text": "Am I The Only One Who Thinks It's Crazy That The U.S. Is About To Sabotage Its Own Economy?",
+      "impressions": 2864,
+      "clicks": 27
+    },
+    "b": {
+      "copy_text": "The Only Thing Out Of Control About Government Spending Is The People Talking About It",
+      "impressions": 2753,
+      "clicks": 27
+    },
+    "observed": {
+      "ctr_a": 0.009427374301675978,
+      "ctr_b": 0.00980748274609517,
+      "difference_b_minus_a_pp": 0.03801084444191912,
+      "difference_95_interval_pp": [
+        -0.48595590880864337,
+        0.5692456520538882
+      ],
+      "relative_difference": 0.04031965128950232,
+      "interval_includes_zero": true,
+      "interval_method": "Newcombe hybrid score; Wilson 95%; unadjusted exploratory interval"
+    },
+    "price": null,
+    "promotion": null,
+    "audience_details": null,
+    "orders": null,
+    "units_sold": null,
+    "revenue": null,
+    "eligible_for_cosmetics_sales_prediction": false,
+    "judge_level": null,
+    "source_url": "https://osf.io/download/3vqmp/"
+  },
+  {
+    "comparison_id": "UPW_51436074220cb800020007b2_5332ba2f1fae79f09f002ecb",
+    "experiment_id": "51436074220cb800020007b2",
+    "image_id": "5332ba2f1fae79f09f002ecb",
+    "created_dates": [
+      "2013-03-06"
+    ],
+    "domain": "US_news_headline; not cosmetics",
+    "evidence_scope": "exploratory_same_test_same_image_click_comparison",
+    "selection": "exactly_two_packages_per_image; >=1000_impressions_each; ratio<=1.2; first_image_id_per_test",
+    "arm_order": "headline_lexicographic; not chosen by outcome",
+    "a": {
+      "copy_text": "I Would Not Want To Hear This Heartbreaking Sound Coming From My Mom",
+      "impressions": 2623,
+      "clicks": 35
+    },
+    "b": {
+      "copy_text": "The Cops Almost Killed This Guy For Drinking At A Bar",
+      "impressions": 2788,
+      "clicks": 39
+    },
+    "observed": {
+      "ctr_a": 0.013343499809378575,
+      "ctr_b": 0.013988522238163558,
+      "difference_b_minus_a_pp": 0.06450224287849834,
+      "difference_95_interval_pp": [
+        -0.5724515953448448,
+        0.6946330324296894
+      ],
+      "relative_difference": 0.048339823734371734,
+      "interval_includes_zero": true,
+      "interval_method": "Newcombe hybrid score; Wilson 95%; unadjusted exploratory interval"
+    },
+    "price": null,
+    "promotion": null,
+    "audience_details": null,
+    "orders": null,
+    "units_sold": null,
+    "revenue": null,
+    "eligible_for_cosmetics_sales_prediction": false,
+    "judge_level": null,
+    "source_url": "https://osf.io/download/3vqmp/"
+  }
+]

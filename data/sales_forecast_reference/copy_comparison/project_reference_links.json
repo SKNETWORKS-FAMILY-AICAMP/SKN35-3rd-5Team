@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "updated_date": "2026-10-14",
+  "product_source": "data/assets/mock_products.json; runtime backend.list_products()",
+  "links": {
+    "PROD_001": {
+      "purpose": "일반 보습 크림의 보습 소구와 보유 실증 비교",
+      "reference_ids": ["MKT_ANUA_PDRN_CREAM", "MKT_KIEHLS_UFC", "MKT_KIEHLS_BARRIER", "MKT_AESTURA_365"],
+      "match_basis": "크림 제형의 시장 표현 참고. 동일 성분·처방·기능성·효능이 확인된 비교가 아님.",
+      "collection_gap": null
+    },
+    "PROD_002": {
+      "purpose": "일반 진정 토너의 소구와 근거 부족 상태 비교",
+      "reference_ids": ["MKT_ROUNDLAB_PDRN_TONER"],
+      "match_basis": "토너 제형만 일치. 시카 성분·진정 효능의 일치나 대체 가능성을 의미하지 않음.",
+      "collection_gap": "시카·진정 소구의 토너 원문과 시험 조건 추가 수집 필요"
+    },
+    "PROD_003": {
+      "purpose": "일반 샴푸의 세정·사용감 소구 비교",
+      "reference_ids": [],
+      "match_basis": "기존 수집 자료에 적합한 일반 샴푸 없음",
+      "collection_gap": "일반 샴푸의 세정·사용감 문구와 가격·구성 수집 필요"
+    },
+    "PROD_004": {
+      "purpose": "탈모 증상 완화 기능성 샴푸의 효능 범위와 실증 비교",
+      "reference_ids": [],
+      "match_basis": "기존 수집 자료에 적합한 기능성 샴푸 없음",
+      "collection_gap": "탈모 증상 완화 기능성 표시·문구·시험 조건·가격 수집 필요"
+    },
+    "PROD_005": {
+      "purpose": "여드름성 피부 완화 기능성 클렌저의 세정 소구 비교",
+      "reference_ids": ["MKT_REJURAN_PH_CLEANSER"],
+      "match_basis": "클렌저 제형만 참고. 외부 사례의 여드름성 피부 완화 기능성은 미확인.",
+      "collection_gap": "동일 기능성 표시가 확인된 클렌저 문구 추가 수집 필요"
+    },
+    "PROD_006": {
+      "purpose": "주름 개선 기능성 세럼의 소구와 만족도 근거 비교",
+      "reference_ids": ["OY_A000000222698", "OY_A000000231293", "OY_A000000265385", "OY_A000000250199", "OY_A000000268161"],
+      "match_basis": "주름·탄력 세럼 시장 후보. 성분·시험·제형이 같지 않으며 일부 기능성 유형은 미확인.",
+      "collection_gap": "외부 세럼의 수치형 문구를 샘플의 만족도 설문으로 입증할 수 없음"
+    }
+  },
+  "evidence_transfer_allowed": false,
+  "market_performance_transfer_allowed": false
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "source_id": "KIS_QOO10_20250915",
+    "url": "https://file.koreainvestment.com/Storage/research/research05/20250915065938043_ko.pdf",
+    "publisher": "한국투자증권",
+    "source_kind": "secondary_research_table",
+    "published_date": "2025-09-15",
+    "locator": "PDF 3페이지 표2, 큐텐 자료 인용",
+    "reuse_note": "보고서 원본 및 표 전체는 재배포하지 않음. 관련 제품의 제한된 수치 사실만 출처와 기록",
+    "accessed_date": "2026-10-14"
+  },
+  {
+    "source_id": "TIKTOK_VISIONARY",
+    "url": "https://ads.tiktok.com/business/en/inspiration/visionary-seed",
+    "publisher": "TikTok for Business",
+    "source_kind": "platform_case_study",
+    "published_date": null,
+    "locator": "The Result; July 2024 Numbuzin",
+    "reuse_note": "원문 복사 대신 성과 수치·조건 요약",
+    "accessed_date": "2026-10-14"
+  },
+  {
+    "source_id": "CRITEO_ALLBEAUTY",
+    "url": "https://www.criteo.com/success-stories/allbeauty/",
+    "publisher": "Criteo",
+    "source_kind": "platform_case_study",
+    "published_date": null,
+    "locator": "Allbeauty 사례 본문과 상단 지표",
+    "reuse_note": "상대 지표; 원시 로그 미공개",
+    "accessed_date": "2026-10-14"
+  },
+  {
+    "source_id": "CRITEO_BIODERMA",
+    "url": "https://www.criteo.com/success-stories/bioderma/",
+    "publisher": "Criteo",
+    "source_kind": "platform_case_study",
+    "published_date": null,
+    "locator": "Bioderma 사례 Results",
+    "reuse_note": "상대 지표; 원시 로그 미공개",
+    "accessed_date": "2026-10-14"
+  },
+  {
+    "source_id": "REDDIT_ULTA",
+    "url": "https://www.business.reddit.com/success-stories/advertisers/ulta-dpa",
+    "publisher": "Reddit for Business",
+    "source_kind": "platform_case_study",
+    "published_date": null,
+    "locator": "Ulta DPA 사례 상단 지표와 광고 예시",
+    "reuse_note": "짧은 광고 문구 1개만 발췌; 문구별 성과는 미공개",
+    "accessed_date": "2026-10-14"
+  },
+  {
+    "source_id": "AMAZON_EOS",
+    "url": "https://advertising.amazon.com/en-us/library/case-studies/tinuiti-skai-eos-category-launch",
+    "publisher": "Amazon Ads; 실적 자료 제공 eos",
+    "source_kind": "platform_case_study",
+    "published_date": null,
+    "locator": "Results; Sources: eos U.S. 2026",
+    "reuse_note": "캠페인 수준의 성과 요약; 원시 측정 데이터 미공개",
+    "accessed_date": "2026-10-14"
+  },
+  {
+    "source_id": "HILLSTROM_2008",
+    "url": "https://blog.minethatdata.com/2008/03/minethatdata-e-mail-analytics-and-data.html",
+    "publisher": "Kevin Hillstrom / MineThatData",
+    "source_kind": "author_published_randomized_dataset",
+    "published_date": "2008-03-20",
+    "locator": "원저자 실험 설명 및 CSV 링크",
+    "reuse_note": "표준 재배포 라이선스 미확인. 원본 CSV는 로컬 raw/에 보관하고 Git 제외",
+    "accessed_date": "2026-10-14"
+  },
+  {
+    "source_id": "CRITEO_UPLIFT",
+    "url": "https://ailab.criteo.com/criteo-uplift-prediction-dataset/",
+    "publisher": "Criteo AI Lab",
+    "source_kind": "author_published_randomized_dataset",
+    "published_date": "2018-05-31",
+    "locator": "ERRATUM 이후 unbiased release",
+    "reuse_note": "약297MB 압축본은 이번에 다운로드하지 않음. 익명 피처·광고 처리 실험으로 문구별 매출 모델 아님",
+    "accessed_date": "2026-10-14"
+  }
+]

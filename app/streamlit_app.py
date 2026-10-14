@@ -43,6 +43,7 @@ PAGES = {
     "generate": st.Page(str(APP_DIR / "views" / "generate.py"), title="광고문 생성", icon=":material/edit_note:"),
     "bulk": st.Page(str(APP_DIR / "views" / "bulk.py"), title="상세페이지 검토", icon=":material/article:"),
     "library": st.Page(str(APP_DIR / "views" / "library.py"), title="규정 · 가이드라인", icon=":material/menu_book:"),
+    "market": st.Page(str(APP_DIR / "views" / "market.py"), title="시장 근거 · 문구 비교", icon=":material/analytics:"),
 }
 st.session_state["bw_pages"] = PAGES
 st.session_state["bw_health"] = _health()

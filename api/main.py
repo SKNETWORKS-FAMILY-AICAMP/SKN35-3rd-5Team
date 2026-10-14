@@ -2,13 +2,17 @@
 [api/main.py]
 FastAPI 애플리케이션 진입점 및 수명주기(Lifespan) 관리.
 """
-from contextlib import asynccontextmanager
 from collections.abc import Callable
+from contextlib import asynccontextmanager
 from typing import Any
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from cosmetic_agent.common.logger import get_logger
+from fastapi.responses import JSONResponse
+from qdrant_client.http.exceptions import ResponseHandlingException
+
 from api.routes import generate, health, review, search
+from cosmetic_agent.common.logger import get_logger
 
 logger = get_logger("API")
 
@@ -42,6 +46,18 @@ def create_app(service_factory: Callable[[], Any] = build_review_service) -> Fas
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.exception_handler(ResponseHandlingException)
+    async def search_database_unavailable(request, exc):
+        # 연결 오류의 원문에는 서버 주소 등이 포함될 수 있으므로 전달하지 않는다.
+        logger.warning("Qdrant 검색 DB 연결 실패: %s", type(exc).__name__)
+        return JSONResponse(
+            status_code=503,
+            content={
+                "code": "SEARCH_DATABASE_UNAVAILABLE",
+                "detail": "검색 DB(Qdrant)에 연결하지 못했습니다. 팀 공유 DB 연결 설정과 서버 실행 상태를 확인해 주세요.",
+            },
+        )
 
     app.include_router(health.router)
     app.include_router(review.router)
