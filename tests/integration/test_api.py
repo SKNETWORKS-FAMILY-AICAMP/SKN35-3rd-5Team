@@ -1,9 +1,17 @@
 """외부 모델/검색 인프라 없이 검증하는 API 계약 테스트."""
 from uuid import uuid4
+
 import pytest
 from fastapi.testclient import TestClient
+
 from api.main import create_app
-from cosmetic_agent.domain.schemas import ExecutionTiming, ReviewResponse, ReviewResult
+from cosmetic_agent.domain.schemas import (
+    ExecutionTiming,
+    GenerateResponse,
+    GeneratedCandidate,
+    ReviewResponse,
+    ReviewResult,
+)
 
 
 class StubReviewService:
@@ -15,6 +23,19 @@ class StubReviewService:
         return ReviewResponse(
             request_id=str(uuid4()), input_text=text,
             result=ReviewResult(status="판단보류", review_notes="API 테스트용 응답"),
+            timing=ExecutionTiming(),
+        )
+
+    def generate_copy(self, request):
+        self.calls.append(("generate", request))
+        return GenerateResponse(
+            request_id=str(uuid4()),
+            status="생성완료",
+            product_id=request.product.product_id,
+            candidates=[GeneratedCandidate(
+                text="매일 탄탄하게 가꾸는 테스트 수분 크림",
+                tier="safe",
+            )],
             timing=ExecutionTiming(),
         )
 
@@ -57,6 +78,25 @@ def test_bulk_preserves_decimal_and_order(api_client, sample_product):
     assert all(product == sample_product for _, product in service.calls)
 
 
+def test_generate_passes_selected_product_and_options(api_client, sample_product):
+    client, service = api_client
+    response = client.post("/generate", json={
+        "instruction": "SNS 광고 문구를 만들어줘",
+        "channel": "SNS",
+        "tone": "간결한",
+        "length": "한 줄",
+        "keywords": ["수분"],
+        "product": sample_product.model_dump(),
+    })
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "생성완료"
+    _, request = service.calls[-1]
+    assert request.product == sample_product
+    assert request.channel == "SNS"
+    assert request.keywords == ["수분"]
+
+
 @pytest.mark.parametrize("path,field,value", [
     ("/review", "copy_text", " \n\t"),
     ("/review", "copy_text", "가" * 5001),
@@ -89,4 +129,32 @@ def test_openapi_contract(api_client):
     schema = client.get("/openapi.json").json()
     assert "/review" in schema["paths"]
     assert "/review/bulk" in schema["paths"]
+    assert "/generate" in schema["paths"]
     assert schema["components"]["schemas"]["ProductCard"]["properties"]["category"]["enum"] == ["일반", "기능성"]
+
+
+@pytest.mark.parametrize("endpoint", ["search", "review", "bulk"])
+def test_qdrant_transport_failure_is_actionable_503(endpoint, sample_product):
+    from types import SimpleNamespace
+
+    from qdrant_client.http.exceptions import ResponseHandlingException
+
+    def unavailable(*args, **kwargs):
+        raise ResponseHandlingException(ConnectionError("private-host-and-secret"))
+
+    service = SimpleNamespace(
+        review_single=unavailable,
+        rewriter=SimpleNamespace(rewrite=lambda query: query),
+        hybrid_retriever=SimpleNamespace(retrieve=unavailable),
+    )
+    with TestClient(create_app(lambda: service)) as client:
+        if endpoint == "search":
+            response = client.get("/search", params={"q": "주름"})
+        else:
+            field = "full_text" if endpoint == "bulk" else "copy_text"
+            path = "/review/bulk" if endpoint == "bulk" else "/review"
+            response = client.post(path, json={field: "보습 케어", "product": sample_product.model_dump()})
+    assert response.status_code == 503
+    assert response.json()["code"] == "SEARCH_DATABASE_UNAVAILABLE"
+    assert "Qdrant" in response.json()["detail"]
+    assert "private-host-and-secret" not in response.text

@@ -1,0 +1,50 @@
+[
+  {
+    "case_id": "CMP_01",
+    "product_id": "OY_A000000265385",
+    "identity_basis": "동일 브랜드·제품명·레티날0.2% 본품;공통 제품명 기준 매칭.전성분의 플랫폼 간 완전 일치 미확인",
+    "collected_date": "2026-10-13",
+    "oliveyoung": {
+      "url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000265385",
+      "price_krw": 25000,
+      "discount_percent_displayed": 21,
+      "exposure": "NEW;0.2퍼센트;앰버서더 행사 이미지",
+      "bundle": "30ml 본품;증정은 별도 조건"
+    },
+    "musinsa": {
+      "url": "https://www.musinsa.com/products/7073570",
+      "price_krw": 28900,
+      "discount_percent_displayed": 10,
+      "exposure": "0.2%;무뷰페;무배당발;첫 구매 쿠폰 별도",
+      "bundle": "상품명에 추가 구성 없음",
+      "evidence_file": "evidence/ongredients_musinsa_top.png"
+    },
+    "observation": "브랜드·본품명이 같은 상품도 플랫폼 행사·배송·유명인 표현의 앞세우는 방식과 표시가가 다름",
+    "limitation": "실험이 아니며 가격·행사·이용자·노출량이 동시 변화.문구 단독 효과 추정 불가"
+  },
+  {
+    "case_id": "CMP_02",
+    "product_id": "OY_A000000250199",
+    "identity_basis": "동일 셀리맥스 레티날 샷 타이트닝 부스터15ml 본품;플랫폼별 증정 구성은 다름",
+    "collected_date": "2026-10-13",
+    "oliveyoung": {
+      "url": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000250199",
+      "price_krw": 23100,
+      "discount_percent_displayed": 23,
+      "exposure": "단독기획;모공탄력",
+      "bundle": "15ml+3ml"
+    },
+    "musinsa": {
+      "url": "https://www.musinsa.com/products/5142164",
+      "price_krw": 29700,
+      "discount_percent_displayed": 1,
+      "exposure": "모공잡티세럼팩1매 증정",
+      "bundle": "15ml+팩1매",
+      "rating": 4.7,
+      "review_count": 208,
+      "evidence_file": "evidence/celimax_musinsa_top.png"
+    },
+    "observation": "올리브영은 효능과 추가 용량을,무신사는 팩 증정을 상품명에서 노출",
+    "limitation": "본품 기준 비교이며 판매 구성 전체가 고정된 비교가 아님.가격·문구의 매출 효과 추정 불가"
+  }
+]

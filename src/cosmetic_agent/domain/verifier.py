@@ -21,7 +21,9 @@ from typing import Any
 from ..common.config import settings
 
 # 숫자 + 단위. 단위 없는 숫자(제품명의 숫자 등)는 효능 주장으로 보지 않는다.
-NUMBER_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(%|퍼센트|주|일|시간|개월|배|명|세|살|년|분|회)")
+NUMBER_RE = re.compile(
+    r"(\d+(?:\.\d+)?)\s*(%|퍼센트|주|일(?!반)|시간|개월|배(?!합|송)|명(?!품)|세(?!럼|트|정|안|대)|살(?!균)|년|분(?![말석비])|회(?!사))"
+)
 UNIT_ALIASES = {"퍼센트": "%", "살": "세"}
 
 

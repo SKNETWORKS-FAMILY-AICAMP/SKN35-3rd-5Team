@@ -1,7 +1,7 @@
 # FastAPI 사용 방법
 
-API는 입력 검증 → 문장 분리 → 기존 `ReviewService.review_single()` 호출 → 응답 검증을 담당합니다.
-판정 모델, RAG, 제안 및 재검사는 기존 서비스/워크플로에서 구현합니다.
+API는 광고 문구 검토와 신규 광고 문구 생성을 제공합니다.
+판정 모델, RAG, 제안·생성 및 재검사는 서비스와 LangGraph 워크플로에서 구현합니다.
 
 ## 실행
 
@@ -20,6 +20,8 @@ uv run uvicorn api.main:app --reload --port 8000
 - `GET /health`: 서버 생존 확인 (모델/검색기 가용성 검사는 아님).
 - `POST /review`: 단일 문구. `copy_text` 최대 5,000자, 기존 화면과 응답 호환.
 - `POST /review/bulk`: 문장별 검토. `full_text` 최대 50,000자, 100문장.
+- `POST /generate`: 제품·선택한 실증자료·채널·톤을 기준으로 검증된 신규 광고 문구 생성.
+- `GET /search`: Qdrant Cloud + BM25 규정 검색.
 
 `/review/bulk` 요청 예시:
 
@@ -62,6 +64,9 @@ uv run uvicorn api.main:app --reload --port 8000
 입력 누락, 공백 문구, 잘못된 제품 유형, 길이/문장 수 초과는 HTTP 422입니다.
 일괄 검토 중 서비스 오류가 발생하면 요청 전체가 실패하고 부분 결과를 반환하지 않습니다.
 
+`/generate`는 `생성완료` 또는 `생성보류`와 함께 검증을 통과한 후보만 반환합니다.
+후보에는 강도(`strong`, `balanced`, `safe`), 사용한 실증자료, 근거 ID와 검증 결과가 포함됩니다.
+
 ## 테스트 및 현재 범위
 
 ```powershell
@@ -70,5 +75,4 @@ uv run pytest tests/integration/test_api.py -q
 
 API 테스트는 외부 인프라 없이 테스트 서비스를 주입합니다.
 테스트 응답은 연결 확인용 `판단보류`이며 실제 법적 판정이 아닙니다.
-기존 서비스에는 근거 조항 복원 및 제안 생성 TODO가 남아 있습니다.
-따라서 이 API 구현만으로 전체 판정 기능이 완성되지는 않습니다.
+외부 인프라를 사용하는 실제 생성 검증에는 OpenAI 및 Qdrant Cloud 환경변수가 필요합니다.

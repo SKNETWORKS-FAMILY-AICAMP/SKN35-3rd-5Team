@@ -1,0 +1,5 @@
+[
+  {"platform_id":"oliveyoung","name":"올리브영","homepage":"https://www.oliveyoung.co.kr/","market":"KR","source_ids":["SRC_OY_ANUA","SRC_OY_AESTURA","SRC_OY_MEDICUBE_MASK","SRC_OY_REJURAN_AMP","SRC_CJ_OY_2025"],"coverage":"상품 페이지·브랜드관·연간 브랜드 실적 구간","missing":"광고 소재별 실적·구매 전환·타깃·SKU별 정확한 매출은 미확보"},
+  {"platform_id":"musinsa_beauty","name":"무신사 뷰티","homepage":"https://www.musinsa.com/","market":"KR","source_ids":["SRC_MUSA_AESTURA","SRC_MUSA_DALBA","SRC_MUSA_ROUNDLAB"],"coverage":"상품 페이지·표시 가격·월간 순위 배지","missing":"순위 계산식·브랜드별 정확한 매출·광고별 성과는 미확보"},
+  {"platform_id":"beauty_kurly","name":"뷰티컬리","homepage":"https://www.kurly.com/","market":"KR","source_ids":["SRC_KURLY_AESTURA_2026","SRC_KURLY_DALBA_2024","SRC_KURLY_AP_MOU"],"coverage":"공식 행사 발표의 기획 구성·제품군 판매량·회사 협력 관계","missing":"이번 수집은 과거 공식 행사 자료 중심. 국내 현재 상품 상세 페이지/가격은 미확보; Kurly USA와 혼합하지 않음"}
+]

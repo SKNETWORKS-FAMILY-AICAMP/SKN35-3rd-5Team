@@ -47,6 +47,8 @@ class Product(TypedDict):
     category: Literal["일반", "기능성"]
     functional_type: str | None
     owned_evidence: list[Evidence]   # 심사 요청에는 사이드바에서 체크한 실증만 담는다
+    ingredients: NotRequired[list[str]]
+    ingredient_source: NotRequired[str]
 
 
 # ── 심사 결과 (= schemas.Citation / ReviewResult / ExecutionTiming) ──────
@@ -201,6 +203,27 @@ class ReviewResponse(TypedDict):
     timing: Timing
     ui: NotRequired[UiExtras]
     mock: NotRequired[bool]     # Mock 응답이면 True → 화면이 "데모 데이터" 를 표시
+
+
+class GeneratedCandidate(TypedDict):
+    text: str
+    tier: Literal["strong", "balanced", "safe"]
+    rationale: str
+    used_evidence: list[str]
+    cited_ids: list[str]
+    verified: bool
+    verify_note: str
+
+
+class GenerateResponse(TypedDict):
+    request_id: str
+    status: Literal["생성완료", "생성보류"]
+    product_id: str
+    candidates: list[GeneratedCandidate]
+    citations: list[Citation]
+    warnings: list[str]
+    timing: Timing
+    mock: NotRequired[bool]
 
 
 # ── 규정 검색 (= api/routes/search.py 응답 한 건) ──────────────────────

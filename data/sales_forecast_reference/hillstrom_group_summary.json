@@ -1,0 +1,38 @@
+{
+  "record_kind": "observed_external_experiment_aggregate",
+  "domain": "non_cosmetics_retail",
+  "measurement_period": "이메일 발송 후2주",
+  "groups": [
+    {
+      "arm": "Mens E-Mail",
+      "customers": 21307,
+      "buyers": 267,
+      "buyer_rate": 0.01253109306800582,
+      "spend_total_source_dollars": 30311.69,
+      "mean_spend_per_customer_source_dollars": 1.4226165110057727,
+      "units_sold": null,
+      "currency_note": "원저자 표기 dollars;KRW 환산하지 않음"
+    },
+    {
+      "arm": "No E-Mail",
+      "customers": 21306,
+      "buyers": 122,
+      "buyer_rate": 0.005726086548390125,
+      "spend_total_source_dollars": 13908.33,
+      "mean_spend_per_customer_source_dollars": 0.6527893551112363,
+      "units_sold": null,
+      "currency_note": "원저자 표기 dollars;KRW 환산하지 않음"
+    },
+    {
+      "arm": "Womens E-Mail",
+      "customers": 21387,
+      "buyers": 189,
+      "buyer_rate": 0.008837144059475383,
+      "spend_total_source_dollars": 23038.11,
+      "mean_spend_per_customer_source_dollars": 1.0772015710478329,
+      "units_sold": null,
+      "currency_note": "원저자 표기 dollars;KRW 환산하지 않음"
+    }
+  ],
+  "use": "방법 검증용;화장품 문구 성과 예측으로 사용 금지"
+}

@@ -1,0 +1,30 @@
+{
+  "dataset_id": "hillstrom_2008",
+  "accessed_date": "2026-10-14",
+  "source_page": "https://blog.minethatdata.com/2008/03/minethatdata-e-mail-analytics-and-data.html",
+  "status": "downloaded_and_validated",
+  "license": "원저자 공개 연구 과제;표준 재배포 라이선스 미확인",
+  "allowed_use": "local_method_validation_only;not_cosmetics_forecast",
+  "author_link_url": "http://www.minethatdata.com/Kevin_Hillstrom_MineThatData_E-MailAnalytics_DataMiningChallenge_2008.03.20.csv",
+  "download_url": "http://www.minethatdata.com/Kevin_Hillstrom_MineThatData_E-MailAnalytics_DataMiningChallenge_2008.03.20.csv",
+  "rows": 64000,
+  "bytes": 3964977,
+  "sha256": "0e5893329d8b93cefecc571777672028290ab69865718020c78c7284f291aece",
+  "columns": [
+    "channel",
+    "conversion",
+    "history",
+    "history_segment",
+    "mens",
+    "newbie",
+    "recency",
+    "segment",
+    "spend",
+    "visit",
+    "womens",
+    "zip_code"
+  ],
+  "local_file": "raw/hillstrom.csv",
+  "git_ignored": true,
+  "transport": "원저자 공개 HTTP 링크;키·개인정보 전송 없음;인증서 검증 비활성화 없음"
+}

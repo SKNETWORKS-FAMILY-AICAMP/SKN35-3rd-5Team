@@ -1,0 +1,22 @@
+{
+  "collected_date": "2026-10-14",
+  "download_url": "https://osf.io/download/3vqmp/",
+  "sha256": "8368313b060f4015a0c6fb34e6d788163cee29554144aba9390b14922eb9d8ce",
+  "raw_rows": 22666,
+  "raw_bytes": 14260949,
+  "license": "CC BY 4.0; attribute Matias, Munger, Le Quere, Ebersole (2021)",
+  "doi": "https://doi.org/10.1038/s41597-021-00934-7",
+  "documentation_url": "https://upworthy.natematias.com/about-the-archive.html",
+  "quality_update_url": "https://upworthy.natematias.com/2024-06-upworthy-archive-update.html",
+  "raw_problem_column_present": false,
+  "risk_exclusion": "2013-06-25 through 2014-01-10 inclusive; entire tests",
+  "counts": {
+    "tests_excluded_randomization_risk_period": 1050,
+    "input_tests": 4873,
+    "eligible_comparisons": 148
+  },
+  "holdout_accessed": false,
+  "confirmatory_accessed": false,
+  "display_selection": "first 3 eligible IDs; not strongest effects",
+  "use": "method demonstration, not cosmetics forecast calibration"
+}

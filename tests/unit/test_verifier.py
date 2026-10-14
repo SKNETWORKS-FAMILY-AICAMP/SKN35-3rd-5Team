@@ -142,3 +142,23 @@ def test_reversed_word_order_and_sensitive_skin_claims_need_evidence(verifier):
     assert "실증필요" in codes(verifier, "민감한 피부도 안심하고 쓰는 크림")
     patch = {"test_type": "인체적용시험", "item": "피부 자극 (첩포 시험)", "value": "무자극 판정"}
     assert "실증필요" not in codes(verifier, "민감한 피부도 안심하고 쓰는 크림", [patch])
+
+
+def test_number_units_do_not_swallow_following_words(verifier):
+    # '100 세럼'의 '세'는 나이 단위가 아니고, '4주차'는 4주로 본다
+    assert "숫자날조" not in codes(verifier, "히알루론산 캡슐 100 세럼")
+    weeks = {"test_type": "인체적용시험", "item": "보습", "value": "4주 사용 후 42% 개선"}
+    assert not codes(verifier, "4주차 보습 42% 개선 (인체적용시험)", [weeks])
+
+
+def test_ranking_badge_is_exclusive_claim(verifier):
+    assert "금지표현" in codes(verifier, "판매랭킹 TOP.1")
+
+
+def test_functional_product_cannot_promise_removal(verifier):
+    # 미백 기능성은 '미백에 도움'까지. 기미가 사라진다는 소멸·즉효 표현은 심사 범위 밖
+    kwargs = {"product_category": "기능성", "functional_type": "피부 미백"}
+    assert "금지표현" in codes(verifier, "바르기만 해도 기미가 싹 사라지는 미백 앰플", **kwargs)
+    assert not codes(verifier, "피부의 미백에 도움을 주는 앰플", **kwargs)
+    assert "금지표현" in codes(verifier, "깊은 주름이 사라지는 세럼",
+                              product_category="기능성", functional_type="주름 개선")

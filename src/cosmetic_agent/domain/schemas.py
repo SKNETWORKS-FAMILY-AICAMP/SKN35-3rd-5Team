@@ -22,7 +22,10 @@ class ProductCard(BaseModel):
     name: RequiredText
     category: Literal["일반", "기능성"]
     functional_type: Optional[str] = None
+    key_ingredients: list[str] = Field(default_factory=list, description="주요 성분 (예: 나이아신아마이드, 판테놀)")
     owned_evidence: list[OwnedEvidence] = Field(default_factory=list)
+    ingredients: list[str] = Field(default_factory=list, description="제공된 전성분명. 효능 시험 근거와 구분")
+    ingredient_source: Optional[str] = None
 
 
 class Citation(BaseModel):
@@ -91,3 +94,43 @@ class ReviewResponse(BaseModel):
     input_text: str
     result: ReviewResult
     timing: ExecutionTiming
+    # 문구 제안 후보 (화면의 '근거 최대 · 균형 · 가장 안전' 탭). result.suggestion 은 그중 검증을 통과한 것.
+    candidates: list[str] = Field(default_factory=list, description="강한 순서의 제안 후보")
+    rejected_notes: list[str] = Field(default_factory=list, description="검증에서 탈락한 후보의 사유 (후보 순서)")
+    used_evidence: list[str] = Field(default_factory=list, description="후보에 사용한 보유 근거")
+    # 후보 비교표: text, tier, chosen, verified, verify_note, removed_risky, kept_risky,
+    # evidence_numbers, changes(원문 대비 변경점), hypothesis(A/B 가설), target_metric
+    candidate_details: list[dict] = Field(default_factory=list, description="후보별 검증 결과·변경점·A/B 가설")
+    # A/B 실험 초안: primary_metric, control(가장 안전 후보), variants(가설 포함), excluded, note
+    experiment: dict = Field(default_factory=dict, description="A/B 실험 초안 (검증 통과 후보만)")
+
+
+class GenerateRequest(BaseModel):
+    """검토 기준을 사용한 광고 문구 생성 요청."""
+    instruction: RequiredText = Field(max_length=2000, description="생성 목적과 요청사항")
+    product: ProductCard
+    channel: Literal["상세페이지", "SNS", "배너", "검색광고", "라이브커머스"] = "상세페이지"
+    tone: RequiredText = "고급스러운"
+    length: Literal["한 줄", "짧은 문단", "상세 설명"] = "한 줄"
+    keywords: list[str] = Field(default_factory=list, max_length=10)
+
+
+class GeneratedCandidate(BaseModel):
+    text: RequiredText
+    tier: Literal["strong", "balanced", "safe"]
+    rationale: str = ""
+    used_evidence: list[str] = Field(default_factory=list)
+    cited_ids: list[str] = Field(default_factory=list)
+    verified: bool = True
+    verify_note: str = "검증 통과"
+
+
+class GenerateResponse(BaseModel):
+    request_id: str
+    status: Literal["생성완료", "생성보류"]
+    product_id: str
+    candidates: list[GeneratedCandidate] = Field(default_factory=list)
+    citations: list[Citation] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    timing: ExecutionTiming
+    mock: bool = False

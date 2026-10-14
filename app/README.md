@@ -38,9 +38,12 @@ API 모드: `uv run uvicorn api.main:app --port 8000` 을 띄운 뒤 `UI_DATA_MO
 
 | 화면 | 파일 | 내용 |
 |---|---|---|
-| 검토 대화 (첫 화면) | `views/review.py` | 질문 → AI 답변(판정 · 검토한 문구 · 문제 표현 · 수정 제안 · 다른 표현 · 출처), 오른쪽 근거 · 원문 문서 · 검토 과정 |
+| 홈 (첫 화면, `/`) | `views/home.py` | 서비스 소개 — 문제 · 검토 방식 · 기능 · 근거 자료. 「시작하기」로 검토 대화에 들어간다. 사이드바 없음 |
+| 검토 대화 (`/review`) | `views/review.py` | 질문 → AI 답변(판정 · 검토한 문구 · 문제 표현 · 수정 제안 · 다른 표현 · 출처), 오른쪽 근거 · 원문 문서 · 검토 과정 |
+| 광고문 생성 | `views/generate.py` | 현재 검토 기준으로 신규 문구 3개 생성 · 역검증 · 근거 확인 · 다시 검토 |
 | 상세페이지 검토 | `views/bulk.py` | 긴 글을 문장 단위로 검토, 문장별 결과 · 교정본 복사/내려받기 |
 | 규정 · 가이드라인 | `views/library.py` | 조항 검색(하이브리드 검색 결과) · 관리지침 금지 표현 · 식약처 적발 사례 |
+| 시장 근거 · 문구 비교 | `views/market.py` | 성분 기반 참고 사례 · 성과 입력 시나리오 · 공개 A/B 비교 |
 
 - 답변의 `[n]` 번호 = 오른쪽 근거 번호. 답이 어떤 조항에서 나왔는지 바로 찾게 했다.
 - **프로젝트**(검토 기준 = 제품 · 보유 실증 자료)는 왼쪽에서 바꾼다. 실증 자료를 해제하면 "검토 기준이 바뀌었습니다" 안내가 뜨고,
@@ -52,10 +55,12 @@ API 모드: `uv run uvicorn api.main:app --port 8000` 을 띄운 뒤 `UI_DATA_MO
 ```
 app/
   streamlit_app.py        진입 파일 (경로 처리 · 페이지 설정 · CSS 주입 · 사이드바 · 내비게이션)
-  views/                  화면 3개 (review · bulk · library) — 레이아웃과 위젯만, HTML 은 components 가 만든다
+  views/                  화면 5개 (home · review · generate · bulk · library) — 레이아웃과 위젯만, HTML 은 components 가 만든다
   components/
     styles/base.css       디자인 토큰(:root) + 공통 컴포넌트 CSS — 색·글자·반경은 여기서만 바꾼다
     styles/pages.css      상세페이지 · 라이브러리 전용 CSS
+    styles/home.css       홈 전용 CSS (명조 제목 · 격자 · 움직임)
+    landing.py            홈 섹션 (데이터 → HTML 순수 함수) + 움직임 스크립트. 예시는 Mock 엔진 결과, 숫자는 data/ 실측
     cards.py              가운데 답변 블록 (데이터 → HTML 순수 함수)
     panels.py             오른쪽 근거 · RAG 패널 (데이터 → HTML 순수 함수)
     suggest.py            최신 답변의 수정 제안 — 후보 고르기(근거 최대 · 균형 · 가장 안전) · 복사 · 이 문구로 다시 검토
@@ -72,7 +77,7 @@ app/
     mock.py               데모용 Mock 판정 엔진 (응답에 mock=True)
     data_sources.py       data/ 원문(법령 XML · 관리지침 · 적발 사례 · 규칙 자산) 읽기
     contract.py           화면이 받는 데이터 모양(TypedDict)과 예시 응답
-  static/                 글꼴(Pretendard · IBM Plex Mono, OFL) · 로고 · 캐릭터(rabbit-*.webp)
+  static/                 글꼴(Pretendard · IBM Plex Mono · 홈용 Inter · Noto Sans KR, OFL) · 로고 · 캐릭터(rabbit-*.webp) · 홈의 검토 화면 캡처(landing/)
 ```
 
 ## 디자인 원칙
@@ -90,8 +95,13 @@ COOA 의 도메인 구조(위험도 · 권장 문구 · RA 검토 권고), 팀 �
 - **움직임**: 뜻이 있는 것만 — 새 답변이 처음 도착할 때 한 번(판정 → 검토한 문구에 밑줄이 그어짐 → 문제 표현 → 수정 제안 → 출처,
   오른쪽은 표현 단계 막대 → 근거 조항), 강도를 바꾼 직후 문구 교체, 근거 번호를 누르면 그 조항에 형광펜.
   다시 그릴 때는 반복하지 않고(`is-arrive` 는 처음 한 번만 붙는다), 시스템 "동작 줄이기"면 전부 멈춘다. 가짜 진행률 · 가짜 타이핑은 없다.
+- **홈**: 색 · 반경 · 선은 위와 같고, 글꼴은 영문 Inter + 한글 Noto Sans KR(제목 800 · 줄간격 1.1 · 자간 -0.02em).
+  한글은 KS X 1001 2,350자 subset(가변 400–800, 307KB), Inter 는 영문만(70KB). 팀 캐릭터가 히어로 예시 카드 뒤에서 말풍선으로 단계를 말한다.
+  격자는 최대 1200px · 간격 24px, 같은 줄의 칸은 높이를 맞추고 칸 안 그림 영역은 높이를 고정한다(기능 카드는 subgrid).
+  움직임은 교정 동작(밑줄 → 판정 → 근거 → 제안 → 역검증, 예시 3개를 돌아가며) · 적발 발표 띠 · 화면에 들어올 때 한 번 올라오기 ·
+  숫자 세기 · 실증을 켜고 끄면 제안 단계가 바뀌는 반복. CSS 기본값이 최종 상태라 스크립트가 없거나 "동작 줄이기"여도 내용은 다 보인다.
 - Streamlit 내부 구조에 기대는 CSS 는 `data-testid` 두 개(메인 여백 · 헤더)와 키 컨테이너 안의 위젯 라벨 숨김뿐이고,
-  나머지는 `st.container(key=…)` 가 붙이는 `.st-key-*` 클래스로만 꾸민다.
+  나머지는 `st.container(key=…)` 가 붙이는 `.st-key-*` 클래스로만 꾸민다. 홈만 예외로 사이드바 숨김 · 상단 바 고정에 몇 개 더 쓴다(`home.css` 위쪽).
 
 ## 팀원 연결 지점
 
@@ -101,6 +111,7 @@ COOA 의 도메인 구조(위험도 · 권장 문구 · RA 검토 권고), 팀 �
 |---|---|---|
 | `review_events(copy_text, product)` | `POST /review/stream` (있으면) → 없으면 `POST /review` | 검토 진행 이벤트 + 결과. 아래 「진행 이벤트」 |
 | `review_copy(copy_text, product)` | `POST /review` | `ReviewResponse` 그대로 |
+| `generate_copy(instruction, product, ...)` | `POST /generate` | 검토 기준 기반 신규 문구 생성 및 역검증 |
 | `review_page(full_text, product)` | `POST /review/bulk` | 문장 분할은 `api/text.py` 와 같은 규칙 |
 | `search_rules(query, scope)` | `GET /search` | `[{content, metadata}]` |
 | `health()` | `GET /health` | 연결 상태 표시 |
