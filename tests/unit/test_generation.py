@@ -103,7 +103,11 @@ def test_generation_rewrites_failed_review_with_bounded_retries():
     )
 
     calls = []
-    generator = FakeGenerator()
+    class RoutineGenerator:
+        def generate(self, **kwargs):
+            return [{"text": "외출 준비의 선케어 루틴", "tier": "safe"}]
+
+    generator = RoutineGenerator()
 
     def review(text, product):
         calls.append(text)

@@ -12,15 +12,18 @@ COPY data/01_raw ./data/01_raw
 COPY data/market_reference ./data/market_reference
 COPY data/sales_forecast_reference ./data/sales_forecast_reference
 COPY data/top_product_copies ./data/top_product_copies
+COPY data/ingredient_knowledge ./data/ingredient_knowledge
+COPY data/creative_reference ./data/creative_reference
 COPY data/02_processed/chunks.jsonl ./data/02_processed/chunks.jsonl
 COPY indexing/05_build_indexes.py ./indexing/05_build_indexes.py
+COPY indexing/metadata_enrichment.py ./indexing/metadata_enrichment.py
 COPY api ./api
 COPY app ./app
 COPY .streamlit/config.toml ./.streamlit/config.toml
 COPY scripts/start_render.py ./scripts/start_render.py
 
 # Generate only the local keyword index; no API keys or embedding calls at build time.
-RUN python -c "import runpy; m = runpy.run_path('indexing/05_build_indexes.py'); m['build_bm25_index'](m['load_chunks'](), m['DEFAULT_BM25_PATH'])"
+RUN PYTHONPATH=/app/indexing python -c "import runpy; m = runpy.run_path('indexing/05_build_indexes.py'); m['build_bm25_index'](m['load_chunks'](), m['DEFAULT_BM25_PATH'])"
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/src:/app \
