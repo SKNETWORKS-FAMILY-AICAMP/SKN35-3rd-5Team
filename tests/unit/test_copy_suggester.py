@@ -64,3 +64,35 @@ def test_node_passes_verify_note_only_on_retry():
     retry_state = {**state, "suggestion": "이전 문구", "verify_passed": False, "verify_note": "검증 실패: X"}
     suggest_copy_node(retry_state, suggester)
     assert "검증 실패: X" in llm.messages[1][1]
+
+
+def test_node_returns_candidates_for_ui_tabs():
+    llm = FakeLLM(SuggestionOutput(candidates=["8주 사용 후 수분량 35% 증가 (인체적용시험)", "촉촉한 보습 크림", "산뜻한 크림"],
+                                   used_evidence=["보습 인체적용시험"]))
+    state = {"copy_text": "원문", "product": PRODUCT, "level": 2, "violation_type": "의약품오인"}
+
+    out = suggest_copy_node(state, CopySuggester(llm=llm))
+
+    assert out["suggestion"] == "8주 사용 후 수분량 35% 증가 (인체적용시험)"
+    assert len(out["candidates"]) == 3
+    assert out["used_evidence"] == ["보습 인체적용시험"]
+
+
+def test_review_response_feeds_streamlit_variants():
+    """세희님 화면(app/services/backend._variants_from)이 실제 응답으로 탭 3개를 만든다."""
+    from app.services.backend import _variants_from
+    from cosmetic_agent.domain.schemas import ExecutionTiming, ReviewResponse, ReviewResult
+
+    response = ReviewResponse(
+        request_id="REQ_TEST", input_text="원문",
+        result=ReviewResult(status="판정", level=0, suggestion="균형 문구"),
+        timing=ExecutionTiming(),
+        candidates=["가장 센 문구", "균형 문구", "안전 문구"],
+        rejected_notes=["검증 실패: 숫자날조"],
+        used_evidence=["보습 인체적용시험"],
+    ).model_dump()
+
+    variants = _variants_from(response)
+    assert [v["tier"] for v in variants] == ["strong", "balanced", "safe"]
+    assert [v["chosen"] for v in variants] == [False, True, False]
+    assert variants[0]["verified"] is False and "숫자날조" in variants[0]["note"]

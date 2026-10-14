@@ -91,3 +91,7 @@ class ReviewResponse(BaseModel):
     input_text: str
     result: ReviewResult
     timing: ExecutionTiming
+    # 문구 제안 후보 (화면의 '근거 최대 · 균형 · 가장 안전' 탭). result.suggestion 은 그중 검증을 통과한 것.
+    candidates: list[str] = Field(default_factory=list, description="강한 순서의 제안 후보")
+    rejected_notes: list[str] = Field(default_factory=list, description="검증에서 탈락한 후보의 사유 (후보 순서)")
+    used_evidence: list[str] = Field(default_factory=list, description="후보에 사용한 보유 근거")
