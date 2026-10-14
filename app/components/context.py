@@ -102,6 +102,8 @@ def render_project(key: str = "proj") -> None:
         states = _evidence_state(product)
         evs = product.get("owned_evidence", [])
         html(f'<div class="bw-proj-meta">{esc(category_label(product))} · 보유 실증 {sum(states)}/{len(evs)}</div>')
+        if any(ev.get("source_kind") == "public_brand_summary" for ev in evs):
+            st.caption("공식몰 공개 시험 요약 · 원보고서 미확보 · 시연용 등록 근거")
         if not evs:
             html('<div class="bw-proj-empty">등록된 실증 자료가 없습니다. 근거가 필요 없는 낮은 단계 표현까지만 제안합니다.</div>')
         for i, ev in enumerate(evs):
@@ -115,6 +117,11 @@ def render_project(key: str = "proj") -> None:
             else:
                 note = '<em class="is-off">해제됨 — 이 자료가 필요한 표현은 제안하지 않습니다</em>'
             html(f'<div class="bw-ev"><span>{esc(detail)}</span>{note}</div>')
+            if ev.get("source_kind") == "public_brand_summary":
+                with st.expander("공개 요약 출처·시험 조건"):
+                    st.caption(ev.get("conditions") or "조건 미공개")
+                    if ev.get("source_url"):
+                        st.link_button("공식 시험 요약 출처", ev["source_url"], key=f"{key}_ev_source_{product['product_id']}_{i}")
         if product.get("key_ingredients"):
             html(f'<div class="bw-proj-meta">주요 성분 · {esc(", ".join(product["key_ingredients"]))}</div>')
         if product["product_id"].startswith("CUSTOM_"):

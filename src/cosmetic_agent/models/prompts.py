@@ -69,6 +69,13 @@ def _format_evidence(evidences: list[dict[str, Any]]) -> str:
     for e in evidences:
         parts = [str(e.get(k)) for k in ("test_type", "item", "value", "institute") if e.get(k)]
         lines.append("- " + " / ".join(parts))
+        if e.get("source_kind") == "public_brand_summary":
+            lines += [
+                "  출처 수준: 공식몰 공개 시험 요약. 원보고서 미확보이며 독립 검증·최종 광고 승인으로 단정하지 말 것.",
+                f"  시험 조건: {e.get('conditions') or '미공개'}",
+                f"  출처 URL: {e.get('source_url') or '미기재'}",
+                "  수치를 활용하는 시연 초안은 공개 출처와 해당 조건을 유지하고, 원보고서·수치 산식 확인 필요를 rationale에 명시할 것.",
+            ]
     return "\n".join(lines)
 
 

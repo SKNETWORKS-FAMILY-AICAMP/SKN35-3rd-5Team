@@ -14,6 +14,10 @@ class OwnedEvidence(BaseModel):
     item: RequiredText = Field(description="시험 항목 (예: 피부 겉보습 개선)")
     value: Optional[str] = Field(default=None, description="수치 및 결과 (예: 42% 개선)")
     institute: Optional[str] = Field(default=None, description="시험 기관")
+    source_kind: Literal["provided_report", "public_brand_summary"] = "provided_report"
+    source_url: str | None = None
+    conditions: str | None = None
+    report_available: bool | None = None
 
 
 class ProductCard(BaseModel):
