@@ -10,7 +10,7 @@ import streamlit as st
 from app.components import landing
 from app.components.layout import html, mode_badge
 from app.components.theme import inject_css
-from app.services import backend
+from app.services import backend, data_sources
 
 pages = st.session_state["bw_pages"]
 health = st.session_state["bw_health"]
@@ -33,18 +33,18 @@ with st.container(key="home_top", horizontal=True, vertical_alignment="center", 
         _start("home_start_top")
 
 exs = landing.examples(product)
+# 히어로 — 왼쪽: 제목 · 시작하기 · 실제 교정 줄 / 오른쪽: 스튜디오 화보(화면 높이에 맞춤) 위에 흘러내리는 세럼 · 빛
 with st.container(key="home_hero"):
-    left, right = st.columns([1.02, 1], gap="large", vertical_alignment="center")
-    with left:
-        html(landing.hero_text())
-        with st.container(key="home_hero_cta", horizontal=True, gap="small"):
-            _start("home_start_hero")
-            html('<a class="bw-h-ghost" href="#bw-features">기능 살펴보기</a>', inline=True)
-        html(landing.hero_meta(stats))
-    with right:
-        html(landing.demo(exs, product["name"], len(product.get("owned_evidence") or [])))
+    html(landing.hero_scene())
+    html(landing.hero_text())
+    with st.container(key="home_hero_cta", horizontal=True, gap="small"):
+        _start("home_start_hero")
+        html('<a class="bw-h-ghost" href="#bw-demo">실제 검토 보기</a>', inline=True)
+    html(landing.hero_meta(stats))
+    html(landing.hero_proof(exs))
 
-html(landing.ticker(backend.enforcement_trends()))
+html(landing.correction_band(data_sources.banned_terms()))
+html(landing.demo_section(exs, product["name"], len(product.get("owned_evidence") or [])))
 html(landing.problem(backend.enforcement_trends()))
 html(landing.how())
 html(landing.features(exs[0], landing.ladder_pair(product), landing.detail_rows(product)))

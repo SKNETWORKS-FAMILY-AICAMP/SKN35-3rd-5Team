@@ -50,12 +50,12 @@
   --bw-hold-line: #D9D3C8;
 
   /* 글자 단계 */
-  --fs-meta: 12.5px;
-  --fs-small: 13.5px;
-  --fs-body: 15px;
-  --fs-em: 17px;
-  --fs-title: 20px;
-  --fs-hero: 24px;
+  --fs-meta: 13.5px;     /* 2026-10-14 CEO "LLM 화면 글씨가 다 너무 작다" → 한 단계씩 키움 (12.5 · 13.5 · 15 · 17 · 20 · 24 에서) */
+  --fs-small: 14.5px;
+  --fs-body: 16.5px;
+  --fs-em: 18.5px;
+  --fs-title: 22px;
+  --fs-hero: 26px;
 
   /* 글꼴·형태 */
   --bw-font: "Pretendard Variable", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;

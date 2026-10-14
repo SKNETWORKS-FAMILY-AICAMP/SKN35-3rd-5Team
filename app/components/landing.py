@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -28,7 +29,7 @@ from app.services.data_sources import case_title
 
 _LANDING_DIR = Path(__file__).resolve().parents[1] / "static" / "landing"
 
-SECTIONS = [("bw-problem", "문제"), ("bw-how", "검토 방식"), ("bw-features", "기능"), ("bw-sources", "근거 자료")]
+SECTIONS = [("bw-demo", "검토 장면"), ("bw-problem", "문제"), ("bw-how", "검토 방식"), ("bw-features", "기능"), ("bw-sources", "근거 자료")]
 
 # 히어로 예시 — views/review.py 의 시작 문구와 같다. 판정은 그때그때 Mock 엔진 결과를 쓴다
 DEMO_COPIES = [
@@ -115,7 +116,14 @@ def detail_rows(product: dict) -> list[dict]:
 
 
 def _display(text_html: str, tag_name: str = "h2") -> str:
-    return f'<{tag_name} class="bw-h-display">{text_html}</{tag_name}>'
+    """큰 제목 — <br> 로 나눈 줄마다 감싸 두어 줄 단위로 올라오게 한다(.ln, 섹션은 화면에 들어올 때 · 히어로는 처음에)."""
+    lines = "".join(f'<span class="ln"><span>{line}</span></span>' for line in text_html.split("<br>"))
+    return f'<{tag_name} class="bw-h-display">{lines}</{tag_name}>'
+
+
+def _photo(name: str) -> str:
+    """생성 화보(app/static/landing/editorial-*.webp, AI 생성) — 정적 서빙 주소. HTML 에 base64 로 넣지 않는다."""
+    return f"/app/static/landing/editorial-{name}.webp"
 
 
 def _head(no: str, eyebrow: str, title_html: str, desc: str = "") -> str:
@@ -151,6 +159,67 @@ def hero_meta(stats: dict) -> str:
     return f'<ul class="bw-h bw-h-meta">{lis}</ul>'
 
 
+def hero_scene() -> str:
+    """히어로 오른쪽 화보 장면 — 사진은 화면 높이에 맞춰 오른쪽에 붙어(넓은 화면에서도 사물이 잘리지 않고 글자와 비율이 맞는다)
+    흘러내리는 세럼과 떨어지는 방울 · 유리의 빛 · 벽의 빛 무늬 · 빛 알갱이는 사진 좌표(%)에 얹는다.
+    (토끼는 2026-10-14 CEO "첫 화면에 토끼는 빼자, 난잡하다"로 뺐다.) 장식이라 화면 읽기에서는 뺀다."""
+    motes = "".join(f'<i class="mote m{i}"></i>' for i in range(1, 6))
+    return ('<div class="bw-h-scene" aria-hidden="true"><div class="ph">'
+            '<img class="photo" src="/app/static/landing/editorial-studio.webp" alt="">'
+            '<span class="stream"></span><i class="drop"></i><i class="drop d2"></i><i class="splash"></i><i class="splash d2"></i>'   # 흘러내리는 세럼 · 떨어지는 방울 · 바닥 물결
+            f'<span class="glint"></span><span class="caustic"></span>{motes}'
+            '</div></div>')
+
+
+def hero_proof(exs: list[dict]) -> str:
+    """히어로 아래쪽 교정 줄 — 사진 위에서 실제 문구에 밑줄이 그어지고(s1) 위험 표현이 지워지고 판정이 붙은 뒤(s2)
+    근거가 달리고(s3) 엔진 제안 문구가 써진다(s4) · 역검증(s5). 판정 · 근거 · 제안은 Mock 엔진 실제 결과(examples)."""
+    panels = []
+    for i, ex in enumerate(exs):
+        fix = (f'<p class="fixed"><span class="arw">{icon("arrow_forward", 16)}</span><span class="t">{esc(ex["fix"])}</span></p>'
+               if ex["fix"] else '<p class="fixed is-hold"><span class="t">근거가 부족해 담당자 검토로 넘깁니다</span></p>')
+        cite = esc(ex["cites"][0]) if ex["cites"] else ""
+        state = " on s1 s2 s3 s4 s5" if i == 0 else ""   # 스크립트가 없으면 첫 예시의 최종 상태
+        panels.append(f'<div class="ex is-{ex["tone"]}{state}"><p class="quote">{ex["quote"]}</p>{fix}'
+                      f'<div class="meta">{tag(ex["label"], ex["tone"], small=True)}'
+                      f'{f"<span class=cite>{cite}</span>" if cite else ""}'
+                      f'{"<span class=ok>" + icon("check", 13) + "역검증 통과</span>" if ex["verified"] else ""}</div></div>')
+    dots = "".join(f'<i{" class=on" if i == 0 else ""}></i>' for i in range(len(exs)))
+    return (f'<div class="bw-h bw-h-proof" data-demo aria-label="교정 장면 — 실제 검토 결과">'
+            f'<div class="bar"><span class="k"><i class="ping"></i>교정 중</span><span class="dots" aria-hidden="true">{dots}</span></div>'
+            f'<div class="stage">{"".join(panels)}</div></div>')
+
+
+def correction_band(terms: list[dict]) -> str:
+    """금지 표현 → 바꿔 쓸 표현 — 금지 표현 사전(banned_terms.json)의 term · fix_hint 그대로, 큰 글자로 흐른다."""
+    rows = []
+    for t in terms:
+        term = re.sub(r"\s*\([^)]*\)", "", t.get("term", "")).strip()
+        fix = (t.get("fix_hint") or "").strip()
+        if not term or not fix or "삭제" in fix or len(fix) > 18:
+            continue
+        rows.append(f'<li><s>{esc(term)}</s><i aria-hidden="true">{icon("arrow_forward", 22)}</i><b>{esc(fix)}</b></li>')
+    items = "".join(rows[:16])
+    return ('<div class="bw-h bw-h-band-type" aria-label="금지 표현 사전 — 금지 표현과 바꿔 쓸 표현">'
+            f'<div class="track"><ul>{items}</ul><ul aria-hidden="true">{items}</ul></div>'
+            '<p class="src">식약처 화장품 표시 · 광고 관리지침 금지 표현과 바꿔 쓸 표현 — 이 서비스의 금지 표현 사전</p></div>')
+
+
+def photo_band(name: str, alt: str, caption: str) -> str:
+    """잡지 펼침면 같은 전폭 사진 띠 — 화면에 들어오면 커튼처럼 열리고, 스크롤에 따라 사진이 천천히 움직인다."""
+    return (f'<figure class="bw-h bw-h-photo rv" data-par><div class="img" role="img" aria-label="{esc(alt)}" '
+            f'style="background-image:url({_photo(name)})"></div><figcaption>{esc(caption)}</figcaption></figure>')
+
+
+def demo_section(exs: list[dict], product_name: str, n_evidence: int) -> str:
+    """실제 검토 장면 — 히어로의 교정 줄을 판정 · 근거 · 제안까지 펼친 예시 카드(엔진 실제 결과)."""
+    return ('<section id="bw-demo" class="bw-h bw-h-sec bw-h-demo-sec">'
+            + _head("01", "실제 검토 장면", "문구 하나에<br>판정 · 근거 · <em>제안</em>까지",
+                    "아래 카드는 Mock 판정 엔진이 시작 문구 세 개에 실제로 낸 결과를 그대로 보여 줍니다. 문구마다 위험 표현에 밑줄을 긋고, "
+                    "규정 기준으로 판정하고, 근거 조항을 단 뒤 보유 실증 범위 안의 문구로 고칩니다.")
+            + demo(exs, product_name, n_evidence) + '</section>')
+
+
 def demo(exs: list[dict], product_name: str, n_evidence: int) -> str:
     panels = []
     for i, ex in enumerate(exs):
@@ -173,7 +242,7 @@ def demo(exs: list[dict], product_name: str, n_evidence: int) -> str:
     first = SAY["fix"] if exs and exs[0]["fix"] else SAY["nofix"]   # 스크립트가 없을 때 = 첫 예시의 마지막 말
     buddy = (f'<div class="buddy" aria-hidden="true"><span class="say">{esc(first)}</span>'
              f'<span class="pic">{_rabbit(228)}</span></div>')
-    return ('<div class="bw-h bw-h-demo" aria-label="검토 예시">' + buddy + '<div class="card">'
+    return ('<div class="bw-h bw-h-demo rv" data-demo aria-label="검토 예시">' + buddy + '<div class="card">'
             f'<div class="bar"><span class="live">{avatar_img(22)}뷰렛 AI · 검토 예시</span>'
             f'<span class="who">{esc(product_name)} · 실증 {n_evidence}건</span>'
             f'<span class="dots" aria-hidden="true">{dots}</span></div>'
@@ -218,8 +287,8 @@ def problem(cases: list[dict]) -> str:
         n = f'<b>{c["count"]:,}건</b>' if c.get("count") else ""
         rows.append(f'<li class="rv"><span class="d">{esc(c.get("date", ""))}</span>'
                     f'<span class="t">{title}</span><span class="n">{n}{sub}</span></li>')
-    return (f'<section id="bw-problem" class="bw-h bw-h-sec">'
-            + _head("01", "문제", "광고 문구 한 줄이<br><em>행정처분</em>으로 이어집니다",
+    return (f'<section id="bw-problem" class="bw-h bw-h-sec bw-h-ink">' + ticker(cases)
+            + _head("02", "문제", "광고 문구 한 줄이<br><em>행정처분</em>으로 이어집니다",
                     f"식약처는 온라인 부당광고를 점검해 적발 결과를 발표합니다. 아래는 이 서비스가 근거로 쓰는 발표 {len(cases)}건입니다.")
             + f'<ul class="bw-h-cols">{cols}</ul>'
             f'<div class="bw-h-cases"><div class="h rv"><span>식약처 적발 발표</span><span>날짜 · 건수</span></div>'
@@ -238,8 +307,9 @@ def how() -> str:
     lis = "".join(f'<li><span class="node">{i}</span><h3>{esc(t)}</h3><p>{esc(d)}</p>{extra}</li>'
                   for i, (t, d, extra) in enumerate(steps, 1))
     return (f'<section id="bw-how" class="bw-h bw-h-sec">'
-            + _head("02", "검토 방식", "근거를 먼저 찾고,<br>그 근거로 <em>판정</em>합니다",
+            + _head("03", "검토 방식", "근거를 먼저 찾고,<br>그 근거로 <em>판정</em>합니다",
                     "답변에는 근거 조항 번호가 붙습니다. 번호를 누르면 오른쪽에 그 조항이 열립니다.")
+            + photo_band("serum", "아이보리 받침대 위에 맺힌 투명한 세럼 방울 접사", "문구 한 줄도 원료 하나처럼 — 성분을 보듯 표현을 봅니다")
             + f'<div class="bw-h-steps rv"><div class="line"><i></i></div><ol>{lis}</ol></div>'
             '<figure class="bw-h-shot rv"><div class="frame"><div class="bar"><i></i><i></i><i></i>'
             '<span class="url">Beaurette · 검토 대화</span></div>'
@@ -274,7 +344,7 @@ def features(ex: dict, pair: dict, rows: list[dict]) -> str:
     lis = "".join(f'<li class="rv"><div class="txt"><h3>{esc(t)}</h3><p>{esc(d)}</p></div>{vis}</li>'
                   for t, d, vis in cards)
     return (f'<section id="bw-features" class="bw-h bw-h-sec">'
-            + _head("03", "기능", "문구 하나부터<br><em>상세페이지</em> 전체까지")
+            + _head("04", "기능", "문구 하나부터<br><em>상세페이지</em> 전체까지")
             + f'<ul class="bw-h-features">{lis}</ul></section>')
 
 
@@ -298,8 +368,10 @@ def sources(stats: dict, docs: list[dict]) -> str:
         f'<p>{esc(" · ".join(x for x in (d.get("org", ""), d.get("version") or d.get("date") or "") if x))}</p></li>'
         for d in laws)
     return (f'<section id="bw-sources" class="bw-h bw-h-sec">'
-            + _head("04", "근거 자료", "답변의 근거는<br>이 <em>문서들</em>에서 찾습니다",
+            + _head("05", "근거 자료", "답변의 근거는<br>이 <em>문서들</em>에서 찾습니다",
                     "법령은 국가법령정보센터, 고시 · 지침 · 사례는 식약처 공개 자료에서 받았습니다.")
+            + photo_band("documents", "숲색 · 테라코타 인덱스 탭이 붙은 서류 묶음과 만년필이 놓인 책상",
+                         "법령 · 고시 · 지침 · 적발 사례 — 조항 단위로 나눠 색인했습니다")
             + f'<ul class="bw-h-stats rv">{cells}</ul><ul class="bw-h-docs rv">{doc_cells}</ul></section>')
 
 
@@ -362,12 +434,14 @@ _MOTION_JS = """<script>
   }
 
   function demo() {
-    var box = document.querySelector('.bw-h-demo:not([data-run])');
-    if (!box) return;
+    document.querySelectorAll('[data-demo]:not([data-run])').forEach(play);
+  }
+  function play(box) {
     box.setAttribute('data-run', '1');
     if (reduce) return;
     var exs = box.querySelectorAll('.ex'), dots = box.querySelectorAll('.dots i');
-    var say = box.querySelector('.say'), buddy = box.querySelector('.buddy');
+    var ext = box.getAttribute('data-buddy') ? document.querySelector(box.getAttribute('data-buddy')) : null;   // 히어로: 사진 위 토끼
+    var say = (ext || box).querySelector('.say'), buddy = ext || box.querySelector('.buddy');
     var SAY = __SAY__;
     var STEPS = [300, 1000, 1700, 2500, 3500], HOLD = 7600, timers = [];
     function talk(text) {
@@ -397,7 +471,49 @@ _MOTION_JS = """<script>
     show(0);
   }
 
-  function run() { reveal(); demo(); }
+  // 4) 히어로 사진 마우스 시차(--mx · --my) 5) 상단 스크롤 진행선(--p) 6) 사진 띠 스크롤 시차(--py) 7) 지금 섹션의 메뉴 표시(.on)
+  //    리스너는 문서에 한 번만 — Streamlit 이 노드를 다시 그려도 매번 다시 찾는다
+  function scene() {
+    if (window.__bwScene) return;
+    window.__bwScene = true;
+    var queued = false;
+    function frame() {
+      queued = false;
+      var main = document.querySelector('[data-testid="stMain"]'), top = document.querySelector('.st-key-home_top');
+      if (!main || !top) return;
+      var max = main.scrollHeight - main.clientHeight, vh = window.innerHeight;
+      top.style.setProperty('--p', max > 0 ? (main.scrollTop / max).toFixed(4) : '0');
+      var current = '';
+      document.querySelectorAll('.bw-h-sec[id]').forEach(function (s) { if (s.getBoundingClientRect().top < vh * 0.4) current = s.id; });
+      document.querySelectorAll('.bw-h-nav a').forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + current); });
+      if (reduce) return;
+      var hero = document.querySelector('.st-key-home_hero');
+      if (hero) {   // 히어로를 지나갈수록 0 → 1 (떠 있는 사물이 흩어진다)
+        var hr = hero.getBoundingClientRect();
+        hero.style.setProperty('--hs', Math.min(1, Math.max(0, -hr.top / Math.max(1, hr.height))).toFixed(3));
+      }
+      document.querySelectorAll('.bw-h-photo[data-par]').forEach(function (f) {
+        var r = f.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh) return;
+        f.style.setProperty('--py', (((r.top + r.height / 2) - vh / 2) / vh).toFixed(4));
+      });
+    }
+    function ask() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
+    document.addEventListener('scroll', ask, { capture: true, passive: true });
+    window.addEventListener('resize', ask);
+    document.addEventListener('mousemove', function (e) {
+      if (reduce) return;
+      var hero = document.querySelector('.st-key-home_hero');
+      if (!hero) return;
+      var r = hero.getBoundingClientRect();
+      if (e.clientY > r.bottom) return;
+      hero.style.setProperty('--mx', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+      hero.style.setProperty('--my', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+    }, { passive: true });
+    ask();
+  }
+
+  function run() { reveal(); demo(); scene(); }
   run();
   setTimeout(run, 250);
   setTimeout(run, 1200);
