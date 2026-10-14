@@ -14,6 +14,7 @@ import streamlit as st
 
 from app.components.layout import esc, html
 from app.services import backend
+from app.services.peer_market import FORMS
 
 _PID = "bw_pid"          # 선택한 제품 id (화면을 옮겨도 유지)
 _EV = "bw_ev_state"      # {product_id: [체크 여부, ...]}
@@ -92,8 +93,10 @@ def render_project(key: str = "proj") -> None:
         sel_key = f"{key}_product"
         if st.session_state.get(sel_key) not in (None, pid):  # 새로 등록한 제품으로 바로 전환
             st.session_state[sel_key] = pid
+        # 세션 값이 이미 있으면 index 를 주지 않는다 (둘 다 주면 Streamlit 경고)
+        initial = {} if sel_key in st.session_state else {"index": ids.index(pid)}
         st.selectbox(
-            "검토할 제품", ids, index=ids.index(pid),
+            "검토할 제품", ids, **initial,
             format_func=lambda i: ("✎ " if i.startswith("CUSTOM_") else "") + by_id[i]["name"],
             key=sel_key, label_visibility="collapsed",
             on_change=_on_product_change, args=(sel_key,),
@@ -135,6 +138,11 @@ def _delete_custom(pid: str) -> None:
     st.session_state.pop(_PID, None)
 
 
+def open_register(key: str = "proj") -> None:
+    """다른 화면(예상 매출 시나리오)에서 등록 팝업을 연다."""
+    _register_dialog(key)
+
+
 def _render_register(key: str) -> None:
     """사이드바 버튼 → 넓은 팝업에서 우리 제품과 보유 실증 자료를 입력한다."""
     if st.button("제품 직접 등록", key=f"{key}_register_open", icon=":material/add:", width="stretch"):
@@ -152,6 +160,10 @@ def _register_dialog(key: str) -> None:
     c3, c4 = st.columns([2, 3])
     functional_type = c3.selectbox("기능성 종류 (기능성일 때만)", FUNCTIONAL_TYPES)
     ingredients = c4.text_input("주요 성분 (쉼표로 구분)", placeholder="예: 나이아신아마이드, 판테놀")
+    # 예상 매출 시나리오에서 비슷한 시장 제품을 찾고 가격을 비교하는 데 쓴다
+    c5, c6 = st.columns([2, 3])
+    form = c5.selectbox("제형", FORMS, help="세럼·앰플·에센스·부스터는 같은 묶음으로 비교합니다")
+    price = c6.number_input("판매가 (원, 선택)", min_value=0, value=None, step=1000, placeholder="예: 32000")
     st.markdown("**보유 실증 자료** · 표 아래 ＋ 로 행을 추가해 여러 개 입력 (항목이 빈 행은 무시)")
     rows = st.data_editor(
         [{"시험 종류": "인체적용시험", "항목": "", "결과": "", "기관": ""}],
@@ -175,7 +187,6 @@ def _register_dialog(key: str) -> None:
          "value": (r.get("결과") or "").strip() or None, "institute": (r.get("기관") or "").strip() or None}
         for r in rows if r.get("시험 종류") and (r.get("항목") or "").strip()
     ]
-    custom = st.session_state.setdefault(_CUSTOM, [])
     seq = st.session_state.get("bw_custom_seq", 0) + 1  # 삭제 후에도 번호가 겹치지 않게
     st.session_state["bw_custom_seq"] = seq
     product = {
@@ -184,9 +195,22 @@ def _register_dialog(key: str) -> None:
         "category": category,
         "functional_type": functional_type if category == "기능성" else None,
         "key_ingredients": [s.strip() for s in ingredients.split(",") if s.strip()],
+        "form": form,
+        "price_krw": int(price) if price else None,
         "owned_evidence": evidence,
     }
-    custom.append(product)
-    st.session_state[_PID] = product["product_id"]
+    register_product(product)
     st.toast(f"‘{product['name']}’ 등록 · 실증 자료 {len(evidence)}개", icon=":material/check:")
     st.rerun()
+
+
+def register_product(product: dict) -> dict:
+    """직접 등록 제품을 세션에 추가하고 선택한다. product_id 가 없으면 CUSTOM_### 을 붙인다."""
+    custom = st.session_state.setdefault(_CUSTOM, [])
+    if not str(product.get("product_id", "")).startswith("CUSTOM_"):
+        seq = st.session_state.get("bw_custom_seq", 0) + 1
+        st.session_state["bw_custom_seq"] = seq
+        product = dict(product, product_id=f"CUSTOM_{seq:03d}")
+    custom.append(product)
+    st.session_state[_PID] = product["product_id"]
+    return product
