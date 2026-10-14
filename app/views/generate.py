@@ -12,7 +12,15 @@ from cosmetic_agent.market_reference import form_of
 
 st.title("광고문 생성")
 st.caption("원하는 제품과 광고 방향을 말해주세요. 성분을 몰라도 초안부터 만들고, 규정과 확인된 제품 근거로 검토합니다.")
-use_project = st.checkbox("왼쪽 「내 제품」의 제품·실증 자료 사용", value=False)
+# 화면을 옮기면 위젯 값이 초기화되므로, 마지막으로 만든 요청 값으로 다시 채운다
+_last = (st.session_state.get("bw_generation") or {}).get("form", {})
+_defaults = {"gen_use_project": False, "gen_instruction": "", "gen_channel": "SNS", "gen_tone": "요청에 맞게",
+             "gen_length": "짧은 문단", "gen_name": "", "gen_raw": ""}
+for _key, _default in _defaults.items():
+    # 다른 화면에 다녀오면 위젯 값이 지워진다 → 마지막 생성 요청 값(없으면 기본값)으로 한 번만 채운다
+    if _key not in st.session_state:
+        st.session_state[_key] = _last.get(_key.removeprefix("gen_"), _default)
+use_project = st.checkbox("왼쪽 「내 제품」의 제품·실증 자료 사용", key="gen_use_project")
 if use_project:
     product, ctx = current()
     st.caption(f"{ctx['product_name']} · 실증 {ctx['evidence_on']}건. 실제 동일 제품의 자료일 때만 사용하세요.")
@@ -20,19 +28,21 @@ else:
     product = {"product_id": "generation_draft", "name": "나의 화장품", "category": "일반", "owned_evidence": []}
 
 with st.form("generate_form"):
-    instruction = st.text_area("어떤 광고문을 만들까요?", placeholder="예: 자외선 차단 선크림 광고를 20대 대상으로 짧고 발랄하게 만들어줘.\n예: 판테놀이 들어간 크림의 SNS 문구를 감성적인 톤으로 써줘.", max_chars=5000, height=140)
+    instruction = st.text_area("어떤 광고문을 만들까요?", key="gen_instruction", placeholder="예: 자외선 차단 선크림 광고를 20대 대상으로 짧고 발랄하게 만들어줘.\n예: 판테놀이 들어간 크림의 SNS 문구를 감성적인 톤으로 써줘.", max_chars=5000, height=140)
     channel_col, tone_col, length_col = st.columns(3)
-    channel = channel_col.selectbox("광고 채널", ["SNS", "상세페이지", "배너", "검색광고", "라이브커머스"])
-    tone = tone_col.text_input("문구 분위기", value="요청에 맞게", max_chars=100, placeholder="예: 재치 있는, 전문적인, 감성적인")
-    length = length_col.selectbox("문구 길이", ["짧은 문단", "한 줄", "상세 설명"])
+    channels = ["SNS", "상세페이지", "배너", "검색광고", "라이브커머스"]
+    channel = channel_col.selectbox("광고 채널", channels, key="gen_channel")
+    tone = tone_col.text_input("문구 분위기", key="gen_tone", max_chars=100, placeholder="예: 재치 있는, 전문적인, 감성적인")
+    lengths = ["짧은 문단", "한 줄", "상세 설명"]
+    length = length_col.selectbox("문구 길이", lengths, key="gen_length")
     with st.expander("제품·성분 정보 추가 (선택)"):
         st.caption("추가 정보가 없어도 생성할 수 있습니다. 성분이나 요청한 효능만으로 심사·시험 사실을 추정하지 않습니다.")
         if not use_project:
-            name = st.text_input("제품명 (선택)", max_chars=100)
+            name = st.text_input("제품명 (선택)", key="gen_name", max_chars=100)
             category = st.selectbox("제품 구분", ["일반", "기능성"])
             functional_type = ", ".join(st.multiselect("실제 심사·보고받은 기능성 유형", FUNCTIONAL_TYPES)) if category == "기능성" else None
             product = dict(product, name=name.strip() or "나의 화장품", category=category, functional_type=functional_type)
-        raw = st.text_area("실제 함유 성분 (선택)", placeholder="판테놀, 히알루론산", max_chars=10000, height=80)
+        raw = st.text_area("실제 함유 성분 (선택)", key="gen_raw", placeholder="판테놀, 히알루론산", max_chars=10000, height=80)
     submitted = st.form_submit_button("광고문 만들기", type="primary", icon=":material/auto_awesome:")
 
 payload = {"instruction": instruction.strip(), "product": product, "channel": channel,
@@ -53,7 +63,9 @@ if submitted:
         try:
             with st.spinner("요청에 맞는 광고 초안을 만들고 검토하고 있습니다…"):
                 response = backend.generate_copy(payload)
-            st.session_state["bw_generation"] = {"payload": payload, "response": response}
+            st.session_state["bw_generation"] = {"payload": payload, "response": response, "form": {
+                "use_project": use_project, "instruction": instruction, "channel": channel, "tone": tone,
+                "length": length, "raw": raw, "name": "" if use_project else (product.get("name") if product.get("name") != "나의 화장품" else "")}}
             if use_project:  # 예상 매출 화면이 같은 생성 결과를 이어 쓴다
                 generation_results.save(product, response, {k: payload[k] for k in ("instruction", "channel", "tone", "length")})
         except backend.BackendError as error:

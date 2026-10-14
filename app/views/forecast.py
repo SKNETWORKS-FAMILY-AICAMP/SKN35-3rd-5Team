@@ -188,7 +188,9 @@ with st.container(key="pagebody"):
                     register_product(dict(EXAMPLE_PRODUCT, owned_evidence=[dict(e) for e in EXAMPLE_PRODUCT["owned_evidence"]]))
                     st.rerun()
         if not is_custom:
-            st.caption("지금은 기본 샘플 제품입니다. 새 제품을 등록하면(제형·주요 성분·판매가) 그 제품과 비슷한 시장 제품을 찾아 비교합니다.")
+            st.caption("아직 제품을 고르지 않았거나 예시 제품입니다. 제품을 등록하면(제형·주요 성분·판매가) 그 제품과 비슷한 시장 제품을 찾아 비교합니다."
+                       if product.get("product_id") != "GENERAL_DEFAULT" else
+                       "아직 고른 제품이 없습니다. 「새 제품 등록」이나 왼쪽 「예시 제품 불러오기」로 제품을 정하면 비슷한 시장 제품을 찾아 비교합니다.")
 
     peers = find_peers(product)
 

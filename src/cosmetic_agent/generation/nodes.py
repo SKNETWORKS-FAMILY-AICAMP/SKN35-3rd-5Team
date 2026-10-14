@@ -95,6 +95,7 @@ def generate_candidates_node(
             retry_note=" / ".join(notes) if notes else None,
             knowledge=build_generation_knowledge(
                 state["product"], state["channel"],
+                tone=state.get("tone", ""),
                 market_refs=state.get("market_references", []),
                 profiles=state.get("ingredient_profiles", []),
             ),
@@ -106,6 +107,15 @@ def generate_candidates_node(
             "generation_error": type(error).__name__,
             "rejected_notes": ["광고 문구 생성 모델을 호출하지 못했습니다."],
         }
+
+
+# 근거는 맞는데 과장 단어 하나 때문에 탈락하는 후보가 많다 (예: 'SPF50+ PA++++로 완벽한 자외선 차단').
+# 그런 단어만 빼고 한 번 더 검증해, 가장 강한 근거 후보를 살린다. 뜻을 바꾸는 단어는 건드리지 않는다.
+_SOFTEN_RE = re.compile(r"(?:완벽(?:한|하게|히)|확실(?:한|하게|히)|확연(?:한|히)|눈에\s*띄게|놀라운|걱정\s*(?:없이|없는))\s*")
+
+
+def _soften(text: str) -> str:
+    return re.sub(r"\s{2,}", " ", _SOFTEN_RE.sub("", text or "")).strip()
 
 
 def _pin_numbers(copy: str, reports: list[dict[str, Any]]) -> str:
@@ -197,6 +207,16 @@ def verify_candidates_node(
         if unsupported:
             rejected.extend(unsupported)
             continue
+        if _SOFTEN_RE.search(text):
+            softened = {k: _soften(draft.get(k, "")) for k in ("text", "headline", "supporting_copy")}
+            ok_soft, _ = verifier.verify_suggestion(
+                compose_copy({**draft, **softened}) if structured else softened["text"],
+                selected_reports if used_ids else product.get("owned_evidence", []), rule_engine,
+                product_category=product.get("category", "일반"), functional_type=product.get("functional_type"))
+            if ok_soft:
+                draft = {**draft, **softened}
+                draft["text"] = compose_copy(draft) if structured else softened["text"]
+                text = draft["text"]
         passed, note = verifier.verify_suggestion(
             text,
             selected_reports if used_ids else product.get("owned_evidence", []),

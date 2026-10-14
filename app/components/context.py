@@ -198,7 +198,7 @@ def _register_dialog(key: str) -> None:
         help="화장품법 시행규칙 제2조의 기능성화장품 10종")
     functional_type = ", ".join(functional_types)
     ingredient_list = st.multiselect(
-        "주요 성분", ingredient_names(), accept_new_options=True,
+        "주요 성분", ingredient_names(), accept_new_options=True, max_selections=15,
         placeholder="한두 글자를 입력하면 식약처 원료사전 21,945개에서 찾아줍니다",
         help="목록에 없는 이름은 입력 후 Enter 로 추가할 수 있습니다")
     # 예상 매출 시나리오에서 비슷한 시장 제품을 찾고 가격을 비교하는 데 쓴다

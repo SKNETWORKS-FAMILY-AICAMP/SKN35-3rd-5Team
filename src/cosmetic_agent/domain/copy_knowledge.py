@@ -216,9 +216,11 @@ def pick_angles(product: dict[str, Any], has_origin: bool, rng: random.Random, n
     """후보마다 다른 각도. strong 은 근거·기능성 각도를 우선 배정한다."""
     has_evidence = bool(product.get("owned_evidence"))
     functional = product.get("category") == "기능성" and bool(product.get("functional_type"))
+    has_ingredients = bool(product.get("key_ingredients"))
     usable = [a for a in expression_bank().get("angles", [])
               if (a.get("requires") or "") in ("", "evidence" if has_evidence else "-",
-                                              "functional" if functional else "-", "origin" if has_origin else "-")]
+                                              "functional" if functional else "-", "origin" if has_origin else "-",
+                                              "ingredients" if has_ingredients else "-")]
     strong_pool = [a for a in usable if a.get("requires") in ("evidence", "functional")]
     rest = [a for a in usable if a not in strong_pool]
     rng.shuffle(strong_pool)
@@ -254,6 +256,7 @@ def build_generation_knowledge(
     rng: random.Random | None = None,
     market_refs: list[dict[str, Any]] | None = None,
     profiles: list[dict[str, Any]] | None = None,
+    tone: str = "",
 ) -> str:
     """생성 프롬프트에 넣을 [쓸 수 있는 재료] 블록.
 
@@ -261,6 +264,7 @@ def build_generation_knowledge(
     """
     rng = rng or random.Random()
     profiles = profiles or []
+    mz = channel in ("SNS", "라이브커머스", "배너") or bool(re.search(r"MZ|엠지|트렌디|발랄|재치|친근|힙", tone or "", re.I))
     ingredients = list(dict.fromkeys(product.get("key_ingredients") or []))
     cards = [ingredient_card(name, product) + _role_suffix(name, profiles) for name in ingredients[:8]]
     has_origin = any("유래:" in c for c in cards)
@@ -271,10 +275,17 @@ def build_generation_knowledge(
     lines += ["", "[이번 후보별 표현 각도 - 후보 6개가 서로 다른 각도로 쓴다]"]
     lines += [f"- 후보 {i} ({tier}): {a['name']} — {a['how']} (예: {a['example']})"
               for i, (tier, a) in enumerate(zip(slots, angles), 1)]
-    hooks = expression_bank().get("hooks", [])
+    # 실증 수치가 없는 제품에 '숫자 전면 배치'를 주면 모델이 숫자를 지어내다 탈락한다
+    hooks = [h for h in expression_bank().get("hooks", [])
+             if h.get("requires") != "evidence" or product.get("owned_evidence")]
     if hooks:
         lines += ["", "[끌림 기법 - 모든 후보의 첫 구절에 하나 이상 쓴다. 기법을 썼다고 효능 주장이 허용되지는 않는다]"]
         lines += [f"- {h['name']}: {h['how']} (예: {h['example']})" for h in rng.sample(hooks, min(6, len(hooks)))]
+    bank = expression_bank()
+    if mz and bank.get("mz_ok"):
+        lines += ["", f"[MZ 말투 - {bank.get('mz_note', '')}]",
+                  "- 써도 됨: " + ", ".join(bank["mz_ok"]),
+                  "- 쓰지 않음(효과·최고 보증): " + ", ".join(bank.get("mz_avoid", []))]
     hint = expression_bank().get("channel_hints", {}).get(channel)
     if hint:
         lines += ["", f"[채널 문법 - {channel}] {hint}"]
