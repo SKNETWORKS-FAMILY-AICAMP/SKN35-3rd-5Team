@@ -512,20 +512,20 @@
 .st-key-aside .bw-card + .bw-card { margin-top: 0; }
 
 /* ── 사이드바 ─────────────────────────────────────────────────────────── */
-.bw-brand { padding: 0 4px 12px; margin-top: -46px; }  /* 사이드바 머리(접기 버튼 줄) 높이만큼 끌어올린다 */
-.bw-brand img { display: block; }
-.st-key-new_review button {
-  justify-content: flex-start; min-height: 40px; padding: 0 12px; border-radius: var(--bw-r);
-  background: var(--bw-surface); border: 1px solid var(--bw-line); color: var(--bw-ink);
-}
-.st-key-new_review button:hover { border-color: var(--bw-accent-line); color: var(--bw-accent-text); background: var(--bw-surface); }
-.st-key-new_review button p { font-size: var(--fs-small); font-weight: 600; }
+.st-key-brand_home { padding: 0 4px 12px; margin-top: -46px; }  /* 사이드바 머리(접기 버튼 줄) 높이만큼 끌어올린다 */
+.st-key-brand_home [data-testid="stPageLink"] a { padding: 0; border-radius: 4px; }
+.st-key-brand_home [data-testid="stPageLink"] a:hover { background: transparent; opacity: .85; }
+.st-key-brand_home [data-testid="stMarkdownContainer"] p { line-height: 1; }
+.st-key-brand_home [data-testid="stMarkdownContainer"] img { display: block; height: 36px; max-height: 36px; width: auto; }
+.st-key-brand_home a:focus-visible { outline: 2px solid var(--bw-accent); outline-offset: 4px; }
 .bw-side-h { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding: 0 6px; font-size: var(--fs-meta); font-weight: 600; color: var(--bw-muted); }
 .bw-side-h .bw-i { --bw-i-size: 16px; }
 .bw-side-note { font-weight: 400; color: var(--bw-faint); }
 .bw-side-empty { padding: 2px 6px; font-size: var(--fs-small); color: var(--bw-faint); }
-.st-key-nav { gap: 1px; }
-.st-key-nav a { min-height: 36px; padding: 0 10px; border-radius: var(--bw-r); gap: 10px; }
+.st-key-nav { gap: 2px; }
+/* 페이지 링크의 기본 음수 여백을 없애 클릭 영역 사이에 실제 간격을 둔다. */
+.st-key-nav > [data-testid="stElementContainer"] { margin-block: 0; }
+.st-key-nav a { min-height: 40px; padding: 0 10px; border-radius: var(--bw-r); gap: 10px; }
 .st-key-nav a:hover { background: rgba(23, 32, 27, .045); }
 .st-key-nav a p, .st-key-nav a span { font-size: var(--fs-small); color: var(--bw-ink); }
 
