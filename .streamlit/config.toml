@@ -75,6 +75,13 @@ weight = "600"
 style = "normal"
 unicodeRange = "U+0000-00FF, U+2000-206F, U+2212"
 
+# 홈 제목 전용 명조 (Noto Serif KR 600, KS X 1001 한글 2,350자 + 영문·기호만 남긴 subset)
+[[theme.fontFaces]]
+family = "Noto Serif KR"
+url = "app/static/fonts/NotoSerifKR-SemiBold-KS.woff2"
+weight = "600"
+style = "normal"
+
 [theme.sidebar]
 backgroundColor = "#EFEBE2"             # 종이보다 한 톤 짙게 — 작업 공간과 탐색을 나눈다
 secondaryBackgroundColor = "#FFFDF9"
