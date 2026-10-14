@@ -1,0 +1,267 @@
+[
+ {
+  "product_id": "SAMPLE_01",
+  "name": "비타C 브라이트닝 앰플",
+  "category": "기능성",
+  "functional_type": "피부 미백",
+  "form": "앰플",
+  "key_ingredients": [
+   "나이아신아마이드",
+   "아스코빌글루코사이드"
+  ],
+  "owned_evidence": [
+   {
+    "test_type": "인체적용시험",
+    "item": "피부톤 개선",
+    "value": "8주 사용 후 피부톤 12% 개선",
+    "institute": "OO피부임상연구소"
+   }
+  ]
+ },
+ {
+  "product_id": "SAMPLE_02",
+  "name": "데일리 워터 선크림",
+  "category": "기능성",
+  "functional_type": "자외선 차단",
+  "form": "선크림",
+  "key_ingredients": [
+   "징크옥사이드"
+  ],
+  "owned_evidence": [
+   {
+    "test_type": "인체적용시험",
+    "item": "자외선 차단지수",
+    "value": "SPF50+ PA++++",
+    "institute": "OO피부임상연구소"
+   },
+   {
+    "test_type": "인체적용시험",
+    "item": "내수성",
+    "value": "80분 내수성 시험 통과",
+    "institute": "OO피부임상연구소"
+   }
+  ]
+ },
+ {
+  "product_id": "SAMPLE_03",
+  "name": "레티놀 리페어 세럼",
+  "category": "기능성",
+  "functional_type": "주름 개선",
+  "form": "세럼",
+  "key_ingredients": [
+   "레티놀",
+   "아데노신"
+  ],
+  "owned_evidence": [
+   {
+    "test_type": "인체적용시험",
+    "item": "눈가 주름 개선",
+    "value": "8주 사용 후 눈가 주름 15% 감소",
+    "institute": "OO대학교 피부과학연구소"
+   }
+  ]
+ },
+ {
+  "product_id": "SAMPLE_04",
+  "name": "듀얼 브라이트 링클 크림",
+  "category": "기능성",
+  "functional_type": "피부 미백, 주름 개선",
+  "form": "크림",
+  "key_ingredients": [
+   "알부틴",
+   "아데노신"
+  ],
+  "owned_evidence": []
+ },
+ {
+  "product_id": "SAMPLE_05",
+  "name": "시카 배리어 크림",
+  "category": "기능성",
+  "functional_type": "피부장벽 기능 회복(가려움 개선)",
+  "form": "크림",
+  "key_ingredients": [
+   "판테놀",
+   "세라마이드엔피"
+  ],
+  "owned_evidence": [
+   {
+    "test_type": "인체적용시험",
+    "item": "경피수분손실량 감소",
+    "value": "4주 사용 후 경피수분손실량 20% 감소",
+    "institute": "OO피부임상연구소"
+   }
+  ]
+ },
+ {
+  "product_id": "SAMPLE_09",
+  "name": "딥 포어 클렌징폼",
+  "category": "일반",
+  "functional_type": null,
+  "form": "클렌징폼",
+  "key_ingredients": [
+   "카올린"
+  ],
+  "owned_evidence": [
+   {
+    "test_type": "인체외시험",
+    "item": "피지 흡착력",
+    "value": "인공 피지 흡착률 85%",
+    "institute": "OO연구원"
+   }
+  ]
+ },
+ {
+  "product_id": "SAMPLE_12",
+  "name": "스칼프 탈모 앰플",
+  "category": "기능성",
+  "functional_type": "탈모 증상 완화",
+  "form": "앰플",
+  "key_ingredients": [
+   "덱스판테놀",
+   "나이아신아마이드"
+  ],
+  "owned_evidence": []
+ },
+ {
+  "product_id": "SAMPLE_13",
+  "name": "클리어 바디워시",
+  "category": "기능성",
+  "functional_type": "여드름성 피부 완화",
+  "form": "바디워시",
+  "key_ingredients": [
+   "살리실릭애씨드"
+  ],
+  "owned_evidence": [
+   {
+    "test_type": "인체적용시험",
+    "item": "여드름성 피부 개선",
+    "value": "4주 사용 후 등 여드름성 피부 병변 수 30% 감소",
+    "institute": "OO피부임상연구소"
+   }
+  ]
+ },
+ {
+  "product_id": "SAMPLE_14",
+  "name": "PDRN 리커버리 앰플",
+  "category": "일반",
+  "functional_type": null,
+  "form": "앰플",
+  "key_ingredients": [
+   "소듐디엔에이(PDRN)"
+  ],
+  "owned_evidence": []
+ },
+ {
+  "product_id": "SAMPLE_15",
+  "name": "콜라겐 부스팅 크림",
+  "category": "일반",
+  "functional_type": null,
+  "form": "크림",
+  "key_ingredients": [
+   "가수분해콜라겐"
+  ],
+  "owned_evidence": [
+   {
+    "test_type": "인체외시험",
+    "item": "콜라겐 생성",
+    "value": "섬유아세포 콜라겐 생성 18% 증가 (in vitro)",
+    "institute": "OO연구원"
+   }
+  ]
+ },
+ {
+  "product_id": "SAMPLE_16",
+  "name": "베이비 무향 로션",
+  "category": "일반",
+  "functional_type": null,
+  "form": "로션",
+  "key_ingredients": [
+   "시어버터"
+  ],
+  "owned_evidence": [
+   {
+    "test_type": "시험 분석",
+    "item": "파라벤 함유 여부",
+    "value": "파라벤 6종 불검출",
+    "institute": "OO분석센터"
+   }
+  ]
+ },
+ {
+  "product_id": "SAMPLE_17",
+  "name": "본딩 헤어 트리트먼트",
+  "category": "일반",
+  "functional_type": null,
+  "form": "트리트먼트",
+  "key_ingredients": [
+   "케라틴"
+  ],
+  "owned_evidence": [
+   {
+    "test_type": "인체외시험",
+    "item": "모발 손상 개선",
+    "value": "손상 모발 인장강도 25% 개선",
+    "institute": "OO연구원"
+   }
+  ]
+ },
+ {
+  "product_id": "SAMPLE_18",
+  "name": "글로우 커버 쿠션",
+  "category": "일반",
+  "functional_type": null,
+  "form": "쿠션(색조)",
+  "key_ingredients": [
+   "나이아신아마이드"
+  ],
+  "owned_evidence": []
+ },
+ {
+  "product_id": "SAMPLE_21",
+  "name": "데일리 여성 청결 폼",
+  "category": "일반",
+  "functional_type": null,
+  "form": "외음부 세정제",
+  "key_ingredients": [
+   "락틱애씨드"
+  ],
+  "owned_evidence": [
+   {
+    "test_type": "시험 분석",
+    "item": "제품 pH",
+    "value": "pH 4.5~5.0",
+    "institute": "OO분석센터"
+   }
+  ]
+ },
+ {
+  "product_id": "SAMPLE_22",
+  "name": "허니 립밤",
+  "category": "일반",
+  "functional_type": null,
+  "form": "립밤",
+  "key_ingredients": [
+   "꿀추출물",
+   "시어버터"
+  ],
+  "owned_evidence": []
+ },
+ {
+  "product_id": "SAMPLE_23",
+  "name": "하이드로겔 수분 마스크팩",
+  "category": "일반",
+  "functional_type": null,
+  "form": "마스크팩",
+  "key_ingredients": [
+   "알로에베라잎추출물"
+  ],
+  "owned_evidence": [
+   {
+    "test_type": "인체적용시험",
+    "item": "즉각 보습",
+    "value": "1회 사용 직후 피부 수분량 35% 증가",
+    "institute": "OO피부임상연구소"
+   }
+  ]
+ }
+]
