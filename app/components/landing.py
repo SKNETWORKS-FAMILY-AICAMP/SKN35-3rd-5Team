@@ -28,7 +28,7 @@ _LANDING_DIR = Path(__file__).resolve().parents[1] / "static" / "landing"
 
 SECTIONS = [("bw-problem", "문제"), ("bw-how", "검토 방식"), ("bw-features", "기능"), ("bw-sources", "근거 자료")]
 
-# 히어로 예시 — views/review.py 의 시작 문구와 같다 (판정 셋이 하나씩 나오게 고른 문구)
+# 히어로 예시 — views/review.py 의 시작 문구와 같다. 판정은 그때그때 Mock 엔진 결과를 쓴다
 DEMO_COPIES = [
     "단 4주 만에 보습력 42% 폭발적 개선 입증! 손상 피부 완벽 재생!",
     "바르는 순간부터 24시간 촉촉함이 지속되는 수분 크림",

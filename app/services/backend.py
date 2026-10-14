@@ -260,6 +260,29 @@ def review_copy(copy_text: str, product: dict) -> dict:
     return _with_rule_highlights(resp, product)
 
 
+def generate_copy(
+    instruction: str,
+    product: dict,
+    *,
+    channel: str = "상세페이지",
+    tone: str = "고급스러운",
+    length: str = "한 줄",
+    keywords: list[str] | None = None,
+) -> dict:
+    """현재 검토 기준으로 신규 광고 문구 후보를 생성한다."""
+    payload = {
+        "instruction": instruction,
+        "product": product,
+        "channel": channel,
+        "tone": tone,
+        "length": length,
+        "keywords": keywords or [],
+    }
+    if data_mode() == "mock":
+        return mock.generate_copy(**payload)
+    return _post("/generate", payload, timeout=180.0)
+
+
 def split_sentences(full_text: str) -> list[str]:
     """서버(api/text.py)와 같은 규칙으로 문장을 나눈다."""
     try:
