@@ -45,7 +45,7 @@ def test_launcher_and_chat_navigation_preserve_existing_pages(monkeypatch):
     monkeypatch.setattr(backend, "health", lambda: {"mode": "mock", "ok": True})
     page = AppTest.from_file(str(APP)).run()
     assert not page.exception
-    assert set(page.session_state["bw_pages"]) == {"chat", "generate", "review", "bulk", "library", "market"}
+    assert set(page.session_state["bw_pages"]) == {"chat", "generate", "review", "bulk", "library", "forecast"}
     assert len(page.get("popover")) == 1
     assert any(w.label == "보내기" for w in page.button)
 
