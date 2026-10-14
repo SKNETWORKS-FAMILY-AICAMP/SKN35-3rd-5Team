@@ -47,6 +47,8 @@ class Product(TypedDict):
     category: Literal["일반", "기능성"]
     functional_type: str | None
     owned_evidence: list[Evidence]   # 심사 요청에는 사이드바에서 체크한 실증만 담는다
+    ingredients: NotRequired[list[str]]
+    ingredient_source: NotRequired[str]
 
 
 # ── 심사 결과 (= schemas.Citation / ReviewResult / ExecutionTiming) ──────

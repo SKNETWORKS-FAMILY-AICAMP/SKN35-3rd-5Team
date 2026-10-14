@@ -57,7 +57,10 @@ def _load_json(path_key: str, fallback: str) -> Any:
 
 
 def mock_products() -> list[dict]:
-    return _load_json("MOCK_PRODUCTS_PATH", "data/assets/mock_products.json")
+    original = _load_json("MOCK_PRODUCTS_PATH", "data/assets/mock_products.json")
+    public_path = REPO_ROOT / "data" / "assets" / "public_analysis_products.json"
+    public = json.loads(public_path.read_text(encoding="utf-8")) if public_path.exists() else []
+    return public + original
 
 
 def banned_terms() -> list[dict]:

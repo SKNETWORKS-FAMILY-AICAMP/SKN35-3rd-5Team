@@ -23,6 +23,8 @@ class ProductCard(BaseModel):
     category: Literal["일반", "기능성"]
     functional_type: Optional[str] = None
     owned_evidence: list[OwnedEvidence] = Field(default_factory=list)
+    ingredients: list[str] = Field(default_factory=list, description="제공된 전성분명. 효능 시험 근거와 구분")
+    ingredient_source: Optional[str] = None
 
 
 class Citation(BaseModel):

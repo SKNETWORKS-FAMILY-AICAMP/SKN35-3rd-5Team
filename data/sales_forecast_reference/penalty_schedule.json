@@ -1,0 +1,325 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "D1",
+  "built_date": "2026-10-14",
+  "source": {
+    "file": "data/01_raw/law/화장품법_시행규칙.xml",
+    "sha256": "268b60f3ad8e59df37480ba8b99f0e02f49ff11913dd08b9936ed142b902447f",
+    "law_id": "008741",
+    "promulgated_date": "20260331",
+    "effective_date": "20260402",
+    "annex_revision_date": "2025-02-07",
+    "official_pdf_url": "https://www.law.go.kr/LSW/flDownload.do?flSeq=162933391",
+    "official_pdf_table_visually_checked": true,
+    "visual_check_date": "2026-10-14",
+    "visually_checked_pdf_sha256": "c8a97458853fd3f6a436d4904479d95be513c408192e8540d3f104fee5079cdc",
+    "latest_law_version_verified": false,
+    "version_note": "기존 XML 스냅샷과 그 XML이 연결한 공식 별표 PDF 대조. 최신 본문 전체를 확인했다는 의미는 아님",
+    "excerpt_file": "data/sales_forecast_reference/penalty_schedule_source_excerpt.txt"
+  },
+  "schedules": [
+    {
+      "schedule_id": "ANNEX7_2_DEO_1",
+      "rule_items": [
+        "2가",
+        "2나",
+        "2카"
+      ],
+      "law_ids": [
+        "LAW_시행규칙_별표5-2가",
+        "LAW_시행규칙_별표5-2나",
+        "LAW_시행규칙_별표5-2카"
+      ],
+      "sanction": {
+        "표시": "해당 품목 판매업무정지",
+        "광고": "해당 품목 광고업무정지"
+      },
+      "months_by_offense": [
+        3,
+        6,
+        9
+      ],
+      "offense_columns": [
+        {
+          "offense": "1",
+          "months": 3,
+          "source_cell_status": "stated"
+        },
+        {
+          "offense": "2",
+          "months": 6,
+          "source_cell_status": "stated"
+        },
+        {
+          "offense": "3",
+          "months": 9,
+          "source_cell_status": "stated"
+        },
+        {
+          "offense": "4이상",
+          "months": null,
+          "source_cell_status": "blank_requires_review"
+        }
+      ],
+      "source_article": "화장품법 시행규칙 제29조제1항·별표7 제2호 더목1) / 화장품법 제13조·제24조제1항제10호",
+      "source_file": "data/01_raw/law/화장품법_시행규칙.xml",
+      "source_locator": "별표번호=0007, 가지번호=00 / PDF 9페이지",
+      "source_columns_compact": [
+        "해당품목판매업무정지3개월(표시위반)또는해당품목광고업무정지3개월(광고위반)",
+        "해당품목판매업무정지6개월(표시위반)또는해당품목광고업무정지6개월(광고위반)",
+        "해당품목판매업무정지9개월(표시위반)또는해당품목광고업무정지9개월(광고위반)",
+        ""
+      ],
+      "verified_against_raw": true,
+      "violation_types": [
+        "기능성오인",
+        "의약품오인"
+      ]
+    },
+    {
+      "schedule_id": "ANNEX7_2_DEO_2",
+      "rule_items": [
+        "2다",
+        "2라",
+        "2마",
+        "2바",
+        "2사",
+        "2아",
+        "2자",
+        "2차"
+      ],
+      "law_ids": [
+        "LAW_시행규칙_별표5-2다",
+        "LAW_시행규칙_별표5-2라",
+        "LAW_시행규칙_별표5-2마",
+        "LAW_시행규칙_별표5-2바",
+        "LAW_시행규칙_별표5-2사",
+        "LAW_시행규칙_별표5-2아",
+        "LAW_시행규칙_별표5-2자",
+        "LAW_시행규칙_별표5-2차"
+      ],
+      "sanction": {
+        "표시": "해당 품목 판매업무정지",
+        "광고": "해당 품목 광고업무정지"
+      },
+      "months_by_offense": [
+        2,
+        4,
+        6,
+        12
+      ],
+      "offense_columns": [
+        {
+          "offense": "1",
+          "months": 2,
+          "source_cell_status": "stated"
+        },
+        {
+          "offense": "2",
+          "months": 4,
+          "source_cell_status": "stated"
+        },
+        {
+          "offense": "3",
+          "months": 6,
+          "source_cell_status": "stated"
+        },
+        {
+          "offense": "4이상",
+          "months": 12,
+          "source_cell_status": "stated"
+        }
+      ],
+      "source_article": "화장품법 시행규칙 제29조제1항·별표7 제2호 더목2) / 화장품법 제13조·제24조제1항제10호",
+      "source_file": "data/01_raw/law/화장품법_시행규칙.xml",
+      "source_locator": "별표번호=0007, 가지번호=00 / PDF 9페이지",
+      "source_columns_compact": [
+        "해당품목판매업무정지2개월(표시위반)또는해당품목광고업무정지2개월(광고위반)",
+        "해당품목판매업무정지4개월(표시위반)또는해당품목광고업무정지4개월(광고위반)",
+        "해당품목판매업무정지6개월(표시위반)또는해당품목광고업무정지6개월(광고위반)",
+        "해당품목판매업무정지12개월(표시위반)또는해당품목광고업무정지12개월(광고위반)"
+      ],
+      "verified_against_raw": true,
+      "violation_types": [
+        "범위이탈",
+        "비교광고",
+        "소비자오인",
+        "실증필요"
+      ]
+    }
+  ],
+  "law_id_mapping": [
+    {
+      "law_id": "LAW_시행규칙_별표5-2가",
+      "rule_item": "2가",
+      "schedule_id": "ANNEX7_2_DEO_1",
+      "description": "의약품 오인",
+      "violation_types": [
+        "의약품오인"
+      ],
+      "type_source": "현재 규칙 자산의 명시적 law_id/type 연결; 미연결은 빈 목록",
+      "selection_requires_law_id": true
+    },
+    {
+      "law_id": "LAW_시행규칙_별표5-2나",
+      "rule_item": "2나",
+      "schedule_id": "ANNEX7_2_DEO_1",
+      "description": "기능성화장품 오인",
+      "violation_types": [
+        "기능성오인"
+      ],
+      "type_source": "현재 규칙 자산의 명시적 law_id/type 연결; 미연결은 빈 목록",
+      "selection_requires_law_id": true
+    },
+    {
+      "law_id": "LAW_시행규칙_별표5-2다",
+      "rule_item": "2다",
+      "schedule_id": "ANNEX7_2_DEO_2",
+      "description": "의약 전문가 등의 지정·공인·추천 등",
+      "violation_types": [
+        "소비자오인"
+      ],
+      "type_source": "현재 규칙 자산의 명시적 law_id/type 연결; 미연결은 빈 목록",
+      "selection_requires_law_id": true
+    },
+    {
+      "law_id": "LAW_시행규칙_별표5-2라",
+      "rule_item": "2라",
+      "schedule_id": "ANNEX7_2_DEO_2",
+      "description": "제품 원산지 오인",
+      "violation_types": [],
+      "type_source": "현재 규칙 자산의 명시적 law_id/type 연결; 미연결은 빈 목록",
+      "selection_requires_law_id": true
+    },
+    {
+      "law_id": "LAW_시행규칙_별표5-2마",
+      "rule_item": "2마",
+      "schedule_id": "ANNEX7_2_DEO_2",
+      "description": "외국 기술제휴 오인",
+      "violation_types": [],
+      "type_source": "현재 규칙 자산의 명시적 law_id/type 연결; 미연결은 빈 목록",
+      "selection_requires_law_id": true
+    },
+    {
+      "law_id": "LAW_시행규칙_별표5-2바",
+      "rule_item": "2바",
+      "schedule_id": "ANNEX7_2_DEO_2",
+      "description": "비교 기준·최상급 표현",
+      "violation_types": [
+        "비교광고"
+      ],
+      "type_source": "현재 규칙 자산의 명시적 law_id/type 연결; 미연결은 빈 목록",
+      "selection_requires_law_id": true
+    },
+    {
+      "law_id": "LAW_시행규칙_별표5-2사",
+      "rule_item": "2사",
+      "schedule_id": "ANNEX7_2_DEO_2",
+      "description": "소비자 기만·오인",
+      "violation_types": [
+        "소비자오인"
+      ],
+      "type_source": "현재 규칙 자산의 명시적 law_id/type 연결; 미연결은 빈 목록",
+      "selection_requires_law_id": true
+    },
+    {
+      "law_id": "LAW_시행규칙_별표5-2아",
+      "rule_item": "2아",
+      "schedule_id": "ANNEX7_2_DEO_2",
+      "description": "객관적 확인 없는 품질·효능 또는 화장품 범위 이탈",
+      "violation_types": [
+        "범위이탈",
+        "실증필요"
+      ],
+      "type_source": "현재 규칙 자산의 명시적 law_id/type 연결; 미연결은 빈 목록",
+      "selection_requires_law_id": true
+    },
+    {
+      "law_id": "LAW_시행규칙_별표5-2자",
+      "rule_item": "2자",
+      "schedule_id": "ANNEX7_2_DEO_2",
+      "description": "저속·혐오 표현",
+      "violation_types": [
+        "소비자오인"
+      ],
+      "type_source": "현재 규칙 자산의 명시적 law_id/type 연결; 미연결은 빈 목록",
+      "selection_requires_law_id": true
+    },
+    {
+      "law_id": "LAW_시행규칙_별표5-2차",
+      "rule_item": "2차",
+      "schedule_id": "ANNEX7_2_DEO_2",
+      "description": "멸종위기종 가공품 함유 표현",
+      "violation_types": [],
+      "type_source": "현재 규칙 자산의 명시적 law_id/type 연결; 미연결은 빈 목록",
+      "selection_requires_law_id": true
+    },
+    {
+      "law_id": "LAW_시행규칙_별표5-2카",
+      "rule_item": "2카",
+      "schedule_id": "ANNEX7_2_DEO_1",
+      "description": "다른 제품 비방",
+      "violation_types": [],
+      "type_source": "현재 규칙 자산의 명시적 law_id/type 연결; 미연결은 빈 목록",
+      "selection_requires_law_id": true
+    }
+  ],
+  "general_criteria": [
+    {
+      "item": "1가",
+      "summary": "복수 위반: 무거운 처분 기준 적용. 복수 업무정지면 가장 무거운 기간에 나머지 각 기간의 1/2 가산, 최대 12개월"
+    },
+    {
+      "item": "1나",
+      "summary": "업무정지와 품목업무정지의 기간에 따라 전체 업무정지 적용 또는 병과"
+    },
+    {
+      "item": "1다·라",
+      "summary": "같은 위반의 차수는 최근 1년간 처분 이력 기준(머목은 2년). 실제 처분일/과징금 통보일과 재적발일 기준. 품목이 다르면 품목업무정지의 차수 기준 적용 제외. 전 차수 다음 차수 적용"
+    },
+    {
+      "item": "1마",
+      "summary": "처분 절차 중 같은 위반 반복: 진행 중 기준 기간의 1/2씩 가산, 최대 12개월"
+    },
+    {
+      "item": "1바",
+      "summary": "같은 위반 3차 이상은 과징금 부과대상 제외"
+    },
+    {
+      "item": "1사",
+      "summary": "등록 소재지에 제조시설이 전혀 없는 경우 등록취소; 본 광고 문구 표의 자동 계산 범위 밖"
+    },
+    {
+      "item": "1아",
+      "summary": "영 제2조제2호라목 책임판매업은 판매금지/판매업무정지를 수입대행금지/수입대행업무정지로 읽음"
+    },
+    {
+      "item": "1자1",
+      "summary": "공익상 필요, 기소유예/선고유예, 광고주 의사와 무관한 무단 광고 등은 1/2까지 감경 또는 면제 가능"
+    },
+    {
+      "item": "1자2",
+      "summary": "유통 보관 중 기능성 원료 변화에 의한 함량 미달, 위해 없는 비병원성 일반세균 오염 인정 등은 1/2까지 감경 가능; 모든 광고 위반에 일괄 적용하지 않음"
+    }
+  ],
+  "mapping_policy": {
+    "lookup_key": "구체적인 별표5 law_id + 표시/광고 + 위반 차수",
+    "violation_type_only_lookup_allowed": false,
+    "unmapped_law_id_months": null,
+    "blank_source_cell_months": null,
+    "multiple_violations_auto_combined": false
+  },
+  "limitations": [
+    "level 2는 법적 적발 확정이 아니다. 처분 종류·차수·감경·가중은 개별 사실관계 및 처분권자 판단이 필요",
+    "광고업무정지는 판매업무정지와 다름. 광고 정지 개월 수만으로 품목 매출이 0이 된다고 가정할 수 없음",
+    "기준 매출×기간은 별도 가정에 따른 노출 시나리오일 뿐 법령이 정한 손실액이나 실제 최대 손실액이 아님",
+    "가·나·카목 4차 이상 칸은 공란으로 null 유지. 직전 차수 값으로 채우지 않음"
+  ],
+  "detection_probability": null,
+  "revenue_loss": null,
+  "verified_against_raw": true,
+  "rule_asset_hashes": {
+    "data/assets/banned_terms.json": "f3d3ed597ef3b8c7a9e8d0c7752a8929d1c0dbb58edfca5e092211d3e4d74056",
+    "data/assets/rule_patterns.json": "9b2ee1508d4ddaf64024df200650f5a55420a8276e9369b371fbf7128775002f"
+  }
+}

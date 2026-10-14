@@ -1,7 +1,9 @@
 """외부 모델/검색 인프라 없이 검증하는 API 계약 테스트."""
 from uuid import uuid4
+
 import pytest
 from fastapi.testclient import TestClient
+
 from api.main import create_app
 from cosmetic_agent.domain.schemas import ExecutionTiming, ReviewResponse, ReviewResult
 
@@ -90,3 +92,30 @@ def test_openapi_contract(api_client):
     assert "/review" in schema["paths"]
     assert "/review/bulk" in schema["paths"]
     assert schema["components"]["schemas"]["ProductCard"]["properties"]["category"]["enum"] == ["일반", "기능성"]
+
+
+@pytest.mark.parametrize("endpoint", ["search", "review", "bulk"])
+def test_qdrant_transport_failure_is_actionable_503(endpoint, sample_product):
+    from types import SimpleNamespace
+
+    from qdrant_client.http.exceptions import ResponseHandlingException
+
+    def unavailable(*args, **kwargs):
+        raise ResponseHandlingException(ConnectionError("private-host-and-secret"))
+
+    service = SimpleNamespace(
+        review_single=unavailable,
+        rewriter=SimpleNamespace(rewrite=lambda query: query),
+        hybrid_retriever=SimpleNamespace(retrieve=unavailable),
+    )
+    with TestClient(create_app(lambda: service)) as client:
+        if endpoint == "search":
+            response = client.get("/search", params={"q": "주름"})
+        else:
+            field = "full_text" if endpoint == "bulk" else "copy_text"
+            path = "/review/bulk" if endpoint == "bulk" else "/review"
+            response = client.post(path, json={field: "보습 케어", "product": sample_product.model_dump()})
+    assert response.status_code == 503
+    assert response.json()["code"] == "SEARCH_DATABASE_UNAVAILABLE"
+    assert "Qdrant" in response.json()["detail"]
+    assert "private-host-and-secret" not in response.text
