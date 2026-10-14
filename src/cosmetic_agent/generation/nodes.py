@@ -158,7 +158,7 @@ def finalize_generation_node(state: AdGenerationState) -> dict[str, Any]:
         )
         return {
             "status": "생성보류",
-            "candidates": [],
-            "warnings": [detail],
+            "candidates": state.get("candidates", []),
+            "warnings": list(dict.fromkeys([detail, *state.get("rejected_notes", [])])),
         }
     return {"status": "생성완료", "warnings": []}
