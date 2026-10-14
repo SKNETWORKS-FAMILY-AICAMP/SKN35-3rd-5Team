@@ -93,3 +93,60 @@ def test_euphemistic_removal_claims_are_blocked():
     assert not verifier.verify_suggestion("이 앰플로 기미를 잊으세요", [], RuleEngine(), **kwargs)[0]
     assert not verifier.verify_suggestion("주름이여 안녕", [], RuleEngine(),
                                           product_category="기능성", functional_type="주름 개선")[0]
+
+
+def test_generation_rewrites_failed_review_with_bounded_retries():
+    from cosmetic_agent.domain.schemas import (
+        ExecutionTiming,
+        ReviewResponse,
+        ReviewResult,
+    )
+
+    calls = []
+    generator = FakeGenerator()
+
+    def review(text, product):
+        calls.append(text)
+        return ReviewResponse(request_id="deferred", input_text=text,
+                              result=ReviewResult(status="판단보류"), timing=ExecutionTiming())
+
+    graph = build_generation_graph(rule_engine=RuleEngine(), rewriter=QueryRewriter(),
+                                   retriever=FakeRetriever(), verifier=CopyVerifier(),
+                                   generator=generator, reviewer=review)
+    state = graph.invoke({"instruction": "선크림 광고를 만들어줘", "product": {
+        "product_id": "P1", "name": "선크림", "category": "일반", "owned_evidence": []},
+        "channel": "SNS", "tone": "재치 있는", "length": "한 줄", "keywords": []})
+    assert len(calls) == 3
+    assert state["status"] == "생성보류"
+    assert all(not c["verified"] and c["status"] == "확인필요" for c in state["candidates"])
+
+
+def test_generation_passes_product_concept_and_previous_copy_to_model():
+    from unittest.mock import Mock
+
+    from cosmetic_agent.generation.nodes import generate_candidates_node
+    model = Mock()
+    model.generate.return_value = []
+    generate_candidates_node({"instruction": "더 짧게", "product": {}, "channel": "SNS",
+                              "tone": "웃기게", "length": "한 줄", "keywords": [],
+                              "product_description": "선크림", "reference_copy": "이전 광고문"}, model)
+    assert model.generate.call_args.kwargs["reference_copy"] == "이전 광고문"
+    assert model.generate.call_args.kwargs["product_description"] == "선크림"
+
+
+def test_unknown_sunscreen_claims_are_rewritten_without_blocking_concept():
+    from cosmetic_agent.generation.nodes import concept_claim_notes
+    state = {"instruction": "자외선 차단 선크림 광고", "product": {
+        "name": "선크림", "category": "일반", "owned_evidence": []}}
+    assert concept_claim_notes("햇살 아래 피부를 지켜주는 선크림", state)
+    assert concept_claim_notes("SPF50 PA++++ 선크림", state)
+    assert not concept_claim_notes("햇살 있는 하루, 외출 준비의 선케어 루틴", state)
+
+
+def test_confirmed_sunscreen_scope_and_spf_evidence_are_preserved():
+    from cosmetic_agent.generation.nodes import concept_claim_notes
+    state = {"instruction": "선크림 광고", "product": {
+        "name": "선크림", "category": "기능성", "functional_type": "자외선 차단",
+        "owned_evidence": [{"test_type": "SPF 시험", "item": "자외선 차단", "value": "SPF50 PA++++"}]}}
+    assert not concept_claim_notes("SPF50 PA++++", state)
+    assert concept_claim_notes("SPF30", state)
