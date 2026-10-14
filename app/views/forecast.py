@@ -29,6 +29,7 @@ from app.services.peer_market import (appeal_summary, candidate_copies, find_pee
                                       judge_candidates, price_benchmark, product_profile, FORMS, form_of, load_market_products)
 from app.services.product_market import latest_review_pair
 from app.services import generation_results
+from app.services.candidate_compare import compare_candidates
 from app.services.revenue_scenario import DISPLAY_LABEL, build_scenario
 
 health = st.session_state["bw_health"]
@@ -106,6 +107,43 @@ def step(no: str, title: str, sub: str = "") -> None:
         f'<span style="font-size:22px;font-weight:750;color:#182230">{escape(title)}</span></div>'
         + (f'<div style="font-size:14px;color:#667085;margin-bottom:6px">{escape(sub)}</div>' if sub else "")
     )
+
+
+def render_candidate_compare(rows: list[dict], selected: int, pid: str) -> None:
+    """생성 후보 3개를 카드로 나란히 — 추천(★)과 지금 시나리오에 쓰는 후보를 표시한다."""
+    level_color = {"green": SAFE, "orange": CAUTION, "red": RISK}
+    cols = st.columns(len(rows)) if rows else []
+    for col, r in zip(cols, rows):
+        label, color = LEVEL_TEXT.get(r["level"], LEVEL_TEXT[None])
+        risk = ("처분 위험 없음" if r["penalty"] == "no_violation"
+                else f"{r['sanction']} {r['months']}개월" if r["months"] else "처분 기준 개별 검토")
+        market = (f"시장 {r['peer_total']}개 중 {r['peer_products']}개 사용 · 인기 상위 {r['peer_popular']}개"
+                  if r["peer_total"] else "비교할 시장 제품 없음")
+        border = "2px solid #0f5c55" if r["recommended"] else "1px solid #dedbd4"
+        badge = '<span style="color:#0f5c55;font-weight:700">★ 매출 시나리오 추천 · </span>' if r["recommended"] else ""
+        using = '<span style="color:#d63838;font-weight:700"> · 지금 계산 중</span>' if r["index"] == selected else ""
+        with col:
+            st.html(
+                f'<div style="border:{border};border-radius:14px;padding:16px 18px;background:#fffdf8;min-height:300px">'
+                f'<div style="font-size:12px;color:#667085">{badge}후보 {r["index"] + 1} · {escape(r["tier_label"])}{using}</div>'
+                f'<div style="font-size:18px;font-weight:750;color:#182230;margin:8px 0 4px">{escape(r["headline"])}</div>'
+                f'<div style="font-size:13px;color:#475467;min-height:38px">{escape(r["supporting"])}</div>'
+                f'<div style="margin:10px 0 6px">' + "".join(chip(t, "#0f5c55", "#e3f2ef") for t in r["types"]) + '</div>'
+                f'<div style="font-size:12px;color:#475467;line-height:1.7">'
+                f'규칙 판정 <b style="color:{level_color.get(color, FLAT)}">{escape(label)}</b> · {escape(risk)}<br>'
+                f'{escape(market)}<br>'
+                f'창작 구조 {escape(", ".join(r["creative"]) or "—")} · '
+                f'{"우리 시험 " + escape(", ".join(r["evidence_ids"])) + " 사용" if r["uses_evidence"] else "시험 수치 없음"}'
+                f'</div></div>'
+            )
+            if r["index"] != selected and st.button("이 후보로 계산", key=f"fc_use_{pid}_{r['index']}", width="stretch"):
+                st.session_state[f"fc_pick_{pid}"] = r["index"]
+                st.rerun()
+    best = next((r for r in rows if r["recommended"]), None)
+    if best:
+        st.caption(f"★ 추천 이유: {best['why']} 문구별 매출 상승률은 데이터가 없어 비교하지 않고, ‘처분 위험 없이 가장 강하게 말할 수 있는가’로 골랐어요.")
+    else:
+        st.warning("규칙상 바로 쓸 수 있는 후보가 없어요. 광고문 생성에서 다시 만들거나 근거 자료를 확인해 주세요.")
 
 
 page_header(
@@ -260,23 +298,23 @@ with st.container(key="pagebody"):
         st.caption("비교할 시장 제품이 있어야 문구를 분석할 수 있어요.")
 
     # ------------------------------------------------------------------ ③ 공통 생성 결과
-    step("3", "선택한 광고 문구", "광고문 생성에서 시장 사례·우리 제품 자료·규정을 참고한 결과를 그대로 사용합니다.")
+    step("3", "생성 후보 비교 · 매출 시나리오에 쓸 문구", "광고문 생성 후보를 문구 유형 · 시장 사용도 · 규칙 판정 · 처분 위험으로 나란히 비교해요.")
     saved, stale = generation_results.record(registered_product)
     best = None
     if stale:
         st.warning("제품 정보 또는 선택한 실증 자료가 바뀌었습니다. 광고문 생성에서 다시 생성해 주세요.")
     elif saved and saved["response"].get("status") == "생성완료" and saved["response"].get("candidates"):
         candidates = saved["response"]["candidates"]
-        index = st.selectbox(
-            "매출 시나리오에 사용할 생성 문구", range(len(candidates)),
-            index=saved["selected"],
-            format_func=lambda i: candidates[i]["text"],
-            key=f"fc_generated_{pid}_{saved['response']['request_id']}_{saved['selected']}",
-        )
+        pick = st.session_state.pop(f"fc_pick_{pid}", None)
+        if pick is not None:
+            generation_results.choose(registered_product, pick)   # saved 도 같은 기록이라 바로 반영된다
+        rows = compare_candidates(product, candidates, summary)
+        render_candidate_compare(rows, saved["selected"], pid)
+        index = saved["selected"]
         generation_results.choose(registered_product, index)
         chosen = generation_results.selected(registered_product)
         best = {"copy": chosen["text"]}
-        st.write(chosen["text"])
+        st.markdown("##### 선택한 문구 자세히")
         if chosen.get("evidence_note"):
             st.caption("선택한 문구와 함께 확인할 시험 정보: " + chosen["evidence_note"])
         st.caption(chosen.get("verify_note") or "생성 단계 검증 통과")
@@ -299,9 +337,20 @@ with st.container(key="pagebody"):
     step("4", "문구를 바꿨을 때의 매출 시나리오", "지금 쓰려는 문구(원문)와 추천 문구를 비교해요. " + DISPLAY_LABEL + ".")
     review = latest_review_pair(st.session_state.get("bw_threads"), pid)
     default_orig = (review or {}).get("original") or ""
+    orig_key = f"fc_orig_{pid}"
+    risky = sorted(({"brand": p["brand"], "copy": c["copy_text"].replace("\n", " ").strip(), "level": c["level"]}
+                    for p in peers for c in p.get("copies", []) if (c.get("level") or 0) >= 1),
+                   key=lambda r: -r["level"])
+    if risky:
+        with st.container(horizontal=True):
+            st.caption("원문이 없다면 — 경쟁 제품에서 ‘근거 필요·쓰면 안 됨’ 판정이 나온 표현을 우리 제품에 그대로 쓴다고 가정해 비교해 볼 수 있어요.")
+            if st.button(f"경쟁 문구로 비교 · {risky[0]['brand']} “{risky[0]['copy'][:18]}”", key=f"fc_risky_{pid}"):
+                st.session_state[orig_key] = risky[0]["copy"]
+                st.rerun()
     c1, c2 = st.columns(2)
     with c1:
-        original = st.text_area("지금 쓰려는 문구 (원문)", value=default_orig, height=80, key=f"fc_orig_{pid}",
+        initial = {} if orig_key in st.session_state else {"value": default_orig}
+        original = st.text_area("지금 쓰려는 문구 (원문)", height=80, key=orig_key, **initial,
                                 help="검토 대화에서 이 제품으로 검토한 문구가 있으면 그 문구가 먼저 들어와요")
     with c2:
         recommended = st.text_area("선택한 생성 문구", value=best["copy"] if best else "", height=80, disabled=True,
