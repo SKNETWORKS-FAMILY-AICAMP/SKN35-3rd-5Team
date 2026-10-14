@@ -1,6 +1,7 @@
 """전체 화면과 작은 팝업이 공유하는 통합 챗봇."""
 import json
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import streamlit as st
 
@@ -12,6 +13,7 @@ from app.components.theme import inject_css
 from app.services import backend
 
 KST = timezone(timedelta(hours=9))
+LAUNCHER_SCRIPT = Path(__file__).with_name("chat_launcher.js")
 
 
 def chat_header(*, compact: bool = False) -> None:
@@ -179,7 +181,7 @@ def render_launcher(pages: dict) -> None:
     st.html(f'<style>.st-key-chat_launcher [data-testid="stPopoverButton"] '
             f'{{background-image:url("{avatar_uri()}");}}</style>')
     with st.container(key="chat_launcher"), \
-            st.popover("통합 챗봇 열기", icon=":material/chat_bubble:", help="통합 챗봇 열기"), \
+            st.popover("통합 챗봇 열기", icon=":material/chat_bubble:", help="클릭하면 대화 · 드래그로 이동 · Alt + 방향키로 이동"), \
             st.container(key="chat_mini"):
         with st.container(key="chat_header_mini"):
             profile, expand = st.columns([4, 1], vertical_alignment="center")
@@ -188,3 +190,5 @@ def render_launcher(pages: dict) -> None:
             with expand:
                 st.page_link(pages["chat"], label="전체", icon=":material/open_in_full:")
         render_chat(compact=True)
+    # 저장소의 정적 스크립트만 실행하며 대화 내용은 JavaScript에 넣지 않는다.
+    st.html(f"<script>{LAUNCHER_SCRIPT.read_text(encoding='utf-8')}</script>", unsafe_allow_javascript=True)
