@@ -1,12 +1,14 @@
-"""검토 기준 기반 신규 광고 문구 생성 API."""
-
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 
 from cosmetic_agent.domain.schemas import GenerateRequest, GenerateResponse
+from cosmetic_agent.models.copy_generator import GenerationUnavailable
 
 router = APIRouter(prefix="/generate", tags=["Generate"])
 
 
 @router.post("", response_model=GenerateResponse)
 def generate_copy(req: GenerateRequest, request: Request):
-    return request.app.state.review_service.generate_copy(req)
+    try:
+        return request.app.state.generation_service.generate(req)
+    except GenerationUnavailable as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error

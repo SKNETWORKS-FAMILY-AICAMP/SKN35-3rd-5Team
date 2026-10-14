@@ -1,150 +1,69 @@
-"""현재 검토 기준을 사용한 신규 광고 문구 생성 화면."""
-
-from __future__ import annotations
+"""제품 설명·작성 요청 중심의 통합 광고문 생성 화면."""
+import re
 
 import streamlit as st
 
-from app.components import threads
 from app.components.context import current
+from app.components.generation import render_generation
 from app.components.ingredient_roles import render_ingredient_roles
-from app.components.layout import esc, html, page_header
-from app.components.theme import AUTHORITY, inject_css
 from app.services import backend, generation_results
 from cosmetic_agent.generation.creative import creative_catalog
 
-health = st.session_state["bw_health"]
-pages = st.session_state["bw_pages"]
-inject_css("pages")
+st.title("광고문 생성")
+st.caption("원하는 제품과 광고 방향을 말해주세요. 성분을 몰라도 초안부터 만들고, 규정과 확인된 제품 근거로 검토합니다.")
+use_project = st.checkbox("왼쪽 프로젝트의 제품·실증 자료 사용", value=False)
+if use_project:
+    product, ctx = current()
+    st.caption(f"{ctx['product_name']} · 실증 {ctx['evidence_on']}건. 실제 동일 제품의 자료일 때만 사용하세요.")
+else:
+    product = {"product_id": "generation_draft", "name": "나의 화장품", "category": "일반", "owned_evidence": []}
 
-product, ctx = current()
-result_key = "bw_generation_result"
-signature_key = "bw_generation_signature"
-
-page_header(
-    "광고문 생성",
-    "왼쪽 검토 기준의 제품 정보와 선택된 실증자료 안에서 검증된 광고 문구를 만듭니다.",
-    health=health,
-)
-
-html(
-    f'<div class="bw-hint"><span class="material-symbols-rounded">science</span><div>'
-    f'<b>{esc(ctx["product_name"])}</b> · {esc(ctx["category_label"])} · '
-    f'사용 실증 {ctx["evidence_on"]}/{ctx["evidence_total"]}<br>'
-    f'<span>왼쪽 「프로젝트 · 검토 기준」에서 제품과 사용할 실증자료를 바꿀 수 있습니다.</span>'
-    f'</div></div>'
-)
-
-with st.container(key="pagebody"):
+if use_project:
     render_ingredient_roles(product)
-    with st.expander("창작 레퍼런스 · 어떤 방식으로 다르게 쓰나요?"):
-        st.caption("제공하신 이미지의 표현 구조만 참고합니다. 해당 브랜드의 수치·기술·효능을 복사하지 않습니다.")
-        for style in creative_catalog()["styles"]:
-            st.markdown(f"**{style['name']}** — {style['pattern']}")
-        st.caption("출력: 창의적 헤드라인 + 제품 설명 + 사용한 실증의 시험 조건. 자료가 없으면 시험 조건을 만들지 않습니다.")
-    with st.form("generate_form"):
-        instruction = st.text_area(
-            "어떤 광고문을 만들까요?",
-            value=f"{ctx['product_name']}의 특징을 설득력 있게 소개하는 광고문을 만들어줘",
-            max_chars=2000,
-            height=100,
-        )
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            channel = st.selectbox("광고 채널", ["상세페이지", "SNS", "배너", "검색광고", "라이브커머스"])
-        with col2:
-            tone = st.selectbox("문구 분위기", ["고급스러운", "전문적인", "감성적인", "간결한", "친근한"])
-        with col3:
-            length = st.selectbox("문구 길이", ["한 줄", "짧은 문단", "상세 설명"])
-        keyword_text = st.text_input("포함할 키워드", placeholder="쉼표로 구분해 입력하세요")
-        submitted = st.form_submit_button("검증된 광고문 생성", type="primary", icon=":material/auto_awesome:")
+with st.expander("창작 레퍼런스 · 표현 구성 5종"):
+    for style in creative_catalog()["styles"]:
+        st.markdown(f"**{style['name']}** — {style['pattern']}")
+    st.caption("표현 구조만 참고하며 다른 브랜드의 효능·수치를 옮기지 않습니다.")
 
-    if submitted:
-        keywords = [word.strip() for word in keyword_text.split(",") if word.strip()][:10]
+with st.form("generate_form"):
+    instruction = st.text_area("어떤 광고문을 만들까요?", placeholder="예: 자외선 차단 선크림 광고를 20대 대상으로 짧고 발랄하게 만들어줘.\n예: 판테놀이 들어간 크림의 SNS 문구를 감성적인 톤으로 써줘.", max_chars=5000, height=140)
+    channel_col, tone_col, length_col = st.columns(3)
+    channel = channel_col.selectbox("광고 채널", ["SNS", "상세페이지", "배너", "검색광고", "라이브커머스"])
+    tone = tone_col.text_input("문구 분위기", value="요청에 맞게", max_chars=100, placeholder="예: 재치 있는, 전문적인, 감성적인")
+    length = length_col.selectbox("문구 길이", ["짧은 문단", "한 줄", "상세 설명"])
+    with st.expander("제품·성분 정보 추가 (선택)"):
+        st.caption("추가 정보가 없어도 생성할 수 있습니다. 성분이나 요청한 효능만으로 심사·시험 사실을 추정하지 않습니다.")
+        if not use_project:
+            name = st.text_input("제품명 (선택)", max_chars=100)
+            category = st.selectbox("제품 구분", ["일반", "기능성"])
+            functional_type = st.text_input("실제 심사·보고받은 기능성 유형", max_chars=100) if category == "기능성" else None
+            product = dict(product, name=name.strip() or "나의 화장품", category=category, functional_type=functional_type)
+        raw = st.text_area("실제 함유 성분 (선택)", placeholder="판테놀, 히알루론산", max_chars=10000, height=80)
+    submitted = st.form_submit_button("광고문 만들기", type="primary", icon=":material/auto_awesome:")
+
+payload = {"instruction": instruction.strip(), "product": product, "channel": channel,
+           "tone": tone.strip() or "요청에 맞게", "length": length,
+           "ingredients": list(dict.fromkeys(v.strip() for v in re.split(r"[,，\n;]+", raw) if v.strip()))}
+if submitted:
+    st.session_state.pop("bw_generation", None)
+    if not payload["instruction"]:
+        st.error("어떤 광고문을 만들지 요청을 입력해주세요.")
+    else:
         try:
-            with st.spinner("관련 규정을 검색하고 광고 문구를 검증하고 있습니다..."):
-                st.session_state[result_key] = backend.generate_copy(
-                    instruction.strip(),
-                    product,
-                    channel=channel,
-                    tone=tone,
-                    length=length,
-                    keywords=keywords,
-                )
-                st.session_state[signature_key] = ctx["signature"]
-                generation_results.save(product, st.session_state[result_key], {
-                    "instruction": instruction.strip(), "channel": channel, "tone": tone,
-                    "length": length, "keywords": keywords,
-                })
+            with st.spinner("요청에 맞는 광고 초안을 만들고 검토하고 있습니다…"):
+                response = backend.generate_copy(payload)
+            st.session_state["bw_generation"] = {"payload": payload, "response": response}
+            if use_project:
+                generation_results.save(product, response, payload)
         except backend.BackendError as error:
             st.error(error.message)
-        except Exception as error:  # noqa: BLE001 - 사용자 화면에 안전하게 표시
-            st.error(f"광고문 생성 중 오류가 발생했습니다: {error}")
-
-    saved, stale = generation_results.record(product)
-    response = saved["response"] if saved else None
-    if response:
-        if stale:
-            st.warning("검토 기준이 바뀌었습니다. 새 기준으로 다시 생성해 주세요.")
-        elif response.get("status") == "생성보류":
-            st.warning(" ".join(response.get("warnings") or ["안전한 광고 문구를 생성하지 못했습니다."]))
-        else:
-            labels = {"strong": "근거 최대", "balanced": "균형", "safe": "가장 안전"}
-            st.subheader("생성 결과")
-            for warning in response.get("warnings", []):
-                st.warning(warning)
-            if response.get("mock"):
-                st.caption("화면 확인용 Mock 결과입니다. 실제 시장 참고 AI 생성 결과가 아닙니다.")
-            for index, candidate in enumerate(response.get("candidates", [])):
-                tier = candidate.get("tier", "safe")
-                with st.container(border=True):
-                    st.caption(f"{labels.get(tier, tier)} · {candidate.get('verify_note', '검증 통과')}")
-                    st.markdown(f"### {candidate.get('headline') or candidate['text']}")
-                    if candidate.get("supporting_copy"):
-                        st.write(candidate["supporting_copy"])
-                    if candidate.get("evidence_note"):
-                        with st.container(border=True):
-                            st.caption("함께 표시할 등록 시험 정보 · 최종 광고 사용 전 원자료 확인")
-                            st.write(candidate["evidence_note"])
-                    if candidate.get("rationale"):
-                        st.write(candidate["rationale"])
-                    if candidate.get("used_evidence"):
-                        st.caption("사용한 근거: " + ", ".join(candidate["used_evidence"]))
-                    st.code(candidate["text"] + ("\n\n" + candidate["evidence_note"] if candidate.get("evidence_note") else ""), language=None)
-                    if candidate.get("creative_application"):
-                        st.caption("창작 구성: " + candidate["creative_application"])
-                    if candidate.get("market_application"):
-                        st.write("시장 표현 반영: " + candidate["market_application"])
-                    if candidate.get("ingredient_application"):
-                        st.write("성분 역할 반영: " + candidate["ingredient_application"])
-                    refs = {r["reference_id"]: r for r in response.get("market_references", [])}
-                    for ref_id in candidate.get("market_reference_ids", []):
-                        ref = refs.get(ref_id)
-                        if ref:
-                            st.caption(f"{ref_id} · {ref['brand']} · {ref['copy_text']}")
-                    if st.button("이 문구를 매출 시나리오에 사용", key=f"select_generated_{index}"):
-                        generation_results.choose(product, index)
-                        st.switch_page(pages["forecast"])
-                    if st.button("이 문구 다시 검토", key=f"review_generated_{index}", icon=":material/fact_check:"):
-                        threads.ask(candidate["text"], ctx, product)
-                        st.switch_page(pages["review"])
-
-            references = response.get("market_references", [])
-            with st.expander(f"비교한 시장 문구 {len(references)}건 · 표현 참고용"):
-                if not references:
-                    st.caption("비교 조건에 맞는 시장 문구가 없어 우리 제품 정보와 규정만으로 생성했습니다.")
-                for ref in references:
-                    st.markdown(f"**{ref['reference_id']} · {ref['brand']} · {ref['product_name']}**")
-                    st.write(ref["copy_text"])
-                    st.caption("공통 성분: " + ", ".join(ref["shared_ingredients"]) + " · " + ref["ingredient_basis"])
-                    st.caption(ref.get("conditions") or "시험 조건 미확인")
-                    if ref.get("source_url"):
-                        st.link_button("시장 문구 원문", ref["source_url"], key=f"market_ref_{ref['reference_id']}")
-            citations = response.get("citations") or []
-            if citations:
-                with st.expander(f"생성에 참고한 규정 {len(citations)}건"):
-                    for number, citation in enumerate(citations, start=1):
-                        authority = AUTHORITY.get(int(citation.get("authority", 4)), "자료")
-                        st.markdown(
-                            f"**{number}. [{authority}] {citation.get('source', '')} "
-                            f"{citation.get('article', '')}**\n\n{citation.get('content_snippet', '') or ''}"
-                        )
+saved = st.session_state.get("bw_generation")
+if saved and saved["payload"] == payload:
+    render_generation(saved["response"])
+    if use_project:
+        for index, candidate in enumerate(saved["response"].get("candidates", [])):
+            if candidate.get("status", "검토통과") == "검토통과" and st.button(f"후보 {index + 1}을 매출 시나리오에 사용", key=f"select_generated_{index}"):
+                generation_results.choose(product, index)
+                st.switch_page(st.session_state["bw_pages"]["forecast"])
+elif saved:
+    st.info("입력 또는 검토 기준이 바뀌었습니다. 다시 생성하면 현재 기준으로 검토합니다.")

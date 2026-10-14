@@ -60,7 +60,8 @@ def mock_products() -> list[dict]:
     original = _load_json("MOCK_PRODUCTS_PATH", "data/assets/mock_products.json")
     public_path = REPO_ROOT / "data" / "assets" / "public_analysis_products.json"
     public = json.loads(public_path.read_text(encoding="utf-8")) if public_path.exists() else []
-    return public + original
+    # 기본 선택(첫 제품)은 시연 시나리오의 자사 샘플(하이드라 워터 크림)로 두고, 공개 분석 샘플은 뒤에 붙인다
+    return original + public
 
 
 def banned_terms() -> list[dict]:

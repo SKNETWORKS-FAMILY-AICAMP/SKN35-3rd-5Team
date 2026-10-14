@@ -10,6 +10,8 @@ class AdGenerationState(TypedDict):
     tone: str
     length: str
     keywords: list[str]
+    product_description: NotRequired[str]
+    reference_copy: NotRequired[str]
     query_retry: NotRequired[int]
     generation_retry: NotRequired[int]
     rewritten_query: NotRequired[str]

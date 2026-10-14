@@ -3,7 +3,8 @@
 검토 진행 표시 — backend.review_events() 가 실제로 낸 이벤트만 그린다.
 
 - 단계 이벤트가 오면: 받은 단계만 순서대로 (끝난 단계 ✓ + 실측 시간, 진행 중 단계, 건너뛴 단계)
-- 단계 없이 기다리는 중이면(스트림이 없는 API): "서버가 검토하는 중 · 경과 n초" 만 — 퍼센트·가짜 단계 없음
+- 단계 없이 기다리는 중이면(스트림이 없는 API): "서버가 검토하는 중 · 경과 n초" 만 — 퍼센트·가짜 단계 없음.
+  경과 초는 브라우저가 센다(CSS 카운터 .bw-clock) — 서버가 카드를 다시 보내지 않아도 숫자가 멈추지 않는다
 - 답변 조각(token)이 오면: 받은 글자만 이어 붙여 보여 준다
 - 카드는 갱신마다 새로 그려진다 → 계속 도는 움직임은 경과 시간(--bw-t), 막 바뀐 줄의 한 번짜리 움직임은
   그 뒤로 지난 시간(--bw-in · --bw-pop)만큼 앞당겨 시작해, 다시 그려져도 처음부터 반복하지 않고 이어진다
@@ -85,7 +86,7 @@ def card(p: Progress, *, elapsed: float | None, demo: bool) -> str:
     text = f'<p class="bw-live-text">{esc("".join(p.tokens))}<span class="bw-caret"></span></p>' if p.tokens else ""
     meta = []
     if elapsed is not None:
-        meta.append(f"경과 {elapsed:.1f}초")
+        meta.append('<span class="bw-clock"></span>')   # 숫자는 base.css 가 --bw-t(실측 경과)부터 센다
     if demo:
         meta.append("데모 데이터 — 단계 표시 속도를 늦춰 보여 줍니다")
     meta_html = f'<div class="bw-live-meta">{" · ".join(meta)}</div>' if meta else ""

@@ -65,10 +65,19 @@ def test_reference_ids_and_foreign_ingredients_cannot_be_invented():
 
 def test_selected_generated_copy_is_shared_with_forecast(monkeypatch):
     from streamlit.testing.v1 import AppTest
+
+    from app.services import backend, mock
+
     monkeypatch.setenv("UI_DATA_MODE", "mock")
+    monkeypatch.setattr(backend, "generate_copy", lambda payload: mock.generate_copy(
+        payload["instruction"], payload["product"], channel=payload["channel"],
+        tone=payload["tone"], length=payload["length"]))
     app = AppTest.from_file(str(Path(__file__).resolve().parents[2] / "app/streamlit_app.py"), default_timeout=30).run()
     app.switch_page("views/generate.py").run()
-    next(b for b in app.button if b.label == "검증된 광고문 생성").click().run()
+    app.selectbox(key="proj_product").set_value("PUBLIC_KIEHLS_UFC").run()
+    next(c for c in app.checkbox if c.label == "왼쪽 프로젝트의 제품·실증 자료 사용").check().run()
+    next(t for t in app.text_area if t.label == "어떤 광고문을 만들까요?").set_value("제품의 특징을 소개해줘")
+    next(b for b in app.button if b.label == "광고문 만들기").click().run()
     assert not app.exception
     record = app.session_state["bw_generation_records"]["PUBLIC_KIEHLS_UFC"]
     expected = record["response"]["candidates"][1]["text"]
