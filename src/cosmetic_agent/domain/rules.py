@@ -46,6 +46,15 @@ IN_HOUSE_KEYWORDS = ("자사", "사내", "자체")
 _GENERIC_WORDS = {"피부", "모발", "손상된", "손상", "개선", "도움"}
 
 
+def _matches_functional(functional_type: str, exempt: list[str] | None) -> bool:
+    """심사받은 기능성 유형이 규칙의 예외 목록에 해당하는지.
+    '미백'·'피부 미백'처럼 표기가 달라도, '피부 미백, 주름 개선'처럼 두 가지여도 맞춘다."""
+    if not exempt:
+        return False
+    parts = [p.strip() for p in re.split(r"[,/·+]|\s및\s", functional_type) if p.strip()]
+    return any(part == e or part in e or e in part for part in parts for e in exempt if len(part) >= 2)
+
+
 def _compact(text: str) -> str:
     return re.sub(r"\s+", "", text or "").lower()
 
@@ -127,7 +136,7 @@ class RuleEngine:
     @staticmethod
     def _is_exempt(rule: dict[str, Any], text: str, category: str, functional_type: str | None) -> bool:
         """기능성 심사 범위 안의 표현이거나, 지침 단서 조항(예: '보습'+'일시적')을 만족하면 예외"""
-        if category == "기능성" and functional_type and functional_type in (rule.get("exempt_functional") or []):
+        if category == "기능성" and functional_type and _matches_functional(functional_type, rule.get("exempt_functional")):
             return True
         required = rule.get("exempt_if_all") or []
         return bool(required) and all(word in text for word in required)
