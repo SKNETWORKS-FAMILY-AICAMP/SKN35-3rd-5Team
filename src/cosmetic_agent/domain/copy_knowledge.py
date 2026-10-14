@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import json
+import os
 import random
 import re
 from functools import lru_cache
@@ -336,7 +337,8 @@ def build_generation_knowledge(
     own = ingredient_groups(" ".join([product.get("name", ""), *ingredients]))
     general = [m for m in market_examples() if ingredient_groups(m["text"]) <= own]
     fill = [f"- ({m['type']}) {m['text']}" for m in rng.sample(general, min(max(0, 4 - len(matched)), len(general)))]
-    bank = copy_bank(product, rng)
+    # 표현 은행은 기본으로 끈다: 블라인드 비교에서 끌림 승률 46%로 제품 사실만 쓸 때보다 낫지 않았다 (COPY_BANK=1 로 켬)
+    bank = copy_bank(product, rng) if os.environ.get("COPY_BANK") == "1" else {}
     if bank:
         names = {"scene": "사용 장면", "template": "문장 구조", "sensory_vocab": "감각 어휘", "angle": "설득 각도"}
         lines += ["", "[수집 표현 재료 - 실제 광고에서 뽑아 추상화한 장면·구조. 문장을 그대로 쓰지 말고 우리 제품 사실로 채운다]"]

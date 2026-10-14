@@ -61,9 +61,12 @@ def test_copy_bank_prefers_same_form_and_feeds_knowledge(monkeypatch):
             {"type": "scene", "form": "선크림", "text": "외출 직전 현관 앞"},
             {"type": "template", "form": "", "text": "{시간대}의 {제형} 한 겹"})
     monkeypatch.setattr(ck, "_bank_rows", lambda: rows)
+    monkeypatch.setenv("COPY_BANK", "1")
     bank = ck.copy_bank(BASE, random.Random(0))
     assert bank == {"scene": ["출근 전 거울 앞 30초"], "template": ["{시간대}의 {제형} 한 겹"]}
     assert "- 사용 장면: 출근 전 거울 앞 30초" in build_generation_knowledge(BASE, rng=random.Random(0))
+    monkeypatch.delenv("COPY_BANK")
+    assert "[수집 표현 재료" not in build_generation_knowledge(BASE, rng=random.Random(0))  # 기본은 꺼짐
 
 
 def test_build_copy_bank_filters_risky_long_and_duplicate_items():
