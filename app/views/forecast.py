@@ -329,7 +329,7 @@ with st.container(key="pagebody"):
                 st.caption(f"참고 {ref_id} · {ref['brand']} · {ref['copy_text']}")
         st.caption("생성 조건: " + " · ".join(str(saved["conditions"].get(k, "")) for k in ("channel", "tone", "length")))
     else:
-        st.info("이 제품으로 생성한 문구가 없습니다. 광고문 생성에서 후보를 만든 뒤 선택해 주세요.")
+        st.info("이 제품으로 생성한 문구가 없습니다. 광고문 생성에서 후보를 만든 뒤 후보 아래 ‘이 문구를 매출 시나리오에 사용’을 눌러 주세요.")
     if st.button("광고문 생성으로 이동", key="fc_open_generation"):
         st.switch_page(st.session_state["bw_pages"]["generate"])
 
