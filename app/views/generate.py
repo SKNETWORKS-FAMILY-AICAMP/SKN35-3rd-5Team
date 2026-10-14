@@ -10,6 +10,7 @@ from app.components.ingredient_roles import render_ingredient_roles
 from app.components.layout import esc, html, page_header
 from app.components.theme import AUTHORITY, inject_css
 from app.services import backend, generation_results
+from cosmetic_agent.generation.creative import creative_catalog
 
 health = st.session_state["bw_health"]
 pages = st.session_state["bw_pages"]
@@ -35,6 +36,11 @@ html(
 
 with st.container(key="pagebody"):
     render_ingredient_roles(product)
+    with st.expander("창작 레퍼런스 · 어떤 방식으로 다르게 쓰나요?"):
+        st.caption("제공하신 이미지의 표현 구조만 참고합니다. 해당 브랜드의 수치·기술·효능을 복사하지 않습니다.")
+        for style in creative_catalog()["styles"]:
+            st.markdown(f"**{style['name']}** — {style['pattern']}")
+        st.caption("출력: 창의적 헤드라인 + 제품 설명 + 사용한 실증의 시험 조건. 자료가 없으면 시험 조건을 만들지 않습니다.")
     with st.form("generate_form"):
         instruction = st.text_area(
             "어떤 광고문을 만들까요?",
@@ -84,18 +90,28 @@ with st.container(key="pagebody"):
         else:
             labels = {"strong": "근거 최대", "balanced": "균형", "safe": "가장 안전"}
             st.subheader("생성 결과")
+            for warning in response.get("warnings", []):
+                st.warning(warning)
             if response.get("mock"):
                 st.caption("화면 확인용 Mock 결과입니다. 실제 시장 참고 AI 생성 결과가 아닙니다.")
             for index, candidate in enumerate(response.get("candidates", [])):
                 tier = candidate.get("tier", "safe")
                 with st.container(border=True):
                     st.caption(f"{labels.get(tier, tier)} · {candidate.get('verify_note', '검증 통과')}")
-                    st.markdown(f"### {candidate['text']}")
+                    st.markdown(f"### {candidate.get('headline') or candidate['text']}")
+                    if candidate.get("supporting_copy"):
+                        st.write(candidate["supporting_copy"])
+                    if candidate.get("evidence_note"):
+                        with st.container(border=True):
+                            st.caption("함께 표시할 등록 시험 정보 · 최종 광고 사용 전 원자료 확인")
+                            st.write(candidate["evidence_note"])
                     if candidate.get("rationale"):
                         st.write(candidate["rationale"])
                     if candidate.get("used_evidence"):
                         st.caption("사용한 근거: " + ", ".join(candidate["used_evidence"]))
-                    st.code(candidate["text"], language=None)
+                    st.code(candidate["text"] + ("\n\n" + candidate["evidence_note"] if candidate.get("evidence_note") else ""), language=None)
+                    if candidate.get("creative_application"):
+                        st.caption("창작 구성: " + candidate["creative_application"])
                     if candidate.get("market_application"):
                         st.write("시장 표현 반영: " + candidate["market_application"])
                     if candidate.get("ingredient_application"):

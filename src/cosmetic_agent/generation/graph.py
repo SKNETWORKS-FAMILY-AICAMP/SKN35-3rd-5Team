@@ -53,6 +53,9 @@ def build_generation_graph(
         if state.get("generation_error"):
             return "finalize_generation"
         if state.get("candidates"):
+            structured = any(d.get("headline") for d in state.get("drafts", []))
+            if structured and len(state["candidates"]) < 3 and state.get("generation_retry", 0) < MAX_GENERATION_RETRIES:
+                return "generate_candidates"
             return "finalize_generation"
         return "generate_candidates" if state.get("generation_retry", 0) < MAX_GENERATION_RETRIES else "finalize_generation"
 
