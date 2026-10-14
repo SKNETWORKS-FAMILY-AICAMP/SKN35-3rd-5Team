@@ -6,6 +6,7 @@
 from pathlib import Path
 from typing import Literal
 import os
+from pydantic import ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # 1. 프로젝트 루트 자동 탐색 (현재 파일 기준 4단계 상위 폴더: src/cosmetic_agent/common/config.py -> 루트)
@@ -67,6 +68,20 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    @field_validator(
+        "OPENAI_API_KEY", "OPENAI_BASE_URL", "QDRANT_URL", "QDRANT_API_KEY",
+        "QDRANT_COLLECTION_NAME", "API_BASE_URL", mode="before",
+    )
+    @classmethod
+    def _strip_pasted_value(cls, value, info: ValidationInfo):
+        """배포 화면에 붙여넣을 때 섞이는 앞뒤 공백·줄바꿈·따옴표를 지운다.
+        (키 끝의 줄바꿈은 OpenAI 요청 헤더를 깨뜨려 'Connection error' 로 보인다)"""
+        if isinstance(value, str):
+            value = value.strip().strip('"').strip("'").strip()
+            if not value and info.field_name == "OPENAI_BASE_URL":
+                return None
+        return value
 
 
 settings = Settings()
