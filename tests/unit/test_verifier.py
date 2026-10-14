@@ -153,3 +153,12 @@ def test_number_units_do_not_swallow_following_words(verifier):
 
 def test_ranking_badge_is_exclusive_claim(verifier):
     assert "금지표현" in codes(verifier, "판매랭킹 TOP.1")
+
+
+def test_functional_product_cannot_promise_removal(verifier):
+    # 미백 기능성은 '미백에 도움'까지. 기미가 사라진다는 소멸·즉효 표현은 심사 범위 밖
+    kwargs = {"product_category": "기능성", "functional_type": "피부 미백"}
+    assert "금지표현" in codes(verifier, "바르기만 해도 기미가 싹 사라지는 미백 앰플", **kwargs)
+    assert not codes(verifier, "피부의 미백에 도움을 주는 앰플", **kwargs)
+    assert "금지표현" in codes(verifier, "깊은 주름이 사라지는 세럼",
+                              product_category="기능성", functional_type="주름 개선")

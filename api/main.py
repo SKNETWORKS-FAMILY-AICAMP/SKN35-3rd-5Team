@@ -8,7 +8,7 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from cosmetic_agent.common.logger import get_logger
-from api.routes import health, review, search
+from api.routes import generate, health, review, search
 
 logger = get_logger("API")
 
@@ -46,6 +46,7 @@ def create_app(service_factory: Callable[[], Any] = build_review_service) -> Fas
     app.include_router(health.router)
     app.include_router(review.router)
     app.include_router(search.router)
+    app.include_router(generate.router)
 
     return app
 
