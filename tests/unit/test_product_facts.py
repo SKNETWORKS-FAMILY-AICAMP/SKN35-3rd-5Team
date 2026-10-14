@@ -97,3 +97,28 @@ def test_market_tags_only_on_mz_channels_and_carry_no_rank_or_numbers():
     assert "올리브영 랭킹 태그어" not in build_generation_knowledge(sun, channel="상세페이지", rng=random.Random(0))
     tags = [t for row in json.loads((ASSETS_DIR / "form_vocab.json").read_text(encoding="utf-8"))["forms"] for t in row["market_tags"]]
     assert not [t for t in tags if re.search(r"1등|1위|연속|\d+\s*(시간|%|배)|진정|미백|장벽|탈모|트러블|여드름|특허", t)]
+
+
+def test_quick_generation_finds_form_from_request_text():
+    from cosmetic_agent.domain.copy_knowledge import with_request_form
+
+    draft = {"product_id": "generation_draft", "name": "나의 화장품", "category": "일반", "owned_evidence": []}
+    assert with_request_form(draft, "가벼운 선크림 광고 만들어줘")["form"] == "선크림"
+    assert with_request_form(draft, "수분크림 인스타 문구")["form"] == "젤·수분크림"
+    assert "form" not in with_request_form(draft, "광고 문구 만들어줘")  # 단서가 없으면 그대로
+    named = {**draft, "name": "허니 립밤"}
+    assert with_request_form(named, "선크림처럼 가볍게") is named  # 제품명으로 알 수 있으면 요청 문장보다 우선
+    assert "[제형 사용감 어휘 - 선크림" in build_generation_knowledge(
+        with_request_form(draft, "선크림 광고"), channel="SNS", rng=random.Random(0))
+
+
+def test_placeholder_name_is_not_given_as_product_name():
+    prompt = _prompt({**BASE, "name": "나의 화장품"})
+    assert "- 제품명: 미정" in prompt and "나의 화장품" not in prompt
+
+
+def test_soften_keeps_sentence_when_removing_worry_free():
+    from cosmetic_agent.generation.nodes import _soften
+
+    assert _soften("백탁 걱정 없이 매끄럽게 마무리") == "백탁 부담 없이 매끄럽게 마무리"
+    assert _soften("완벽하게 촉촉한 마무리") == "촉촉한 마무리"

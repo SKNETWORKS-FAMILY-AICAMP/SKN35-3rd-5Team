@@ -98,6 +98,15 @@ PRODUCT_FACTS = (
 )
 
 
+PLACEHOLDER_NAMES = {"", "나의 화장품"}
+
+
+def _display_name(product: dict[str, Any]) -> str:
+    """빠른 생성의 임시 이름('나의 화장품')을 모델이 제품명처럼 문구에 쓰지 않게 한다."""
+    name = str(product.get("name") or "").strip()
+    return "미정 (문구에 제품명을 쓰지 말고 제품 유형으로 부른다)" if name in PLACEHOLDER_NAMES else name
+
+
 def product_fact_lines(product: dict[str, Any]) -> list[str]:
     """[제품] 블록에 넣을 제품 사실 줄. 입력된 칸만 넣고, 하나도 없으면 미확인이라고 적는다."""
     rows = [f"- {label}: {str(product.get(key)).strip()}" for key, label in PRODUCT_FACTS if str(product.get(key) or "").strip()]
@@ -135,7 +144,7 @@ def build_generation_prompt(
         instruction,
         "",
         "[제품]",
-        f"- 제품명: {product.get('name', '')}",
+        f"- 제품명: {_display_name(product)}",
         f"- 구분: {product.get('category', '일반')}",
         f"- 심사(보고) 기능성: {product.get('functional_type') or '없음'}",
         f"- 주요 성분: {', '.join(product.get('key_ingredients') or []) or '없음'}",

@@ -4,7 +4,7 @@ import re
 from types import SimpleNamespace
 from typing import Any
 
-from ..domain.copy_knowledge import build_generation_knowledge, material_claim_notes
+from ..domain.copy_knowledge import build_generation_knowledge, material_claim_notes, with_request_form
 from ..domain.rules import RuleEngine
 from ..domain.schemas import ProductCard
 from ..domain.verifier import NUMBER_RE, CopyVerifier
@@ -94,7 +94,9 @@ def generate_candidates_node(
             reference_copy=state.get("reference_copy", ""),
             retry_note=" / ".join(notes) if notes else None,
             knowledge=build_generation_knowledge(
-                state["product"], state["channel"],
+                with_request_form(state["product"], state["instruction"], state.get("product_description", ""),
+                                  " ".join(state.get("keywords") or [])),
+                state["channel"],
                 tone=state.get("tone", ""),
                 market_refs=state.get("market_references", []),
                 profiles=state.get("ingredient_profiles", []),
@@ -111,11 +113,14 @@ def generate_candidates_node(
 
 # 근거는 맞는데 과장 단어 하나 때문에 탈락하는 후보가 많다 (예: 'SPF50+ PA++++로 완벽한 자외선 차단').
 # 그런 단어만 빼고 한 번 더 검증해, 가장 강한 근거 후보를 살린다. 뜻을 바꾸는 단어는 건드리지 않는다.
-_SOFTEN_RE = re.compile(r"(?:완벽(?:한|하게|히)|확실(?:한|하게|히)|확연(?:한|히)|눈에\s*띄게|놀라운|걱정\s*(?:없이|없는))\s*")
+_SOFTEN_RE = re.compile(r"(?:완벽(?:한|하게|히)|확실(?:한|하게|히)|확연(?:한|히)|눈에\s*띄게|놀라운)\s*")
+# '걱정 없이'는 지우면 '백탁 매끄럽게'처럼 문장이 깨지므로 보장 뜻이 약한 '부담 없이'로 바꾼다
+_WORRY_RE = re.compile(r"걱정\s*(없이|없는)")
 
 
 def _soften(text: str) -> str:
-    return re.sub(r"\s{2,}", " ", _SOFTEN_RE.sub("", text or "")).strip()
+    text = _WORRY_RE.sub(r"부담 \1", _SOFTEN_RE.sub("", text or ""))
+    return re.sub(r"\s{2,}", " ", text).strip()
 
 
 def _pin_numbers(copy: str, reports: list[dict[str, Any]]) -> str:

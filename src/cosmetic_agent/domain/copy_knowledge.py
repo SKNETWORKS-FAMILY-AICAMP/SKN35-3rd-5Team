@@ -172,6 +172,16 @@ def form_words(product: dict[str, Any]) -> tuple[str, list[str]]:
     return "", []
 
 
+def with_request_form(product: dict[str, Any], *texts: str) -> dict[str, Any]:
+    """제품명·제형으로 제형을 모를 때 요청 문장('선크림 광고 만들어줘')에서 제형을 찾아 재료용 제품 정보에 붙인다.
+
+    빠른 생성은 제품명이 '나의 화장품'이라 요청 문장 말고는 제형 단서가 없다. 재료(어휘·태그) 고르기에만 쓰고 제품 사실로 넣지 않는다."""
+    if form_words(product)[0]:
+        return product
+    form = form_words({"name": " ".join(t for t in texts if t)})[0]
+    return dict(product, form=form) if form else product
+
+
 def market_tags(product: dict[str, Any]) -> list[str]:
     """같은 제형의 올리브영 랭킹 홍보 태그어 (효능·순위·수치 없는 말만, form_vocab.json market_tags)."""
     text = f"{product.get('form') or ''} {product.get('name') or ''}"
