@@ -1,0 +1,9 @@
+[
+  {"relation_id":"REL_AP_AESTURA","company_id":"CO_AMOREPACIFIC","brand":"AESTURA","platform_id":null,"product_id":null,"relationship":"brand_business_operator","source_id":"SRC_AP_BRAND_2026","scope_note":"공식 브랜드 소개에서 확인한 사업 관계. 개별 법적 제조업자 관계 아님."},
+  {"relation_id":"REL_APR_MEDICUBE","company_id":"CO_APR","brand":"MEDICUBE","platform_id":null,"product_id":null,"relationship":"brand_business_operator","source_id":"SRC_APR_ABOUT","scope_note":"뷰티디바이스와 화장품을 구분해 설명."},
+  {"relation_id":"REL_APR_APRILSKIN","company_id":"CO_APR","brand":"APRILSKIN","platform_id":null,"product_id":null,"relationship":"brand_business_operator","source_id":"SRC_APR_ABOUT","scope_note":"관계만 확보. 에이프릴스킨 개별 상품·플랫폼 판매 데이터는 아직 미수집."},
+  {"relation_id":"REL_DALBA","company_id":"CO_DALBA_GLOBAL","brand":"DALBA","platform_id":null,"product_id":null,"relationship":"brand_business_operator","source_id":"SRC_DALBA_GLOBAL","scope_note":"개별 OEM 제조사를 추정하지 않음."},
+  {"relation_id":"REL_PHARMA_REJURAN_COSMETICS","company_id":"CO_PHARMARESEARCH","brand":"REJURAN_COSMETICS","platform_id":null,"product_id":null,"relationship":"cosmetics_brand_business_operator","source_id":"SRC_PHARMA_COSMETIC","scope_note":"화장품 브랜드에 한정. 주사형 제품과 별도 노드."},
+  {"relation_id":"REL_FOUNDERS_ANUA","company_id":"CO_FOUNDERS","brand":"ANUA","platform_id":null,"product_id":null,"relationship":"brand_business_operator","source_id":"SRC_FOUNDERS","scope_note":"회사 다중 브랜드 합산 실적의 분리 필요."},
+  {"relation_id":"REL_AP_KURLY","company_id":"CO_AMOREPACIFIC","brand":null,"platform_id":"beauty_kurly","product_id":null,"relationship":"announced_joint_product_and_marketing_agreement","source_id":"SRC_KURLY_AP_MOU","scope_note":"2026-09-30 업무협약. 독점 유통·지분 관계·개별 SKU 제조 계약으로 확대하지 않음."}
+]

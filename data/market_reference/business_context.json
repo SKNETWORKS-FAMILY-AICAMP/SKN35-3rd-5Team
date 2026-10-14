@@ -1,0 +1,3 @@
+[
+  {"context_id":"FIN_FOUNDERS_2025","source_id":"SRC_FOUNDERS","entity_name":"더파운더즈","entity_scope":"company_multiple_brands","period":"2025","metric":"annual_revenue","reported_text":"2025년 연매출 +7,000억원 달성","value_krw":700000000000,"value_semantics":"reported_threshold_not_exact","audit_status":"company_website_self_report_not_audited_statement","related_brands":["ANUA","프롬랩스","프로젝트21"],"product_id":null,"offer_id":null,"observation_id":null,"usable_for_copy_performance":false,"note":"회사 소개 자료의 규모 정보. ANUA 단일 브랜드·PDRN 세럼 매출로 배분하거나 특정 문구 효과의 라벨로 사용하지 않음."}
+]

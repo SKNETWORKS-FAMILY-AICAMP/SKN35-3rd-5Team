@@ -1,0 +1,7 @@
+{
+  "schema_version":"1.0",
+  "schema_file":"internal_performance.schema.json",
+  "status":"awaiting_actual_internal_campaign_exports",
+  "records":[],
+  "note":"공개 경쟁사 페이지에서 문구별 실제 매출·노출·전환·타깃을 확인하지 못했으므로 가상 값으로 채우지 않음. 실제 회사 광고/분석/주문 내보내기 자료를 연결할 자리."
+}

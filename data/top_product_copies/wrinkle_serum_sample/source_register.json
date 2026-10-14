@@ -1,0 +1,25 @@
+{
+  "collected_date": "2026-10-13",
+  "method": "공개 페이지 브라우저 직접 열람;광고 이미지 육안 채록;대량 크롤링 없음",
+  "ranking_url": "https://www.oliveyoung.co.kr/store/main/getBestList.do?dispCatNo=900000100100001&fltDispCatNo=10000010001",
+  "functional_sources": {
+    "anua": "https://m.anua.kr/product/detail.html?product_no=359",
+    "primera": "https://prd-ko-kr.primerabeauty.com/kr/ko/product/vitatinol-bouncy-lift-serum.html",
+    "celimax": "https://celimax.co.kr/product/레티날-샷-타이트닝-부스터-15ml-스팟크림/70/",
+    "ongredients": "https://ongredients.com/product/detail.html?cate_no=90&display_group=1&product_no=89"
+  },
+  "product_urls": [
+    "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000222698",
+    "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000231293",
+    "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000265385",
+    "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000250199",
+    "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000268161"
+  ],
+  "comparison_urls": [
+    "https://www.musinsa.com/products/7073570",
+    "https://www.musinsa.com/products/5142164"
+  ],
+  "scope": "5개 후보 샘플.현재 주름 유형 명시 확인3개;유형 보완2개.주름 전용 TOP5 아님",
+  "copy_selection": "대표 문구 발췌;상세 전체 전수 채록 아님",
+  "schema_extension": "요청 태그6종에 비수치 효능을 담을 수 없어 효능 서술형을 추가 제안.유명인 단독 문구는 빈 유형+보완 사유로 기록"
+}
