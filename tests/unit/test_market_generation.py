@@ -47,7 +47,8 @@ def test_generation_receives_market_data_separately_from_regulations():
     generate_candidates_node({"product": TONER, "instruction": "소개", "channel": "SNS",
                               "tone": "간결한", "length": "한 줄", "keywords": [],
                               "evidence_text": "[L1] 규정", "market_references": market_references(TONER)}, Generator())
-    assert "M1" in captured["market_reference_text"]
+    # 시장 문구는 규정(evidence_text)과 섞이지 않고 생성 재료 블록의 [말투 참고]에 M번호로 들어간다
+    assert "M1" in captured["knowledge"] and "M1" not in captured["evidence_text"]
     assert captured["evidence_text"] == "[L1] 규정"
     assert captured["product"]["owned_evidence"] == []
 

@@ -34,7 +34,8 @@ def test_role_prompt_does_not_add_owned_evidence():
     state = {"product": product, "ingredient_profiles": ingredient_profiles(product),
              "instruction": "데일리 보습 루틴 중심", "channel": "SNS", "tone": "간결한", "length": "한 줄", "keywords": []}
     generate_candidates_node(state, Generator())
-    assert "판테놀" in captured["ingredient_reference_text"] and '"I1"' in captured["ingredient_reference_text"]
+    # 성분 역할 카드는 생성 재료 블록의 성분 카드 줄에 I번호로 붙는다
+    assert "판테놀" in captured["knowledge"] and "[I1]" in captured["knowledge"]
     assert captured["product"]["owned_evidence"] == []
 
 

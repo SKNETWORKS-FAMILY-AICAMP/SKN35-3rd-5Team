@@ -208,13 +208,39 @@ def pick_angles(product: dict[str, Any], has_origin: bool, rng: random.Random, n
     return ordered[:n]
 
 
+def _role_suffix(name: str, profiles: list[dict[str, Any]]) -> str:
+    """준호 님 성분 역할 카드(연구 출처 있음)가 연결된 성분이면 역할·표현 방향·주장 금지를 덧붙인다."""
+    for prof in profiles:
+        if name in prof.get("matched_ingredients", []):
+            return (f" · [{prof['reference_id']}] 역할: {'·'.join(prof.get('roles', []))}"
+                    f" / 표현 방향: {' / '.join(prof.get('copy_angles', []))}"
+                    f" / 주장 금지: {'·'.join(prof.get('avoid_claims', []))}")
+    return ""
+
+
+def _usable_market_copy(text: str, types: list[str]) -> bool:
+    """말투 참고로 쓸 만한 시장 문구: 구성·순위·수치 소구 문구와 짧은 조각은 뺀다.
+
+    같은 제형·공통 성분으로 매칭된 문구는 상품명 속 숫자(예: 어성초 77)를 허용하고, 숫자는 프롬프트에서 옮기지 못하게 한다.
+    """
+    return len(text.strip()) >= 6 and not set(types) & {"구성·혜택형", "비교·순위형", "효능 수치형"}
+
+
 def build_generation_knowledge(
-    product: dict[str, Any], channel: str = "", rng: random.Random | None = None
+    product: dict[str, Any],
+    channel: str = "",
+    rng: random.Random | None = None,
+    market_refs: list[dict[str, Any]] | None = None,
+    profiles: list[dict[str, Any]] | None = None,
 ) -> str:
-    """생성 프롬프트에 넣을 [쓸 수 있는 재료] 블록."""
+    """생성 프롬프트에 넣을 [쓸 수 있는 재료] 블록.
+
+    market_refs·profiles 는 준호 님 생성 연결(같은 제형·공통 성분 시장 문구 M번호, 연구 출처 성분 역할 카드 I번호).
+    """
     rng = rng or random.Random()
+    profiles = profiles or []
     ingredients = list(dict.fromkeys(product.get("key_ingredients") or []))
-    cards = [ingredient_card(name, product) for name in ingredients[:8]]
+    cards = [ingredient_card(name, product) + _role_suffix(name, profiles) for name in ingredients[:8]]
     has_origin = any("유래:" in c for c in cards)
     angles = pick_angles(product, has_origin, rng)
     tiers = ["strong", "balanced", "safe"]
@@ -227,11 +253,18 @@ def build_generation_knowledge(
     sensory = sensory_phrases(product)
     if sensory:
         lines += ["", "[쓸 수 있는 사용감 표현 - 효능 단계 lv0, 실증 없이 가능]", "- " + ", ".join(rng.sample(sensory, min(8, len(sensory))))]
-    market = market_examples()
-    if market:
-        picks = rng.sample(market, min(4, len(market)))
-        lines += ["", "[말투 참고 - 규칙 검사를 통과한 실제 상위 제품 문구. 문장·제품명을 베끼지 말고 구성만 참고]"]
-        lines += [f"- ({m['type']}) {m['text']}" for m in picks]
+    matched = [f"- {r['reference_id']} ({'·'.join(r.get('copy_types') or []) or '시장 문구'}) {r['copy_text']}"
+               for r in (market_refs or []) if _usable_market_copy(r.get("copy_text") or "", r.get("copy_types") or [])][:4]
+    # 일반 예시는 우리 제품에 없는 성분(PDRN·히알루론산 등)을 부르는 문구를 빼고 채운다.
+    # 그런 예시가 들어가면 모델이 다른 성분을 끼워 넣고, 미확인 성분 검사에 걸려 후보가 줄어든다.
+    from ..market_reference import ingredient_groups
+
+    own = ingredient_groups(" ".join([product.get("name", ""), *ingredients]))
+    general = [m for m in market_examples() if ingredient_groups(m["text"]) <= own]
+    fill = [f"- ({m['type']}) {m['text']}" for m in rng.sample(general, min(max(0, 4 - len(matched)), len(general)))]
+    if matched or fill:
+        lines += ["", "[말투 참고 - 실제 시장 문구. 문장·제품명·수치를 베끼지 말고 구성만 참고. M번호는 같은 제형·공통 성분 제품]"]
+        lines += matched + fill
     avoid = forbidden_examples(product)
     if avoid:
         lines += ["", "[실제 적발·불가 표현 - 이런 말은 돌려서도 쓰지 않는다]", "- " + ", ".join(rng.sample(avoid, min(12, len(avoid))))]

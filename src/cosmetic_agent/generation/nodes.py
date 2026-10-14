@@ -4,7 +4,7 @@ import re
 from types import SimpleNamespace
 from typing import Any
 
-from ..domain.copy_knowledge import material_claim_notes
+from ..domain.copy_knowledge import build_generation_knowledge, material_claim_notes
 from ..domain.rules import RuleEngine
 from ..domain.schemas import ProductCard
 from ..domain.verifier import CopyVerifier
@@ -12,8 +12,8 @@ from ..market_reference import ingredient_groups
 from ..models.copy_generator import CopyGenerator, grounding_notes
 from ..rag.hybrid import HybridRetriever
 from ..rag.query_rewriter import QueryRewriter
-from .ingredients import ingredient_profiles, ingredient_prompt
-from .market import market_prompt, market_references
+from .ingredients import ingredient_profiles
+from .market import market_references
 from .state import AdGenerationState
 
 
@@ -92,8 +92,11 @@ def generate_candidates_node(
             product_description=state.get("product_description", ""),
             reference_copy=state.get("reference_copy", ""),
             retry_note=" / ".join(notes) if notes else None,
-            market_reference_text=market_prompt(state.get("market_references", [])),
-            ingredient_reference_text=ingredient_prompt(state.get("ingredient_profiles", [])),
+            knowledge=build_generation_knowledge(
+                state["product"], state["channel"],
+                market_refs=state.get("market_references", []),
+                profiles=state.get("ingredient_profiles", []),
+            ),
         )
         return {"drafts": drafts, "generation_error": ""}
     except Exception as error:  # noqa: BLE001 - 자격증명이나 외부 응답 본문은 노출하지 않는다
