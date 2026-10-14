@@ -22,7 +22,7 @@ def chat_header(*, compact: bool = False) -> None:
 
 
 def state() -> dict:
-    return st.session_state.setdefault("bw_chatbot_conversation", {"messages": [], "context": {}, "signature": None})
+    return st.session_state.setdefault("bw_chatbot_conversation", {"messages": [], "context": {}, "signature": None, "history_start": 0})
 
 
 def reset() -> None:
@@ -40,9 +40,9 @@ def _sync_product() -> dict:
     signature = json.dumps(product, ensure_ascii=False, sort_keys=True)
     chat = state()
     if chat["signature"] is not None and chat["signature"] != signature:
-        reset()
-        chat = state()
-        st.info("제품 또는 실증 기준이 바뀌어 새 챗봇 대화를 시작합니다.")
+        chat["context"] = {}
+        chat["history_start"] = len(chat["messages"])
+        st.info("제품·실증 기준을 변경했습니다. 대화 기록은 유지하고, 이번 요청부터 새 기준을 적용합니다.")
     chat["signature"] = signature
     return product
 
@@ -88,7 +88,7 @@ def _send(message: str, product: dict) -> None:
         return
     chat = state()
     history = []
-    for turn in chat["messages"][-12:]:
+    for turn in chat["messages"][chat.get("history_start", 0):][-12:]:
         if turn["role"] == "user":
             history.append({"role": "user", "content": turn["text"]})
         else:
@@ -111,10 +111,13 @@ def render_chat(*, compact: bool = False) -> None:
     inject_css("chat")
     product = _sync_product()
     chat = state()
+    display_product = product
+    if chat["context"].get("product_source") == "conversation":
+        display_product = {"name": chat["context"].get("product_name") or "나의 화장품", "owned_evidence": []}
     scope = "mini" if compact else "full"
     mode = " · 데모 모드" if backend.data_mode() != "api" else ""
     st.html(f'<div class="bw-chat-context"><span class="bw-chat-context-dot"></span>'
-            f'{esc(product["name"])} · 실증 {len(product.get("owned_evidence", []))}건{mode}</div>')
+            f'{esc(display_product["name"])} · 실증 {len(display_product.get("owned_evidence", []))}건{mode}</div>')
     with st.container(height=260 if compact else 350, border=False, autoscroll=True, key=f"chat_messages_{scope}"):
         st.html(f'<div class="bw-chat-date"><span>{datetime.now(KST):%Y년 %m월 %d일}</span></div>')
         if not chat["messages"]:

@@ -19,6 +19,7 @@ class ChatPlan(BaseModel):
     question: str = Field(default="", max_length=2000)
     reference_index: int | None = Field(default=None, ge=1, le=3)
     needs_rules: bool = False
+    new_topic: bool = Field(default=False, description="이전 문구의 수정이 아니라 새로운 제품·주제·독립 작업으로 넘어가는지")
 
 
 class ChatState(TypedDict, total=False):
@@ -43,9 +44,15 @@ ROUTER_PROMPT = """너는 화장품 광고 카피라이터 챗봇의 요청 해�
 제품명·성분·채널·어조·실증·SPF 등이 없어도 기본값을 사용해 generate한다. 실증 부족은 생성 후 필요한 조건을 설명하며 질문으로 생성을 막지 않는다.
 실제 광고문을 검토·규정에 맞게 고쳐 달라면 review, 실제 본문만 copy_text에 넣는다.
 생성된 문구를 '더 짧게', '친근하게', '10대 대상으로', '2번처럼' 바꾸는 요청은 generate이며 이전 제품과 작성 목적을 유지한다.
-context는 이전 맥락과 이번의 명시적인 변경을 합친 전체 값이다. 다른 제품으로 바뀌면 성분과 이전 후보를 초기화한다.
+같은 대화에서 주제를 얼마든지 바꿀 수 있다. 새 채팅을 시작하라고 안내하지 않는다.
+'이번엔 립밤 광고를 만들어줘', '다른 주제로 브랜드 소개 글을 써줘', '기존 건 말고 새 캠페인을 만들자'는 new_topic=true다.
+새 작업은 제품명이 같거나 '나의 화장품' 같은 임시 이름이어도 new_topic=true다. context에는 이번 주제에서 제공된 정보만 넣는다.
+이전 성분·제품 설명·타깃·작성 조건은 새 주제에 자동 적용하지 않는다. 사용자가 같은 조건을 다시 사용해 달라고 명시했을 때만 이어 쓴다.
+'방금 문구를 더 짧게', '2번을 감성적으로', '같은 제품으로 SNS 버전' 같은 후속 수정은 new_topic=false이며 이전 맥락을 유지한다.
+context는 계속하는 주제에서는 이전 맥락과 이번 변경을 합치고, 새 주제에서는 이번 요청의 정보로 새로 구성한다.
 ingredients는 실제 함유한다고 사용자가 제공한 성분만 넣고 효능에서 추측하지 않는다. product_description은 제품 설명·콘셉트이며 심사나 실증의 증명이 아니다.
 제품의 기능성 심사·보고, 시험 수치, 인증은 추론하지 않는다. 실제 기준은 별도로 입력된 product만 사용한다.
+context.product_source가 conversation이면 현재 제품은 대화에서 설명한 제품이다. 이때 product에는 이전에 선택한 다른 제품이 남아 있을 수 있으므로 그 성분·실증을 현재 주제로 옮기지 않는다.
 tone은 사용자 어조를 자유롭게 표현한다. channel은 SNS/상세페이지/배너/검색광고/라이브커머스, length는 한 줄/짧은 문단/상세 설명 중 고른다.
 brief에 타깃·톤·형식·길이·작성 목적을 누적 반영한다. 최신 변경을 우선한다.
 이전 후보를 지정하면 reference_index(1부터)를 반환한다. '이걸 더 짧게'처럼 번호가 없어도 첫 번째 후보를 기본으로 선택하며 불필요하게 되묻지 않는다.
@@ -104,16 +111,24 @@ class ChatService:
     def _resolve(self, state: ChatState):
         request, plan = state["request"], state["plan"]
         context = plan.context.model_copy(deep=True)
+        plan.new_topic = plan.new_topic or context.product_name != request.context.product_name
         # 필수 정보가 아닌 성분/어조 질문 때문에 작성 요청을 막는 모델 오분류도 방지한다.
         if plan.intent == "clarify" and re.search(r"성분|제품명|채널|어조|SPF|PA", plan.question, re.IGNORECASE) and (
                 context.product_description or context.brief or re.search(r"만들|작성|광고|카피|홍보", request.message)):
             plan.intent = "generate"
-        context.last_copies = list(request.context.last_copies) if context.product_name == request.context.product_name else []
+        continuing = not plan.new_topic and context.product_name == request.context.product_name
+        context.last_copies = list(request.context.last_copies) if continuing else []
         product = request.product.model_copy(deep=True)
-        if product.product_id == "chat_draft":
+        context.product_source = request.context.product_source
+        if plan.new_topic:
+            context.product_source = "conversation" if context.product_name not in ("나의 화장품", product.name) else "selected"
+        if context.product_source == "conversation":
+            # 다른 제품으로 넘어가면 이전 제품의 기능성·실증을 새 제품에 적용하지 않는다.
+            product = ProductCard(product_id="chat_draft", name=context.product_name.strip() or "나의 화장품", category="일반")
+        elif product.product_id == "chat_draft":
             product.name = context.product_name.strip() or "나의 화장품"
         reference = ""
-        if plan.reference_index is not None:
+        if plan.reference_index is not None and not plan.new_topic:
             if plan.reference_index > len(context.last_copies):
                 plan.intent, plan.question = "clarify", "해당 번호의 이전 후보가 없습니다. 후보 번호를 확인해주세요."
             else:
