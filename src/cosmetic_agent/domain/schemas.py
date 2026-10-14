@@ -31,6 +31,13 @@ class ProductCard(BaseModel):
     ingredients: list[str] = Field(default_factory=list, description="제공된 전성분명. 효능 시험 근거와 구분")
     ingredient_source: Optional[str] = None
     form: str | None = None
+    # 제품 사실: 사용자가 확인한 제품 정보. 광고문을 구체적으로 만드는 재료이며 효능 실증은 아니다.
+    texture: Optional[str] = Field(None, max_length=200, description="제형·질감 (예: 물처럼 가벼운 젤 크림)")
+    scent: Optional[str] = Field(None, max_length=100, description="향 (예: 은은한 풀잎 향, 무향)")
+    package: Optional[str] = Field(None, max_length=100, description="용량·용기 (예: 50ml 튜브)")
+    usage_step: Optional[str] = Field(None, max_length=200, description="사용 순서·방법 (예: 세안 후 토너 다음)")
+    skin_type: Optional[str] = Field(None, max_length=100, description="추천 피부 타입 (예: 건성·복합성)")
+    highlight: Optional[str] = Field(None, max_length=200, description="한 줄 특징 (예: 펌프형이라 한 손으로 사용)")
 
 
 class Citation(BaseModel):

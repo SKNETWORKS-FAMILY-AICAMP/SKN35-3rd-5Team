@@ -71,7 +71,9 @@ GENERATION_SYSTEM_PROMPT = """\
     줄마다 수치·항목·비교 기준은 E자료 원문과 일치해야 하며, 등록되지 않은 항목의 줄은 만들지 않는다.
 24. 사용자 요청이 시간·장벽·수치처럼 시험이 필요한 표현을 원하면, 의도는 살려 허용 범위의 구체 표현으로 바꾸고(예: '8시간 촉촉' → '건조한 오후에도 다시 꺼내 덧바르는 수분 한 겹'),
     rationale 끝에 '원 요청의 ○○ 표현은 관련 인체적용시험을 등록하면 사용할 수 있음'을 적는다.
-
+25. [제품 사실] 제형·질감, 향, 용량·용기, 사용 순서, 추천 피부 타입, 한 줄 특징은 사용자가 확인한 제품 정보이므로 그대로 써도 된다.
+    제품 사실이 있으면 모든 후보의 supporting_copy에 최소 1개를 구체적으로 녹이고, 후보마다 서로 다른 사실을 앞세운다.
+    제품 사실에 없는 질감·향·용량·용기는 지어내지 않는다. 제품 사실 안의 효능 주장(예: '진정 효과')은 원칙 1~7과 효능 상한을 따른다.
 
 [출력]
 - candidates: strong 2개, balanced 2개, safe 2개 순서의 후보 6개 (각 후보는 [이번 후보별 표현 각도]의 같은 번호 각도를 쓴다)
@@ -84,6 +86,22 @@ GENERATION_SYSTEM_PROMPT = """\
   '한 줄'은 headline 한 줄 + supporting_copy 1문장(성분이나 장면 포함).
   '짧은 문단'은 headline + supporting_copy 2~3문장. '상세 설명'은 headline + supporting_copy 4~6문장(성분별 역할, 사용 장면, 사용 방법, 결과감).
 """
+
+
+PRODUCT_FACTS = (
+    ("texture", "제형·질감"),
+    ("scent", "향"),
+    ("package", "용량·용기"),
+    ("usage_step", "사용 순서"),
+    ("skin_type", "추천 피부 타입"),
+    ("highlight", "한 줄 특징"),
+)
+
+
+def product_fact_lines(product: dict[str, Any]) -> list[str]:
+    """[제품] 블록에 넣을 제품 사실 줄. 입력된 칸만 넣고, 하나도 없으면 미확인이라고 적는다."""
+    rows = [f"- {label}: {str(product.get(key)).strip()}" for key, label in PRODUCT_FACTS if str(product.get(key) or "").strip()]
+    return rows or ["- 제품 사실(질감·향·용기 등): 미확인 (지어내지 말 것)"]
 
 
 def build_generation_prompt(
@@ -121,6 +139,7 @@ def build_generation_prompt(
         f"- 구분: {product.get('category', '일반')}",
         f"- 심사(보고) 기능성: {product.get('functional_type') or '없음'}",
         f"- 주요 성분: {', '.join(product.get('key_ingredients') or []) or '없음'}",
+        *product_fact_lines(product),
         f"- 사용자 제품 설명/콘셉트: {product_description or '없음'}",
         f"- 다듬을 이전 광고문: {reference_copy or '없음'}",
         "",

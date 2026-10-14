@@ -157,6 +157,9 @@ def _render_product_card(key: str, product: dict) -> None:
                     st.link_button("공식 시험 요약 출처", ev["source_url"], key=f"{key}_ev_source_{product['product_id']}_{i}")
     if product.get("key_ingredients"):
         html(f'<div class="bw-proj-meta">주요 성분 · {esc(", ".join(product["key_ingredients"]))}</div>')
+    facts = [product.get(k) for k in ("texture", "scent", "package", "usage_step") if product.get(k)]
+    if facts:
+        html(f'<div class="bw-proj-meta">제품 사실 · {esc(" · ".join(facts))}</div>')
     c1, c2 = st.columns(2)
     if c1.button("기준 해제", key=f"{key}_clear_{product['product_id']}", type="tertiary",
                  icon=":material/close:", help="제품 정보 없이 일반 화장품 기준으로 검토"):
@@ -207,6 +210,15 @@ def _register_dialog(key: str) -> None:
     form = form_of(name) if form_choice == "제품명에서 자동 확인" else form_choice
     c5.caption(f"비교 제형: {form or '제품명으로 확인할 수 없어 직접 선택이 필요합니다.'}")
     price = c6.number_input("판매가 (원, 선택)", min_value=0, value=None, step=1000, placeholder="예: 32000")
+    with st.expander("제품 사실 (선택) · 채울수록 광고문이 구체적이 됩니다"):
+        st.caption("질감·향·용기처럼 확인된 사실만 적어 주세요. 광고문 생성에 그대로 쓰이며, 효능 근거로는 쓰지 않습니다.")
+        f1, f2 = st.columns(2)
+        texture = f1.text_input("제형·질감", placeholder="예: 물처럼 가볍게 펴지는 젤 크림", max_chars=200)
+        scent = f2.text_input("향", placeholder="예: 은은한 풀잎 향 / 무향", max_chars=100)
+        package = f1.text_input("용량·용기", placeholder="예: 50ml 튜브", max_chars=100)
+        usage_step = f2.text_input("사용 순서", placeholder="예: 세안 후 토너 다음, 마지막 단계", max_chars=200)
+        skin_type = f1.text_input("추천 피부 타입", placeholder="예: 건성·복합성", max_chars=100)
+        highlight = f2.text_input("한 줄 특징", placeholder="예: 펌프형이라 한 손으로 덜어 쓰기 편함", max_chars=200)
     st.markdown("**보유 실증 자료** · 표 아래 ＋ 로 행을 추가해 여러 개 입력 (항목이 빈 행은 무시)")
     rows = st.data_editor(
         [{"시험 종류": "인체적용시험", "항목": "", "결과": "", "기관": ""}],
@@ -246,6 +258,8 @@ def _register_dialog(key: str) -> None:
         "key_ingredients": list(dict.fromkeys(i.strip() for i in ingredient_list if i.strip())),
         "form": form,
         "price_krw": int(price) if price else None,
+        **{k: v.strip() for k, v in {"texture": texture, "scent": scent, "package": package, "usage_step": usage_step,
+                                     "skin_type": skin_type, "highlight": highlight}.items() if v and v.strip()},
         "owned_evidence": evidence,
     }
     register_product(product)

@@ -162,6 +162,37 @@ def sensory_phrases(product: dict[str, Any] | None = None) -> list[str]:
     return list(dict.fromkeys(out))
 
 
+def form_words(product: dict[str, Any]) -> tuple[str, list[str]]:
+    """제형별 사용감 어휘 (data/assets/form_vocab.json). 제형·제품명으로 제형을 알 수 있을 때만 준다."""
+    text = f"{product.get('form') or ''} {product.get('name') or ''}"
+    for row in _read(ASSETS / "form_vocab.json", {}).get("forms", []):
+        if re.search(row["match"], text):
+            return row["form"], list(row.get("words", []))
+    return "", []
+
+
+@lru_cache(maxsize=1)
+def _bank_rows() -> tuple[dict[str, Any], ...]:
+    path = ASSETS.parent / "copy_bank" / "bank.jsonl"
+    if not path.exists():
+        return ()
+    return tuple(json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip())
+
+
+def copy_bank(product: dict[str, Any], rng: random.Random, per_type: int = 3) -> dict[str, list[str]]:
+    """표현 은행(data/copy_bank/bank.jsonl)에서 같은 제형 + 공통 항목을 종류별로 몇 개씩 고른다. 같은 제형을 먼저 채운다."""
+    form = form_words(product)[0]
+    out: dict[str, list[str]] = {}
+    for kind in ("scene", "template", "sensory_vocab", "angle"):
+        own = [r["text"] for r in _bank_rows() if r["type"] == kind and form and r.get("form") == form]
+        common = [r["text"] for r in _bank_rows() if r["type"] == kind and not r.get("form")]
+        picked = rng.sample(own, min(per_type, len(own)))
+        picked += rng.sample(common, min(per_type - len(picked), len(common)))
+        if picked:
+            out[kind] = picked
+    return out
+
+
 def forbidden_examples(product: dict[str, Any]) -> list[str]:
     """lv9(불가) 표현 + 기능성 금지 표현 + 실제 적발 보도자료 속 따옴표 표현."""
     out = [t.strip() for c in _ladder() for lv in c.get("levels", []) if lv.get("lv") == 9
@@ -292,6 +323,10 @@ def build_generation_knowledge(
     sensory = sensory_phrases(product)
     if sensory:
         lines += ["", "[쓸 수 있는 사용감 표현 - 효능 단계 lv0, 실증 없이 가능]", "- " + ", ".join(rng.sample(sensory, min(8, len(sensory))))]
+    form, words = form_words(product)
+    if words:
+        lines += ["", f"[제형 사용감 어휘 - {form}. 제품 사실(질감·향)과 다르면 제품 사실이 우선]",
+                  "- " + ", ".join(rng.sample(words, min(6, len(words))))]
     matched = [f"- {r['reference_id']} ({'·'.join(r.get('copy_types') or []) or '시장 문구'}) {r['copy_text']}"
                for r in (market_refs or []) if _usable_market_copy(r.get("copy_text") or "", r.get("copy_types") or [])][:4]
     # 일반 예시는 우리 제품에 없는 성분(PDRN·히알루론산 등)을 부르는 문구를 빼고 채운다.
@@ -301,6 +336,12 @@ def build_generation_knowledge(
     own = ingredient_groups(" ".join([product.get("name", ""), *ingredients]))
     general = [m for m in market_examples() if ingredient_groups(m["text"]) <= own]
     fill = [f"- ({m['type']}) {m['text']}" for m in rng.sample(general, min(max(0, 4 - len(matched)), len(general)))]
+    bank = copy_bank(product, rng)
+    if bank:
+        names = {"scene": "사용 장면", "template": "문장 구조", "sensory_vocab": "감각 어휘", "angle": "설득 각도"}
+        lines += ["", "[수집 표현 재료 - 실제 광고에서 뽑아 추상화한 장면·구조. 문장을 그대로 쓰지 말고 우리 제품 사실로 채운다]"]
+        lines += [f"- {names[k]}: " + " / ".join(v) for k, v in bank.items()]
+        fill = fill[:1]  # 표현 은행이 있으면 일반 시장 예시는 하나만 (프롬프트 길이·베끼기 방지)
     if matched or fill:
         lines += ["", "[말투 참고 - 실제 시장 문구. 문장·제품명·수치를 베끼지 말고 구성만 참고. M번호는 같은 제형·공통 성분 제품]"]
         lines += matched + fill
