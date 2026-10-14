@@ -19,6 +19,7 @@ class ChatContext(BaseModel):
     tone: str = Field(default="담백한", min_length=1, max_length=100)
     length: Literal["한 줄", "짧은 문단", "상세 설명"] = "짧은 문단"
     product_name: str = Field(default="나의 화장품", max_length=100)
+    product_source: Literal["selected", "conversation"] = Field(default="selected", description="현재 주제가 선택 제품인지 대화에서 새로 설명한 제품인지. 서버가 결정")
     brief: str = Field(default="", max_length=2000)
     product_description: str = Field(default="", max_length=2000)
     last_copies: list[str] = Field(default_factory=list, max_length=3)

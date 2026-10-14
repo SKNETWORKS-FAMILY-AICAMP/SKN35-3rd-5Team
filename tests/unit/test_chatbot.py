@@ -131,3 +131,55 @@ def test_capability_conversation_does_not_treat_it_as_ad_review():
     assert response.intent == "answer"
     svc.generator.generate.assert_not_called()
     svc.reviewer.review_single.assert_not_called()
+
+
+def test_new_topic_with_same_placeholder_name_does_not_reuse_old_copy():
+    svc = service(ChatPlan(intent="generate", new_topic=True, reference_index=1,
+                           context=ChatContext(brief="립밤의 브랜드 소개", product_description="립밤")))
+    svc.generator.generate.return_value = GenerateResponse(
+        request_id="new", status="생성완료", product_id="chat_draft", timing=ExecutionTiming())
+    old = ChatContext(ingredients=["판테놀"], product_description="선크림", brief="20대 선크림 SNS 광고", last_copies=["이전 선크림 광고"])
+    svc.chat(ChatRequest(message="이번엔 립밤 소개 글을 써줘", context=old))
+    sent = svc.generator.generate.call_args.args[0]
+    assert sent.reference_copy == ""
+    assert sent.ingredients == []
+    assert sent.product_description == "립밤"
+    assert "선크림" not in sent.instruction
+
+
+def test_new_topic_then_followup_works_without_resetting_conversation():
+    svc = service(None)
+    svc._llm.invoke.side_effect = [
+        ChatPlan(intent="generate", new_topic=True, context=ChatContext(product_name="선크림", product_description="선크림")),
+        ChatPlan(intent="generate", new_topic=True, context=ChatContext(product_name="립밤", product_description="립밤")),
+        ChatPlan(intent="generate", context=ChatContext(product_name="립밤", product_description="립밤", length="한 줄")),
+    ]
+    svc.generator.generate.side_effect = [
+        GenerateResponse(request_id=str(i), status="생성완료", product_id="chat_draft", timing=ExecutionTiming(),
+                         candidates=[GeneratedCandidate(text=text, tier="safe")])
+        for i, text in enumerate(["선케어 루틴", "립밤 루틴", "짧은 립밤 루틴"])
+    ]
+    first = svc.chat(ChatRequest(message="선크림 광고 써줘"))
+    second = svc.chat(ChatRequest(message="이번엔 립밤 광고 써줘", context=first.context))
+    svc.chat(ChatRequest(message="방금 걸 더 짧게", context=second.context))
+    sent = [call.args[0] for call in svc.generator.generate.call_args_list]
+    assert sent[1].reference_copy == ""
+    assert sent[2].reference_copy == "립밤 루틴"
+
+
+def test_new_product_and_followup_do_not_reuse_selected_product_evidence(sample_product):
+    svc = service(None)
+    svc._llm.invoke.side_effect = [
+        ChatPlan(intent="generate", new_topic=True, context=ChatContext(product_name="립밤", product_description="립밤")),
+        ChatPlan(intent="generate", context=ChatContext(product_name="립밤", product_description="립밤", tone="재치 있는")),
+    ]
+    svc.generator.generate.return_value = GenerateResponse(
+        request_id="lip", status="생성완료", product_id="chat_draft", timing=ExecutionTiming(),
+        candidates=[GeneratedCandidate(text="립밤 루틴", tier="safe")])
+    result = svc.chat(ChatRequest(message="이번에는 립밤 광고 써줘", product=sample_product))
+    assert result.context.product_source == "conversation"
+    svc.chat(ChatRequest(message="방금 걸 재치 있게", product=sample_product, context=result.context))
+    for call in svc.generator.generate.call_args_list:
+        assert call.args[0].product.name == "립밤"
+        assert call.args[0].product.owned_evidence == []
+        assert call.args[0].product.functional_type is None
