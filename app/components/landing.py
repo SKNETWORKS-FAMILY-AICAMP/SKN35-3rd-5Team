@@ -3,7 +3,8 @@
 홈(소개) 화면의 섹션 HTML — 데이터 dict → HTML 문자열 순수 함수 + 움직임 스크립트 하나(MOTION_SCRIPT).
 버튼(시작하기)은 views/home.py 가 Streamlit 위젯으로 넣는다. CSS 는 styles/home.css.
 
-- 글자: 제목만 명조(Noto Serif KR 600, 앱 로고의 세리프와 맞춤), 본문 Pretendard, 날짜·조항 번호 IBM Plex Mono.
+- 글자: 홈 전체를 영문 Inter + 한글 Noto Sans KR 로(제목 800 · 줄간격 1.1 · 자간 -0.02em), 날짜·조항 번호는 IBM Plex Mono.
+- 캐릭터: 히어로 예시 카드 뒤에서 고개를 내밀고 단계마다 말풍선으로 지금 하는 일을 말한다 · 카드 머리 아바타 · 마지막 안내.
 - 움직임은 '교정 동작'만 쓴다 — 밑줄이 그어지고, 판정이 붙고, 근거가 달리고, 제안 문구로 바뀐다.
   적발 발표 띠는 흐르고, 섹션은 화면에 들어올 때 한 번 올라오며, 숫자는 센다. '동작 줄이기'면 모두 멈춘 최종 상태.
 - 예시를 지어내지 않는다: 히어로·기능 카드의 판정·제안은 Mock 판정 엔진(services/mock.py)이 그 문구에 실제로 낸 결과,
@@ -12,10 +13,11 @@
 from __future__ import annotations
 
 import base64
+import json
 from functools import lru_cache
 from pathlib import Path
 
-from app.components.brand import character_img, lockup_img
+from app.components.brand import avatar_img, character_img, lockup_img
 from app.components.cards import highlighted, tag
 from app.components.icons import icon
 from app.components.layout import esc
@@ -34,6 +36,17 @@ DEMO_COPIES = [
     "바르는 순간부터 24시간 촉촉함이 지속되는 수분 크림",
     "PDRN 성분이 피부 속 깊이 전달되는 신개념 앰플",
 ]
+# 히어로 캐릭터 말풍선 — 예시 카드의 단계(s1 밑줄 · s2 판정 · s3 근거 · s4 제안)마다. 없는 단계는 말하지 않는다
+SAY = {
+    "start": "문구를 읽고 있어요",
+    "marks": "위험 표현에 밑줄을 그었어요",
+    "nomarks": "근거 조항을 찾고 있어요",
+    "verdict": "규정 기준으로 판정했어요",
+    "hold": "판단하기 어려운 문구예요",
+    "cites": "근거 조항을 달았어요",
+    "fix": "이렇게 고쳐 보면 어때요?",
+    "nofix": "담당자 확인이 필요해요",
+}
 # 기능 카드 「상세페이지 검토」 — views/bulk.py 예시 상세페이지의 문장들
 DETAIL_LINES = [
     "건조한 피부에 촉촉함을 채워 주는 데일리 수분 크림입니다.",
@@ -152,12 +165,15 @@ def demo(exs: list[dict], product_name: str, n_evidence: int) -> str:
             f'{f"<ol class=cites>{cites}</ol>" if cites else ""}{fix}</div>'
         )
     dots = "".join(f'<i{" class=on" if i == 0 else ""}></i>' for i in range(len(exs)))
-    return ('<div class="bw-h bw-h-demo" aria-label="검토 예시">'
-            f'<div class="bar"><span class="live"><i class="ping"></i>검토 예시</span>'
+    first = SAY["fix"] if exs and exs[0]["fix"] else SAY["nofix"]   # 스크립트가 없을 때 = 첫 예시의 마지막 말
+    buddy = (f'<div class="buddy" aria-hidden="true"><span class="say">{esc(first)}</span>'
+             f'<span class="pic">{character_img(228)}</span></div>')
+    return ('<div class="bw-h bw-h-demo" aria-label="검토 예시">' + buddy + '<div class="card">'
+            f'<div class="bar"><span class="live">{avatar_img(22)}뷰렛 AI · 검토 예시</span>'
             f'<span class="who">{esc(product_name)} · 실증 {n_evidence}건</span>'
             f'<span class="dots" aria-hidden="true">{dots}</span></div>'
             f'<div class="stage">{"".join(panels)}</div>'
-            '<div class="foot">Mock 판정 엔진의 실제 결과 · 데모 데이터</div></div>')
+            '<div class="foot">Mock 판정 엔진의 실제 결과 · 데모 데이터</div></div></div>')
 
 
 # ── 적발 발표 띠 ────────────────────────────────────────────────────
@@ -284,7 +300,7 @@ def sources(stats: dict, docs: list[dict]) -> str:
 
 # ── 마지막 안내 · 푸터 ──────────────────────────────────────────────
 def cta_text() -> str:
-    return (f'<div class="bw-h bw-h-cta"><span class="pic">{character_img(112, alt="")}</span>'
+    return (f'<div class="bw-h bw-h-cta"><span class="pic">{character_img(136, alt="")}</span>'
             '<div>' + _display("검토할 문구가 있나요?") +
             '<p>가입 없이 바로 써 볼 수 있습니다. 문구를 붙여 넣거나 시작 문구 하나를 눌러 보세요.</p></div></div>')
 
@@ -297,9 +313,10 @@ def footer(mode: str) -> str:
 
 
 # ── 움직임 ──────────────────────────────────────────────────────────
-# 1) .rv 가 화면에 들어오면 is-in (한 번)  2) [data-count] 숫자 세기  3) 히어로 예시를 단계별로 보이고 다음 예시로
+# 1) .rv 가 화면에 들어오면 is-in (한 번)  2) [data-count] 숫자 세기  3) 히어로 예시를 단계별로 보이고 다음 예시로,
+#    단계마다 캐릭터가 말풍선으로 말하고 살짝 뛴다
 # 스크립트가 돌지 않으면 html 에 bw-js 가 없어 숨김 규칙이 걸리지 않는다 — 내용은 그대로 보인다.
-MOTION_SCRIPT = """<script>
+_MOTION_JS = """<script>
 (function () {
   document.documentElement.classList.add('bw-js');
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -345,13 +362,31 @@ MOTION_SCRIPT = """<script>
     box.setAttribute('data-run', '1');
     if (reduce) return;
     var exs = box.querySelectorAll('.ex'), dots = box.querySelectorAll('.dots i');
+    var say = box.querySelector('.say'), buddy = box.querySelector('.buddy');
+    var SAY = __SAY__;
     var STEPS = [300, 1000, 1700, 2500, 3500], HOLD = 7600, timers = [];
+    function talk(text) {
+      if (!say || !text) return;
+      say.textContent = text;
+      say.classList.remove('pop'); void say.offsetWidth; say.classList.add('pop');
+      if (buddy) { buddy.classList.remove('hop'); void buddy.offsetWidth; buddy.classList.add('hop'); }
+    }
+    function line(ex, step) {
+      if (step === 1) return ex.querySelector('.bw-mark:not(.is-verified)') ? SAY.marks : SAY.nomarks;
+      if (step === 2) return ex.classList.contains('is-hold') ? SAY.hold : SAY.verdict;
+      if (step === 3) return ex.querySelector('.cites') ? SAY.cites : '';
+      if (step === 4) return ex.querySelector('.fix.is-hold') ? SAY.nofix : SAY.fix;
+      return '';
+    }
     function show(n) {
       timers.forEach(clearTimeout); timers = [];
       if (!document.body.contains(box)) return;
       exs.forEach(function (e, k) { e.classList.remove('on', 's1', 's2', 's3', 's4', 's5'); if (k === n) e.classList.add('on'); });
       dots.forEach(function (d, k) { d.classList.toggle('on', k === n); });
-      STEPS.forEach(function (ms, k) { timers.push(setTimeout(function () { exs[n].classList.add('s' + (k + 1)); }, ms)); });
+      talk(SAY.start);
+      STEPS.forEach(function (ms, k) {
+        timers.push(setTimeout(function () { exs[n].classList.add('s' + (k + 1)); talk(line(exs[n], k + 1)); }, ms));
+      });
       timers.push(setTimeout(function () { show((n + 1) % exs.length); }, HOLD));
     }
     show(0);
@@ -363,3 +398,5 @@ MOTION_SCRIPT = """<script>
   setTimeout(run, 1200);
 })();
 </script>"""
+
+MOTION_SCRIPT = _MOTION_JS.replace("__SAY__", json.dumps(SAY, ensure_ascii=False))
