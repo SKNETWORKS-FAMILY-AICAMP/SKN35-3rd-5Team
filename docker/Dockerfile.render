@@ -10,6 +10,8 @@ COPY configs ./configs
 COPY data/assets ./data/assets
 COPY data/01_raw ./data/01_raw
 COPY data/market_reference ./data/market_reference
+COPY data/sales_forecast_reference ./data/sales_forecast_reference
+COPY data/top_product_copies ./data/top_product_copies
 COPY data/02_processed/chunks.jsonl ./data/02_processed/chunks.jsonl
 COPY indexing/05_build_indexes.py ./indexing/05_build_indexes.py
 COPY api ./api

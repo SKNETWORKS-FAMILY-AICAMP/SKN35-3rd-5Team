@@ -46,3 +46,8 @@ def character_img(height: int = 200, *, alt: str = "") -> str:
 def lockup_img(height: int = 36) -> str:
     """캐릭터 마크 + Beaurette 워드마크 로고 <img> (2배 해상도 PNG)."""
     return f'<img src="{_data_uri("beaurette-lockup.png")}" style="height:{height}px;width:auto" alt="{BRAND_NAME}">'
+
+
+def lockup_uri() -> str:
+    """Streamlit 페이지 링크에서도 같은 토끼·워드마크 로고를 사용한다."""
+    return _data_uri("beaurette-lockup.png")

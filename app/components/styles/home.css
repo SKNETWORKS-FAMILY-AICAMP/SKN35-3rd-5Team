@@ -594,6 +594,8 @@
   cursor: url("/app/static/brand/cursor-serum-hot.png") 2 2, pointer;
   cursor: -webkit-image-set(url("/app/static/brand/cursor-serum-hot.png") 1x, url("/app/static/brand/cursor-serum-hot@2x.png") 2x) 2 2, pointer;
 }
+.stApp:has(.st-key-home_top) .st-key-chat_launcher [data-testid="stPopoverButton"] { cursor: grab; }   /* 챗봇 버튼은 끌어서 옮긴다(팀 chat_launcher.js) */
+.stApp:has(.st-key-home_top) .st-key-chat_launcher[data-bw-dragging="true"] [data-testid="stPopoverButton"] { cursor: grabbing; }
 
 /* 큰 제목: 줄 단위로 올라온다 — 히어로는 처음에, 섹션은 화면에 들어올 때 */
 .bw .bw-h-display .ln { display: block; overflow: hidden; padding-bottom: .06em; margin-bottom: -.06em; }
