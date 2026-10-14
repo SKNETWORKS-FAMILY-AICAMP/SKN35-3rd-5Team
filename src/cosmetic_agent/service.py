@@ -35,8 +35,13 @@ def _ensure_bm25_index() -> None:
     if settings.BM25_INDEX_PATH.exists():
         return
     import importlib.util
+    import sys
 
-    builder_path = PROJECT_ROOT / "indexing" / "05_build_indexes.py"
+    indexing_dir = PROJECT_ROOT / "indexing"
+    # 색인 스크립트가 같은 폴더의 metadata_enrichment 를 불러오므로 경로에 넣는다
+    if str(indexing_dir) not in sys.path:
+        sys.path.insert(0, str(indexing_dir))
+    builder_path = indexing_dir / "05_build_indexes.py"
     spec = importlib.util.spec_from_file_location("build_indexes", builder_path)
     builder = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(builder)

@@ -187,3 +187,10 @@ def test_claims_still_caught_after_ingredient_exceptions(verifier):
     assert "금지표현" in codes(verifier, "체중 감량을 돕는 바디 크림")
     assert "금지표현" in codes(verifier, "인체 줄기세포 엑소좀 앰플")
     assert not codes(verifier, "연어정소엑소좀 함유")  # 인체 외 유래를 밝힘
+
+
+@pytest.mark.parametrize("text", ["나이 들지 않는 피부의 비밀, 아데노신", "젊음을 유지하세요", "시간을 되돌리는 세럼"])
+def test_reversing_aging_is_out_of_scope_even_for_wrinkle_products(verifier, text):
+    kwargs = {"product_category": "기능성", "functional_type": "주름 개선"}
+    assert "금지표현" in codes(verifier, text, **kwargs)
+    assert not codes(verifier, "피부의 주름 개선에 도움을 주는 세럼", **kwargs)

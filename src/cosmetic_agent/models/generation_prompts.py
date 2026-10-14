@@ -63,6 +63,7 @@ GENERATION_SYSTEM_PROMPT = """\
 [출력]
 - candidates: strong 2개, balanced 2개, safe 2개 순서의 후보 6개 (각 후보는 [이번 후보별 표현 각도]의 같은 번호 각도를 쓴다)
 - 각 후보에는 text, tier, rationale, used_evidence, cited_ids를 포함한다.
+- rationale·market_application·ingredient_application·creative_application 은 각각 25자 이내 한 구절로 쓴다 (없으면 빈 값). 설명보다 광고 문구에 공을 들인다.
 - cited_ids는 [관련 규정]의 L1, L2 같은 번호만 사용한다.
 - headline, supporting_copy를 분리해 작성하고 text에는 두 부분을 합친 광고문을 쓴다.
 - creative_reference_ids에는 참고한 C번호, creative_application에는 구조를 어떻게 새롭게 적용했는지 적는다.
