@@ -35,7 +35,8 @@ VIOLATION_TYPES = ("의약품오인", "범위이탈", "기능성오인", "실증
 VIOLATION_PRIORITY = ("의약품오인", "범위이탈", "기능성오인", "비교광고", "소비자오인", "실증필요")
 
 # 숫자 + 단위. 단위 없는 숫자(제품명 숫자 등)는 효능 주장으로 보지 않는다. (verifier 와 같은 기준)
-NUMBER_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(%|퍼센트|배|주|일|개월|시간|분|회|명)")
+# 수치 인식은 검증기와 같은 기준을 쓴다 (사용법·조건·함량 숫자 제외 포함)
+from .verifier import NUMBER_RE, _number_tokens as _shared_number_tokens  # noqa: E402
 UNIT_ALIASES = {"퍼센트": "%"}
 
 # 실증규정 제3조 제3항: 조사결과(만족도 등)는 효능 주장의 직접 근거가 아니다.
@@ -71,7 +72,7 @@ def _compact(text: str) -> str:
 
 
 def _number_tokens(text: str) -> set[str]:
-    return {f"{n}{UNIT_ALIASES.get(u, u)}" for n, u in NUMBER_RE.findall(text or "")}
+    return _shared_number_tokens(text)
 
 
 def _evidence_text(evidence: dict[str, Any]) -> str:

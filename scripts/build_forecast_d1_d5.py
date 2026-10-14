@@ -15,7 +15,7 @@ LAW = ROOT / "data" / "01_raw" / "law" / "화장품법_시행규칙.xml"
 PAIRS = OUT / "copy_comparison" / "headline_comparisons.jsonl"
 DATE = "2026-10-14"
 VISUALLY_AUDITED_XML_SHA256 = (
-    "268b60f3ad8e59df37480ba8b99f0e02f49ff11913dd08b9936ed142b902447f"
+    "cc66e0682ecc0b607c30c5f43039081a067199bfa178a0e8efac3e32e09c6e0c"
 )
 VISUALLY_AUDITED_PDF_SHA256 = (
     "c8a97458853fd3f6a436d4904479d95be513c408192e8540d3f104fee5079cdc"
@@ -23,7 +23,8 @@ VISUALLY_AUDITED_PDF_SHA256 = (
 
 
 def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    # 줄바꿈(CRLF/LF)은 체크아웃 환경마다 달라지므로 LF 로 맞춘 뒤 해시한다
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def save(path, value):

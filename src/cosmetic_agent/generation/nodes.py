@@ -108,6 +108,15 @@ def generate_candidates_node(
         }
 
 
+def _pin_numbers(copy: str, reports: list[dict[str, Any]]) -> str:
+    """설명 문구에서 숫자가 든 문장만 실증 원문으로 바꾸고, 장면·성분 문장은 남긴다."""
+    # 원문 그대로 (시험 종류·기관은 evidence_note 주석에 따로 붙는다)
+    pinned = list(dict.fromkeys(str(e["value"]) for e in reports if e.get("value")))
+    sentences = [x for x in re.split(r"(?<=[.!?])\s+|\n+", copy or "") if x.strip()]
+    kept = [x for x in sentences if not NUMBER_RE.search(x)]
+    return "\n".join(pinned + kept) if pinned else "\n".join(kept)
+
+
 SHOWN_CANDIDATES = 3
 
 
@@ -199,7 +208,7 @@ def verify_candidates_node(
             # 수치 자체가 맞아도 분모·방향을 바꾸어 설명할 수 있으므로,
             # 수치 설명은 선택한 제품 시험의 원문으로 고정한다. (준호)
             if structured and used_ids and NUMBER_RE.search(draft.get("supporting_copy", "")):
-                draft["supporting_copy"] = "\n".join(str(e["value"]) for e in selected_reports if e.get("value"))
+                draft["supporting_copy"] = _pin_numbers(draft.get("supporting_copy", ""), selected_reports)
                 draft["text"] = compose_copy(draft)
                 passed, note = verifier.verify_suggestion(
                     draft["text"], selected_reports, rule_engine,
