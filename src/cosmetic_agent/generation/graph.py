@@ -54,7 +54,12 @@ def build_generation_graph(
     def route_verification(state: AdGenerationState) -> str:
         if state.get("generation_error"):
             return "finalize_generation"
-        if any(candidate.get("status", "검토통과") == "검토통과" for candidate in state.get("candidates", [])):
+        passed = sum(candidate.get("status", "검토통과") == "검토통과" for candidate in state.get("candidates", []))
+        if passed:
+            # 헤드라인 세트(준호)가 3개 미만만 통과하면 탈락 사유를 주고 한 번만 다시 쓴다 (지연 때문에 1회)
+            structured = any(d.get("headline") for d in state.get("drafts", []))
+            if structured and passed < 3 and state.get("generation_retry", 0) < 1:
+                return "generate_candidates"
             return "finalize_generation"
         return "generate_candidates" if state.get("generation_retry", 0) < MAX_GENERATION_RETRIES else "finalize_generation"
 

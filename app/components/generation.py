@@ -10,13 +10,22 @@ def render_generation(response: dict) -> None:
     for index, candidate in enumerate(response.get("candidates", []), 1):
         status = candidate.get("status") or ("검토통과" if candidate.get("verified") else "확인필요")
         st.markdown(f"**후보 {index} · {status}**")
+        if candidate.get("headline"):
+            st.markdown(f"### {candidate['headline']}")
+            if candidate.get("supporting_copy"):
+                st.write(candidate["supporting_copy"])
+        if candidate.get("evidence_note"):
+            st.caption("함께 표시할 등록 시험 정보 · 최종 광고 사용 전 원자료 확인")
+            st.write(candidate["evidence_note"])
         if status == "검토통과":
-            st.code(candidate["text"], language=None)
+            st.code(candidate["text"] + ("\n\n" + candidate["evidence_note"] if candidate.get("evidence_note") else ""), language=None)
         else:
             with st.expander("확인이 필요한 초안"):
                 st.write(candidate["text"])
         if candidate.get("rationale"):
             st.caption(candidate["rationale"])
+        if candidate.get("creative_application"):
+            st.caption("창작 구성: " + candidate["creative_application"])
         if candidate.get("market_application"):
             st.caption("시장 표현 반영: " + candidate["market_application"])
         if candidate.get("ingredient_application"):

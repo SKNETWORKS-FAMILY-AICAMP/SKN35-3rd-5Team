@@ -5,8 +5,10 @@ import json
 
 import streamlit as st
 
+from cosmetic_agent.generation.creative import creative_catalog
 from cosmetic_agent.generation.ingredients import catalog
 from cosmetic_agent.market_reference import form_of
+from cosmetic_agent.models.generation_prompts import GENERATION_SYSTEM_PROMPT
 
 
 def signature(product: dict) -> str:
@@ -16,6 +18,8 @@ def signature(product: dict) -> str:
     )}
     fields["form"] = product.get("form") or form_of(product.get("name", ""))
     fields["ingredient_knowledge"] = catalog()
+    fields["creative_reference"] = creative_catalog()
+    fields["generation_prompt"] = GENERATION_SYSTEM_PROMPT
     return hashlib.sha256(json.dumps(fields, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 

@@ -7,6 +7,7 @@ from app.components.context import current
 from app.components.generation import render_generation
 from app.components.ingredient_roles import render_ingredient_roles
 from app.services import backend, generation_results
+from cosmetic_agent.generation.creative import creative_catalog
 
 st.title("광고문 생성")
 st.caption("원하는 제품과 광고 방향을 말해주세요. 성분을 몰라도 초안부터 만들고, 규정과 확인된 제품 근거로 검토합니다.")
@@ -38,6 +39,11 @@ payload = {"instruction": instruction.strip(), "product": product, "channel": ch
            "ingredients": list(dict.fromkeys(v.strip() for v in re.split(r"[,，\n;]+", raw) if v.strip()))}
 # 등록 성분과 연결된 성분 역할 카드(연구 범위·출처)를 생성 전에 보여준다
 render_ingredient_roles(dict(product, key_ingredients=[*(product.get("key_ingredients") or []), *payload["ingredients"]]))
+with st.expander("창작 레퍼런스 · 어떤 방식으로 다르게 쓰나요?"):
+    st.caption("제공된 광고 이미지의 표현 구조만 참고합니다. 해당 브랜드의 수치·기술·효능을 복사하지 않습니다.")
+    for style in creative_catalog()["styles"]:
+        st.markdown(f"**{style['name']}** — {style['pattern']}")
+    st.caption("출력: 헤드라인 + 설명 문구 + 사용한 실증의 시험 조건. 자료가 없으면 시험 조건을 만들지 않습니다.")
 if submitted:
     st.session_state.pop("bw_generation", None)
     if not payload["instruction"]:

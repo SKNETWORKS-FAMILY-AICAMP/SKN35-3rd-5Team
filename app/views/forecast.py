@@ -116,6 +116,7 @@ page_header(
 
 with st.container(key="pagebody"):
     # 기존 등록 세션도 재등록 없이 잘못 선택된 제형을 바로잡을 수 있다.
+    registered_product = product  # 광고문 생성 결과는 등록 제품 기준으로 찾는다 (아래 제형 보정은 시장 비교용)
     inferred_form = form_of(product.get("name", ""))
     if pid.startswith("CUSTOM_"):
         default_form = inferred_form or product.get("form")
@@ -260,7 +261,7 @@ with st.container(key="pagebody"):
 
     # ------------------------------------------------------------------ ③ 공통 생성 결과
     step("3", "선택한 광고 문구", "광고문 생성에서 시장 사례·우리 제품 자료·규정을 참고한 결과를 그대로 사용합니다.")
-    saved, stale = generation_results.record(product)
+    saved, stale = generation_results.record(registered_product)
     best = None
     if stale:
         st.warning("제품 정보 또는 선택한 실증 자료가 바뀌었습니다. 광고문 생성에서 다시 생성해 주세요.")
@@ -272,10 +273,12 @@ with st.container(key="pagebody"):
             format_func=lambda i: candidates[i]["text"],
             key=f"fc_generated_{pid}_{saved['response']['request_id']}_{saved['selected']}",
         )
-        generation_results.choose(product, index)
-        chosen = generation_results.selected(product)
+        generation_results.choose(registered_product, index)
+        chosen = generation_results.selected(registered_product)
         best = {"copy": chosen["text"]}
         st.write(chosen["text"])
+        if chosen.get("evidence_note"):
+            st.caption("선택한 문구와 함께 확인할 시험 정보: " + chosen["evidence_note"])
         st.caption(chosen.get("verify_note") or "생성 단계 검증 통과")
         if chosen.get("market_application"):
             st.write("시장 표현 반영: " + chosen["market_application"])
@@ -364,7 +367,11 @@ with st.container(key="pagebody"):
 
     r1, r2 = st.columns(2)
     with r1, st.container(border=True):
-        risk_card("원문 그대로", original, before)
+        if original.strip():
+            risk_card("원문 그대로", original, before)
+        else:
+            st.markdown("**원문 그대로**")
+            st.info("지금 쓰려는 문구를 위 ‘원문’ 칸에 넣으면, 그 문구를 그대로 쓸 때의 처분 위험을 추천 문구와 나란히 비교해요.")
     with r2, st.container(border=True):
         if after:
             risk_card("추천 문구로 바꾸면", recommended, after)
@@ -399,8 +406,10 @@ with st.container(key="pagebody"):
             exposed_share=exposed / 100, change_pct=pct,
             change_amount=delta, peer_count=len(peers),
             market_example=next((
-                {"brand": p["brand"], "name": p["name"], "copy": p["copies"][0]["copy_text"]}
-                for p in peers if p.get("copies")
+                {"brand": p["brand"], "name": p["name"], "copy": c["copy_text"]}
+                for pref in ("성분 소구형", "효능 서술형", "효능 수치형", None)
+                for p in peers for c in p.get("copies", [])
+                if pref is None or pref in (c.get("types") or [])
             ), None),
             own_copy=recommended,
         )

@@ -2,6 +2,8 @@
 
 from typing import Any
 
+from ..generation.creative import creative_prompt
+
 GENERATION_SYSTEM_PROMPT = """\
 너는 화장품 회사의 카피라이터이자 표시·광고 심의 담당자다.
 제품 정보, 사용자가 선택한 보유 실증자료, 관련 규정 안에서 광고 문구 후보를 만든다.
@@ -42,8 +44,19 @@ GENERATION_SYSTEM_PROMPT = """\
     PN과 PDRN, 레티놀과 레티날, 스쿠알란과 스쿠알렌처럼 비슷한 원료를 바꿔 부르지 않는다.
     [말투 참고]의 M번호 시장 문구는 외부 관찰이며 실증이 아니다. 수치·순위·인증·효능을 옮기지 않는다.
     실제로 참고한 번호만 ingredient_reference_ids·market_reference_ids 에 넣고, ingredient_application·market_application 에 무엇을 반영했는지 한 줄로 적는다. 참고하지 않았으면 비워 둔다.
+18. [창작 구조 참고]의 C번호는 사용자 제공 이미지의 구성 방식을 추상화한 것이다. 이미지에 등장한 브랜드명·수치·기간·기술명·성분을 우리 제품 사실로 쓰지 않는다.
+    후보들은 단어만 바꾸지 말고 비유·일상 장면·성분 이야기 등 서로 다른 창작 구조를 선택한다.
+    헤드라인은 짧고 기억에 남게, 설명 문구는 제품의 확인된 사실로 구체화한다. 성분명·제품명 나열과 '경험하세요/유지하세요' 같은 상투적 마무리를 반복하지 않는다.
+    고객이 떠올릴 수 있는 한 장면·리듬·대비를 선택한다. '고급스러운/특별한/향연/선사합니다' 같은 분위기 설명 단어로 창의성을 대신하지 않는다.
+    은유는 자유롭게 설계하되 '어떠한 환경에서도/절대/완벽' 같은 보장과 시간·깊이·장벽 복구의 효능 주장을 은유로 숨기지 않는다.
+    텍스처·향·흡수·사용감이 미확인이라면 실제 촉감의 사실로 단정하지 않고 루틴·분위기 중심으로 쓴다.
+19. strong은 보유 근거를 가장 잘 활용한 창의적 안, balanced는 제품 특징과 사용 상황을 연결한 안, safe는 근거가 추가로 필요한 효능 없이 장면·루틴을 제안하는 안이다.
+    시험이 없으면 수치·효과·시험 조건을 만들지 않는다. 시험이 있으면 사용한 자료 E번호만 evidence_reference_ids에 적는다.
+    시험의 효과·시간·비교 기준을 원문보다 넓히지 않고, 주석은 서버가 해당 E자료로 조립한다. 자료에 없는 기관·대상·기간을 보충하지 않는다.
+    '72시간 후 측정'은 '72시간 동안 지속'과 다르다. 하루 종일·밤사이·즉각 효과도 관련 시험 표현이 없으면 쓰지 않는다.
+    실증 수치를 쓸 때는 설명 문구에 해당 value의 원문(비교 기준 포함)을 그대로 살린다. 유지력·변화율·감소율을 서로 바꾸거나 비교 대상을 생략하지 않는다.
 
-18. 너는 스크롤을 멈추게 하는 카피라이터다. 첫 구절이 승부다. [끌림 기법]으로 첫 구절을 쓴다.
+20. 너는 스크롤을 멈추게 하는 카피라이터다. 첫 구절이 승부다. [끌림 기법]으로 첫 구절을 쓴다.
    그 뒤에는 요청한 [광고 조건]의 길이를 꽉 채워 제품 사실·사용 장면·감각을 구체적으로 이어 쓴다. 짧게 줄이라는 뜻이 아니다.
    길이 기준: 한 줄 = 한 문장(배너는 6~15자), 짧은 문단 = 2~3문장, 상세 설명 = 4~6문장.
    올리브영·인스타그램에서 실제로 클릭되는 광고처럼 구체적이고 감각적으로 쓴다. 다만 자극은 표현 방식에서 만들고, 효능·안전성·순위·후기를 꾸며내서 만들지 않는다.
@@ -51,6 +64,9 @@ GENERATION_SYSTEM_PROMPT = """\
 - candidates: strong 2개, balanced 2개, safe 2개 순서의 후보 6개 (각 후보는 [이번 후보별 표현 각도]의 같은 번호 각도를 쓴다)
 - 각 후보에는 text, tier, rationale, used_evidence, cited_ids를 포함한다.
 - cited_ids는 [관련 규정]의 L1, L2 같은 번호만 사용한다.
+- headline, supporting_copy를 분리해 작성하고 text에는 두 부분을 합친 광고문을 쓴다.
+- creative_reference_ids에는 참고한 C번호, creative_application에는 구조를 어떻게 새롭게 적용했는지 적는다.
+- 한 줄 요청: headline은 한 줄, supporting_copy는 짧은 보조 설명 한 문장. 상세 설명 요청은 보조 설명을 확장한다.
 """
 
 
@@ -73,13 +89,13 @@ def build_generation_prompt(
 ) -> str:
     evidences = product.get("owned_evidence") or []
     evidence_rows = []
-    for evidence in evidences:
+    for index, evidence in enumerate(evidences, start=1):
         values = [
             str(evidence.get(key))
-            for key in ("test_type", "item", "value", "institute")
+            for key in ("test_type", "item", "value", "conditions", "institute", "source_kind", "source_url")
             if evidence.get(key)
         ]
-        evidence_rows.append("- " + " / ".join(values))
+        evidence_rows.append(f"[E{index}] " + " / ".join(values))
     lines = [
         "[생성 요청]",
         instruction,
@@ -106,6 +122,9 @@ def build_generation_prompt(
         "",
         "[관련 규정]",
         evidence_text or "- 검색된 규정 없음",
+        "",
+        "[창작 구조 참고 - 브랜드 원문·효능·숫자 복사 금지]",
+        creative_prompt(),
     ]
     # 시장·성분 역할 자료는 보통 [쓸 수 있는 재료] 안에 들어간다. 따로 넘어온 경우에만 섹션을 붙인다.
     if market_reference_text:

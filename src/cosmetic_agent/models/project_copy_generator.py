@@ -24,6 +24,11 @@ class GeneratedDraft(BaseModel):
     market_application: str = ""
     ingredient_reference_ids: list[str] = Field(default_factory=list)
     ingredient_application: str = ""
+    headline: str = ""
+    supporting_copy: str = ""
+    creative_reference_ids: list[str] = Field(default_factory=list)
+    creative_application: str = ""
+    evidence_reference_ids: list[str] = Field(default_factory=list)
 
 
 class GenerationOutput(BaseModel):

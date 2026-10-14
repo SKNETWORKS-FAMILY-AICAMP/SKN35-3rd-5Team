@@ -71,8 +71,18 @@ def render_reference_guide(*, product_name: str, base_revenue: float,
         st.write(f"여기에 선택한 변화 폭 **±{change_pct:.2f}%** 를 가정하면:")
         st.code(f"{base_revenue:,.0f}원 × {exposed_share:.0%} × {change_pct:.2f}% ≈ {change_amount:,.0f}원", language=None)
         a, b = st.columns(2)
-        a.metric("상승을 가정한 월 매출", f"{base_revenue + change_amount:,.0f}원", f"+{change_amount:,.0f}원", delta_color="inverse", border=True)
-        b.metric("하락을 가정한 월 매출", f"{base_revenue - change_amount:,.0f}원", f"-{change_amount:,.0f}원", delta_color="inverse", border=True)
+        # 화면 공통 규칙: 오르면 빨간색 ▲, 내리면 파란색 ▼
+        for col, title, value, delta, color, arrow in (
+            (a, "상승을 가정한 월 매출", base_revenue + change_amount, f"+{change_amount:,.0f}원", "#d63838", "▲"),
+            (b, "하락을 가정한 월 매출", base_revenue - change_amount, f"−{change_amount:,.0f}원", "#2563c9", "▼"),
+        ):
+            with col:
+                st.html(
+                    f'<div style="border:1px solid #dedbd4;border-radius:12px;padding:14px 18px;background:#fffdf8">'
+                    f'<div style="font-size:13px;color:#667085">{title}</div>'
+                    f'<div style="font-size:26px;font-weight:750;color:#182230;margin:4px 0">{value:,.0f}원</div>'
+                    f'<div style="font-weight:700;color:{color}">{arrow} {delta}</div></div>'
+                )
         st.caption("변화 폭은 뉴스 제목 실험의 클릭 차이에서 참고했습니다. "
                    "구매전환율·객단가가 고정된다는 가정이며, 화장품 매출의 예측 구간이 아닙니다.")
     st.success("다음 확인: 같은 제품·가격·행사·이미지·타깃 조건에서 기존 문구 A와 추천 문구 B를 테스트합니다. "
