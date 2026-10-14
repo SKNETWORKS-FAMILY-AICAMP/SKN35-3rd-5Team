@@ -11,7 +11,7 @@ from cosmetic_agent.generation.creative import creative_catalog
 
 st.title("광고문 생성")
 st.caption("원하는 제품과 광고 방향을 말해주세요. 성분을 몰라도 초안부터 만들고, 규정과 확인된 제품 근거로 검토합니다.")
-use_project = st.checkbox("왼쪽 프로젝트의 제품·실증 자료 사용", value=False)
+use_project = st.checkbox("왼쪽 「내 제품」의 제품·실증 자료 사용", value=False)
 if use_project:
     product, ctx = current()
     st.caption(f"{ctx['product_name']} · 실증 {ctx['evidence_on']}건. 실제 동일 제품의 자료일 때만 사용하세요.")

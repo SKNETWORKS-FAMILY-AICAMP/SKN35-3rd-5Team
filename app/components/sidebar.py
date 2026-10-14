@@ -1,6 +1,6 @@
 """
 [app/components/sidebar.py]
-왼쪽 사이드바 — 브랜드(누르면 홈) · 메뉴(사용 흐름 묶음) · 프로젝트(제품·실증 자료) · 데이터 상태.
+왼쪽 사이드바 — 브랜드(누르면 홈) · 메뉴(사용 흐름 묶음) · 내 제품(제품·실증 자료) · 데이터 상태.
 (최근 대화 목록은 화면을 단순하게 하려고 뺐다. 대화 기록 기능(threads)은 그대로 있다.)
 """
 from __future__ import annotations
@@ -39,7 +39,7 @@ def render_sidebar(pages: dict[str, st.Page], health: dict, *, home: st.Page) ->
 
         _nav(pages)
 
-        _section("프로젝트", '<span class="bw-side-note">검토 기준</span>')
+        _section("내 제품", '<span class="bw-side-note">검토 기준</span>')
         render_project()
 
         if health.get("mode") == "mock":

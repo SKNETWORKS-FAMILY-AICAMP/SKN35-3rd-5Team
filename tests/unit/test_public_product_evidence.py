@@ -65,8 +65,8 @@ def test_review_chat_receives_selected_evidence_and_respects_checkbox(monkeypatc
     ).run()
     app.switch_page("views/review.py").run()
     assert not app.exception
-    # 기본 제품은 시연용 자사 샘플(PROD_001). 공개 분석 샘플을 직접 고른 뒤 같은 내용을 확인한다.
-    assert app.selectbox(key="proj_product").value == "PROD_001"
+    # 처음에는 제품 정보 없이 일반 화장품 기준(GENERAL_DEFAULT). 공개 분석 샘플을 직접 고른 뒤 같은 내용을 확인한다.
+    assert app.selectbox(key="proj_product").value == "GENERAL_DEFAULT"
     app.selectbox(key="proj_product").select("PUBLIC_KIEHLS_UFC").run()
     assert not app.exception
     assert len([c for c in app.checkbox if c.key.startswith("proj_ev_PUBLIC_")]) == 3

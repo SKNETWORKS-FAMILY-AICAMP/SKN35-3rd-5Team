@@ -1,6 +1,6 @@
 """
 [app/services/product_market.py]
-선택한 제품(사이드바 「프로젝트」)을 실제 시장 수집 자료와 연결한다 — 예상 매출 시나리오의 기본값 출처.
+선택한 제품(사이드바 「내 제품」)을 실제 시장 수집 자료와 연결한다 — 예상 매출 시나리오의 기본값 출처.
 
 연결 순서: 제품 카드의 ingredient_profile_id (예: PUBLIC_KIEHLS_UFC → MKT_KIEHLS_UFC)
   · 가격      data/market_reference/offers.json          (공식몰·올리브영 페이지 표시가)

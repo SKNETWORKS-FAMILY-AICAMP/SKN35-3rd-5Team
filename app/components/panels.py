@@ -160,7 +160,7 @@ def rag_empty(stats: dict, docs: list[dict]) -> str:
     steps = ('<ol class="bw-howto">'
              '<li><span><b>근거 검색</b> 문구와 관련된 법령·고시·지침·적발 사례 조항을 하이브리드 검색으로 찾습니다.</span></li>'
              '<li><span><b>판정</b> 금지 표현 규칙과 AI 판정을 함께 써서 사용 가능 · 실증 필요 · 수정 필요로 나눕니다.</span></li>'
-             '<li><span><b>교정</b> 프로젝트의 보유 실증 범위 안에서 쓸 수 있는 문구를 제안하고 다시 검증합니다.</span></li></ol>')
+             '<li><span><b>교정</b> 내 제품의 보유 실증 범위 안에서 쓸 수 있는 문구를 제안하고 다시 검증합니다.</span></li></ol>')
     docs_block = (f'<div class="bw-block"><div class="bw-block-h"><span>수집 문서</span>'
                   f'<span class="bw-pane-meta">{len(laws)}건</span></div>{documents_list(laws)}</div>' if laws else "")
     return (f'<div class="bw-pane-h"><h3>{icon("menu_book", 20)}근거</h3><span class="bw-pane-meta">RAG</span></div>'

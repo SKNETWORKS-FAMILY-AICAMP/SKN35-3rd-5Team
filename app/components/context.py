@@ -1,8 +1,9 @@
 """
 [app/components/context.py]
-검토 기준 = "프로젝트": 어떤 제품을, 어떤 실증 자료를 가진 상태로 검토하는지 정한다.
-왼쪽 사이드바의 「프로젝트」 영역이 그린다(render_project). 화면들은 current() 로 읽기만 한다.
-선택은 화면을 옮겨도 유지된다.
+검토 기준 = "내 제품": 어떤 제품을, 어떤 실증 자료를 가진 상태로 검토하는지 정한다.
+왼쪽 사이드바의 「내 제품」 영역이 그린다(render_project). 화면들은 current() 로 읽기만 한다.
+선택은 화면을 옮겨도 유지된다. 처음에는 제품 정보 없이 '일반 화장품 · 실증 없음' 기준으로 검토하고,
+우리 제품을 등록하거나 「예시 제품 불러오기」에서 시연용 제품을 고를 수 있다.
 
 실증 자료를 해제하면 그 자료 없이 쓸 수 있는 단계까지만 제안이 내려간다(데모 핵심 장면).
 「제품 직접 등록」으로 우리 제품(이름 · 구분 · 기능성 · 주요 성분 · 실증 자료 여러 개)을 추가할 수 있다.
@@ -27,9 +28,15 @@ FUNCTIONAL_TYPES = ["피부 미백", "주름 개선", "자외선 차단", "탈�
                     "피부장벽 기능 회복(가려움 개선)", "튼살 붉은 선 완화", "피부 미백, 주름 개선"]
 
 
+GENERAL_ID = "GENERAL_DEFAULT"
+# 아무 제품도 고르지 않았을 때의 검토 기준: 일반 화장품 · 보유 실증 없음 (가장 보수적인 기준)
+GENERAL = {"product_id": GENERAL_ID, "name": "일반 화장품 (제품 정보 없음)", "category": "일반",
+           "functional_type": None, "key_ingredients": [], "owned_evidence": []}
+
+
 def all_products() -> list[dict]:
-    """기본 제품(data/assets/mock_products.json) + 직접 등록한 제품."""
-    return backend.list_products() + list(st.session_state.get(_CUSTOM, []))
+    """기본 기준(제품 정보 없음) + 예시 제품(data/assets) + 직접 등록한 제품."""
+    return [GENERAL] + backend.list_products() + list(st.session_state.get(_CUSTOM, []))
 
 
 def _evidence_state(product: dict) -> list[bool]:
@@ -82,7 +89,7 @@ def current() -> tuple[dict, dict]:
 
 
 def render_project(key: str = "proj") -> None:
-    """사이드바 「프로젝트」: 제품 선택 + 보유 실증 자료 체크."""
+    """사이드바 「내 제품」: 지금 검토 기준(제품 카드 + 실증 체크) → 예시 제품 불러오기."""
     products = all_products()
     ids = [p["product_id"] for p in products]
     by_id = {p["product_id"]: p for p in products}
@@ -90,47 +97,73 @@ def render_project(key: str = "proj") -> None:
     pid = st.session_state[_PID]
 
     with st.container(key=key, gap="small"):
-        sel_key = f"{key}_product"
-        if st.session_state.get(sel_key) not in (None, pid):  # 새로 등록한 제품으로 바로 전환
-            st.session_state[sel_key] = pid
-        # 세션 값이 이미 있으면 index 를 주지 않는다 (둘 다 주면 Streamlit 경고)
-        initial = {} if sel_key in st.session_state else {"index": ids.index(pid)}
-        st.selectbox(
-            "검토할 제품", ids, **initial,
-            format_func=lambda i: ("✎ " if i.startswith("CUSTOM_") else "") + by_id[i]["name"],
-            key=sel_key, label_visibility="collapsed",
-            on_change=_on_product_change, args=(sel_key,),
-        )
-        product = by_id[st.session_state[_PID]]
-        states = _evidence_state(product)
-        evs = product.get("owned_evidence", [])
-        html(f'<div class="bw-proj-meta">{esc(category_label(product))} · 보유 실증 {sum(states)}/{len(evs)}</div>')
-        if any(ev.get("source_kind") == "public_brand_summary" for ev in evs):
-            st.caption("공식몰 공개 시험 요약 · 원보고서 미확보 · 시연용 등록 근거")
-        if not evs:
-            html('<div class="bw-proj-empty">등록된 실증 자료가 없습니다. 근거가 필요 없는 낮은 단계 표현까지만 제안합니다.</div>')
-        for i, ev in enumerate(evs):
-            ck = f'{key}_ev_{product["product_id"]}_{i}'
-            st.checkbox(f'{ev["test_type"]} · {ev["item"]}', value=states[i], key=ck,
-                        on_change=_on_evidence_change, args=(product["product_id"], i, ck))
-            detail = " · ".join(x for x in (ev.get("value"), ev.get("institute")) if x)
-            if states[i]:
-                hint = backend.unlock_hint(product, ev)
-                note = f'<em>{esc(hint)}</em>' if hint else ""
-            else:
-                note = '<em class="is-off">해제됨 — 이 자료가 필요한 표현은 제안하지 않습니다</em>'
-            html(f'<div class="bw-ev"><span>{esc(detail)}</span>{note}</div>')
-            if ev.get("source_kind") == "public_brand_summary":
-                with st.expander("공개 요약 출처·시험 조건"):
-                    st.caption(ev.get("conditions") or "조건 미공개")
-                    if ev.get("source_url"):
-                        st.link_button("공식 시험 요약 출처", ev["source_url"], key=f"{key}_ev_source_{product['product_id']}_{i}")
-        if product.get("key_ingredients"):
-            html(f'<div class="bw-proj-meta">주요 성분 · {esc(", ".join(product["key_ingredients"]))}</div>')
-        if product["product_id"].startswith("CUSTOM_"):
-            st.button("이 제품 삭제", key=f"{key}_del_{product['product_id']}", type="tertiary",
-                      icon=":material/delete:", on_click=_delete_custom, args=(product["product_id"],))
-    _render_register(key)
+        if pid == GENERAL_ID:
+            html('<div class="bw-proj-empty bw-proj-invite"><b>검토할 제품을 등록하세요</b><br>'
+                 '일반/기능성 구분·성분·시험 자료에 따라 판정과 제안이 달라집니다.</div>')
+            if st.button("내 제품 등록", key=f"{key}_register_open", icon=":material/add:",
+                         type="primary", width="stretch"):
+                _register_dialog(key)
+            st.caption("지금은 일반 화장품 · 실증 없음 기준으로 검토합니다.")
+        else:
+            _render_product_card(key, by_id[pid])
+            if st.button("다른 제품 등록", key=f"{key}_register_open", icon=":material/add:",
+                         type="tertiary", width="stretch"):
+                _register_dialog(key)
+
+        examples = [i for i in ids if i != GENERAL_ID]
+        with st.expander(f"예시 제품 불러오기 · {len(examples)}개", icon=":material/menu_book:"):
+            sel_key = f"{key}_product"
+            if st.session_state.get(sel_key) not in (None, pid):  # 새로 등록한 제품으로 바로 전환
+                st.session_state[sel_key] = pid
+            # 세션 값이 이미 있으면 index 를 주지 않는다 (둘 다 주면 Streamlit 경고)
+            initial = {} if sel_key in st.session_state else {"index": ids.index(pid)}
+            st.selectbox(
+                "검토할 제품", ids, **initial,
+                format_func=lambda i: "선택 안 함 · 일반 화장품 기준" if i == GENERAL_ID
+                else ("✎ " if i.startswith("CUSTOM_") else "") + by_id[i]["name"],
+                key=sel_key, label_visibility="collapsed",
+                on_change=_on_product_change, args=(sel_key,),
+            )
+            st.caption("시연용 예시입니다. 실제 검토는 「내 제품 등록」으로 우리 제품과 시험 자료를 넣어 주세요.")
+
+
+def _render_product_card(key: str, product: dict) -> None:
+    """선택한 제품: 이름·구분·성분과 사용할 실증 자료 체크 (해제하면 그 자료가 필요한 표현은 제안하지 않는다)."""
+    states = _evidence_state(product)
+    evs = product.get("owned_evidence", [])
+    html(f'<div class="bw-proj-meta"><b>{esc(product["name"])}</b><br>'
+         f'{esc(category_label(product))} · 보유 실증 {sum(states)}/{len(evs)}</div>')
+    if any(ev.get("source_kind") == "public_brand_summary" for ev in evs):
+        st.caption("공식몰 공개 시험 요약 · 원보고서 미확보 · 시연용 등록 근거")
+    if not evs:
+        html('<div class="bw-proj-empty">등록된 실증 자료가 없습니다. 근거가 필요 없는 낮은 단계 표현까지만 제안합니다.</div>')
+    for i, ev in enumerate(evs):
+        ck = f'{key}_ev_{product["product_id"]}_{i}'
+        st.checkbox(f'{ev["test_type"]} · {ev["item"]}', value=states[i], key=ck,
+                    on_change=_on_evidence_change, args=(product["product_id"], i, ck))
+        detail = " · ".join(x for x in (ev.get("value"), ev.get("institute")) if x)
+        if states[i]:
+            hint = backend.unlock_hint(product, ev)
+            note = f'<em>{esc(hint)}</em>' if hint else ""
+        else:
+            note = '<em class="is-off">해제됨 — 이 자료가 필요한 표현은 제안하지 않습니다</em>'
+        html(f'<div class="bw-ev"><span>{esc(detail)}</span>{note}</div>')
+        if ev.get("source_kind") == "public_brand_summary":
+            with st.expander("공개 요약 출처·시험 조건"):
+                st.caption(ev.get("conditions") or "조건 미공개")
+                if ev.get("source_url"):
+                    st.link_button("공식 시험 요약 출처", ev["source_url"], key=f"{key}_ev_source_{product['product_id']}_{i}")
+    if product.get("key_ingredients"):
+        html(f'<div class="bw-proj-meta">주요 성분 · {esc(", ".join(product["key_ingredients"]))}</div>')
+    c1, c2 = st.columns(2)
+    if c1.button("기준 해제", key=f"{key}_clear_{product['product_id']}", type="tertiary",
+                 icon=":material/close:", help="제품 정보 없이 일반 화장품 기준으로 검토"):
+        st.session_state[_PID] = GENERAL_ID
+        st.session_state.pop(f"{key}_product", None)
+        st.rerun()
+    if product["product_id"].startswith("CUSTOM_"):
+        c2.button("이 제품 삭제", key=f"{key}_del_{product['product_id']}", type="tertiary",
+                  icon=":material/delete:", on_click=_delete_custom, args=(product["product_id"],))
 
 
 def _delete_custom(pid: str) -> None:
@@ -144,12 +177,12 @@ def open_register(key: str = "proj") -> None:
 
 
 def _render_register(key: str) -> None:
-    """사이드바 버튼 → 넓은 팝업에서 우리 제품과 보유 실증 자료를 입력한다."""
-    if st.button("제품 직접 등록", key=f"{key}_register_open", icon=":material/add:", width="stretch"):
+    """(호환용) 넓은 팝업에서 우리 제품과 보유 실증 자료를 입력하는 버튼."""
+    if st.button("내 제품 등록", key=f"{key}_register_open2", icon=":material/add:", width="stretch"):
         _register_dialog(key)
 
 
-@st.dialog("제품 직접 등록", width="large")
+@st.dialog("내 제품 등록", width="large")
 def _register_dialog(key: str) -> None:
     st.caption("우리 제품과 보유한 실증 자료를 입력하면, 그 근거가 허용하는 범위 안에서 검토·제안합니다. "
                "등록한 제품은 이 브라우저 세션에만 저장됩니다.")

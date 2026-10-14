@@ -74,7 +74,9 @@ def test_selected_generated_copy_is_shared_with_forecast(monkeypatch):
     monkeypatch.setattr(backend, "generate_copy", lambda payload: mock.generate_copy(payload["instruction"], payload["product"]))
     app = AppTest.from_file(str(Path(__file__).resolve().parents[2] / "app/streamlit_app.py"), default_timeout=30).run()
     app.switch_page("views/generate.py").run()
-    next(c for c in app.checkbox if c.label.startswith("왼쪽 프로젝트")).check().run()
+    # 실증 자료가 있는 시연용 예시 제품을 불러온다 (처음에는 제품 정보 없음 기준)
+    app.selectbox(key="proj_product").select("PROD_001").run()
+    next(c for c in app.checkbox if c.label.startswith("왼쪽 「내 제품」")).check().run()
     # 폼 안의 입력은 제출 버튼과 같은 실행에서 반영된다
     next(t for t in app.text_area if t.label == "어떤 광고문을 만들까요?").input("제품 광고문을 만들어줘")
     next(b for b in app.button if b.label == "광고문 만들기").click().run()
