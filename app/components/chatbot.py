@@ -82,7 +82,27 @@ def _response(response: dict) -> None:
                 st.caption(citation.get("content_snippet") or "")
 
 
-def _send(message: str, product: dict) -> None:
+def _render_turn(turn: dict, *, scope: str, index: int | str, typing: bool = False) -> None:
+    role = turn["role"]
+    with st.container(key=f"chat_{role}_{scope}_{index}"), \
+            st.chat_message(role, avatar=avatar_uri() if role == "assistant" else None):
+        if role == "assistant":
+            st.html('<div class="bw-chat-sender">뷰렛</div>')
+        with st.container(key=f"chat_bubble_{role}_{scope}_{index}"):
+            if typing:
+                st.html('<div class="bw-chat-typing" role="status" aria-label="뷰렛이 답변을 작성하고 있습니다">'
+                        '<span aria-hidden="true"></span><span aria-hidden="true"></span>'
+                        '<span aria-hidden="true"></span></div>')
+            elif role == "user":
+                st.write(turn["text"])
+            else:
+                _response(turn["response"])
+        if turn.get("at"):
+            at = datetime.fromisoformat(turn["at"])
+            st.html(f'<div class="bw-chat-time">{clock(at)}</div>')
+
+
+def _send(message: str, product: dict, messages, *, scope: str) -> None:
     if not message.strip():
         st.warning("요청을 입력해주세요.")
         return
@@ -94,12 +114,18 @@ def _send(message: str, product: dict) -> None:
         else:
             # 실행 결과와 상태도 전달해 후속 후보 참조를 지원한다.
             history.append({"role": "assistant", "content": json.dumps(turn["response"], ensure_ascii=False)[:6000]})
+    with messages:
+        pending = st.empty()
+    with pending.container():
+        _render_turn({"role": "user", "text": message, "at": datetime.now(KST).isoformat()}, scope=scope, index="pending")
+        _render_turn({"role": "assistant"}, scope=scope, index="pending", typing=True)
     try:
-        with st.spinner("요청을 읽고 처리하고 있습니다…"):
-            response = backend.chat({"message": message, "context": chat["context"], "history": history, "product": product})
+        response = backend.chat({"message": message, "context": chat["context"], "history": history, "product": product})
     except backend.BackendError as error:
         st.error(error.message)
         return
+    finally:
+        pending.empty()
     now = datetime.now(KST).isoformat()
     chat["messages"].extend([{"role": "user", "text": message, "at": now},
                              {"role": "assistant", "response": response, "at": now}])
@@ -118,7 +144,8 @@ def render_chat(*, compact: bool = False) -> None:
     mode = " · 데모 모드" if backend.data_mode() != "api" else ""
     st.html(f'<div class="bw-chat-context"><span class="bw-chat-context-dot"></span>'
             f'{esc(display_product["name"])} · 실증 {len(display_product.get("owned_evidence", []))}건{mode}</div>')
-    with st.container(height=260 if compact else 350, border=False, autoscroll=True, key=f"chat_messages_{scope}"):
+    messages = st.container(height=260 if compact else 350, border=False, autoscroll=True, key=f"chat_messages_{scope}")
+    with messages:
         st.html(f'<div class="bw-chat-date"><span>{datetime.now(KST):%Y년 %m월 %d일}</span></div>')
         if not chat["messages"]:
             st.html(f'<div class="bw-chat-welcome"><span class="bw-chat-welcome-avatar">'
@@ -129,19 +156,7 @@ def render_chat(*, compact: bool = False) -> None:
                     '<p>“이 광고 문구, 검토하고 고쳐줘”</p>'
                     '<p>“선크림 광고를 짧고 발랄하게 만들어줘”</p></div></div></div>')
         for index, turn in enumerate(chat["messages"]):
-            role = turn["role"]
-            with st.container(key=f"chat_{role}_{scope}_{index}"), \
-                    st.chat_message(role, avatar=avatar_uri() if role == "assistant" else None):
-                if role == "assistant":
-                    st.html('<div class="bw-chat-sender">뷰렛</div>')
-                with st.container(key=f"chat_bubble_{role}_{scope}_{index}"):
-                    if role == "user":
-                        st.write(turn["text"])
-                    else:
-                        _response(turn["response"])
-                if turn.get("at"):
-                    at = datetime.fromisoformat(turn["at"])
-                    st.html(f'<div class="bw-chat-time">{clock(at)}</div>')
+            _render_turn(turn, scope=scope, index=index)
     if compact:
         with st.form("chat_mini_form", clear_on_submit=True):
             entry, send = st.columns([5, 1], gap="small", vertical_alignment="center")
@@ -150,12 +165,12 @@ def render_chat(*, compact: bool = False) -> None:
             with send:
                 submitted = st.form_submit_button("보내기", icon=":material/arrow_upward:", width="stretch")
         if submitted:
-            _send(message, product)
+            _send(message, product, messages, scope=scope)
     else:
         with st.container(key="chat_composer_full"):
             message = st.chat_input("뷰렛에게 메시지 보내기", max_chars=5000, key="chat_full_input")
             if message:
-                _send(message, product)
+                _send(message, product, messages, scope=scope)
             st.html('<div class="bw-chat-composer-note">Enter로 전송 · Shift + Enter로 줄바꿈</div>')
 
 

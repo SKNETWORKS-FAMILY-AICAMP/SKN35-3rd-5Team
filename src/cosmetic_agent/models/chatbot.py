@@ -20,6 +20,9 @@ class ChatPlan(BaseModel):
     reference_index: int | None = Field(default=None, ge=1, le=3)
     needs_rules: bool = False
     new_topic: bool = Field(default=False, description="이전 문구의 수정이 아니라 새로운 제품·주제·독립 작업으로 넘어가는지")
+    needs_history: bool = Field(default=False, description="이전 문구의 수정·번호 참조처럼 요청을 이해하기 위해 이전 대화가 필요한지. 새 제품 광고 요청은 false")
+    reuse_style: list[Literal["channel", "tone", "length"]] = Field(default_factory=list,
+        description="새 작업에서도 사용자가 명시적으로 그대로 사용하겠다고 한 이전 채널·어조·길이만 선택")
 
 
 class ChatState(TypedDict, total=False):
@@ -62,6 +65,18 @@ clarify는 검토할 본문이 대화 어디에도 없거나 작업 목적조차
 광고 후보·판정·법률 답변을 여기서 날조하지 않는다. 실제 실행은 다음 단계가 처리한다."""
 
 
+CURRENT_REQUEST_PROMPT = """이번 단계는 최신 메시지만 독립적으로 읽는다. 이전 대화의 제품·성분·광고문은 제공되지 않는다.
+제품·성분·주제를 직접 지정해서 광고를 만드는 요청은 new_topic=true, needs_history=false다.
+'선크림 광고문도 만들어줘', '립밤 광고도 부탁해', 'PDRN 크림 광고 써줘'의 '도'는 추가 작업이며 이전 제품의 수정이 아니다.
+'더 짧게', '방금 광고를 감성적으로', '2번 문구 검토해줘', '그 제품으로 다시 만들어줘'는 needs_history=true다.
+이전 대화가 있을 때 대상 없는 '광고도 만들어줘'처럼 앞선 대상을 참조하는 요청도 needs_history=true다.
+context는 최신 메시지에서 확인한 제품·성분·조건만 담는다. 제품이나 성분을 모르더라도 생성은 진행한다.
+제품 설명과 brief에 보습·보호·사용감 등 입력에 없는 제품 특성이나 효능을 보충하지 않는다.
+새 제품에 '같은 톤으로', '채널은 그대로'를 명시한 경우에는 new_topic=true를 유지하고 reuse_style에 해당 필드를 넣는다.
+새 제품의 사실을 이전 대화에서 가져오기 위해 needs_history=true를 반환하지 않는다.
+인사·기능 안내·일반 질문은 answer로 처리하며 이전 광고의 제품 맥락을 변경하지 않는다."""
+
+
 class ChatService:
     def __init__(self, reviewer, generator, llm=None, answer_llm=None):
         self.reviewer = reviewer
@@ -101,9 +116,31 @@ class ChatService:
         if self._llm is None:
             self._llm = self._model(ChatPlan)
         try:
-            raw = self._llm.invoke([("system", ROUTER_PROMPT),
-                                    ("human", json.dumps(state["request"].model_dump(), ensure_ascii=False))])
+            request = state["request"]
+            # 새 요청의 해석에는 이전 제품 사실을 넣지 않아 맥락 오염을 막는다.
+            raw = self._llm.invoke([("system", ROUTER_PROMPT + "\n\n" + CURRENT_REQUEST_PROMPT),
+                                    ("human", json.dumps({"message": request.message,
+                                        "has_previous_context": bool(request.history or request.context != ChatContext())}, ensure_ascii=False))])
             plan = ChatPlan.model_validate(raw if isinstance(raw, dict) else raw.model_dump())
+            if plan.intent == "generate" and plan.context.product_name not in ("나의 화장품", request.context.product_name):
+                plan.new_topic = True
+            if not plan.new_topic and (plan.needs_history or plan.reference_index is not None):
+                raw = self._llm.invoke([("system", ROUTER_PROMPT),
+                                       ("human", json.dumps(request.model_dump(), ensure_ascii=False))])
+                plan = ChatPlan.model_validate(raw if isinstance(raw, dict) else raw.model_dump())
+            elif plan.intent == "generate":
+                plan.new_topic = True
+            elif plan.intent == "answer":
+                plan.context = request.context.model_copy(deep=True)
+                plan.new_topic = False
+            elif plan.intent == "clarify" and plan.context == ChatContext():
+                plan.context = request.context.model_copy(deep=True)
+            if plan.new_topic:
+                # 제품 콘셉트와 작성 목적의 출처는 사용자 원문이다. 해석 모델이 보충한 효능은 전달하지 않는다.
+                plan.context.brief = request.message[:2000]
+                plan.context.product_description = request.message[:2000]
+                for field in plan.reuse_style:
+                    setattr(plan.context, field, getattr(request.context, field))
         except Exception as error:
             raise GenerationUnavailable("챗봇이 요청을 해석하지 못했습니다. 연결 상태를 확인하고 다시 시도하세요.") from error
         return {"plan": plan}
@@ -121,7 +158,7 @@ class ChatService:
         product = request.product.model_copy(deep=True)
         context.product_source = request.context.product_source
         if plan.new_topic:
-            context.product_source = "conversation" if context.product_name not in ("나의 화장품", product.name) else "selected"
+            context.product_source = "selected" if context.product_name == product.name else "conversation"
         if context.product_source == "conversation":
             # 다른 제품으로 넘어가면 이전 제품의 기능성·실증을 새 제품에 적용하지 않는다.
             product = ProductCard(product_id="chat_draft", name=context.product_name.strip() or "나의 화장품", category="일반")
@@ -145,14 +182,18 @@ class ChatService:
 
     def _generate(self, state: ChatState):
         request, context = state["request"], state["context"]
-        instruction = "\n".join(filter(None, [context.brief, "이번 요청: " + request.message]))[:5000]
+        instruction = (request.message if context.brief == request.message else
+                       "\n".join(filter(None, [context.brief, "이번 요청: " + request.message])))[:5000]
         result = self.generator.generate(GenerateRequest(
             instruction=instruction, product=state["product"], ingredients=context.ingredients,
             product_description=context.product_description, channel=context.channel,
             tone=context.tone, length=context.length, reference_copy=state["reference"],
         ))
         context.last_copies = [c.text for c in result.candidates if c.status != "제외"][:3]
-        message = "요청하신 방향으로 광고 초안을 만들고 검토했습니다." if result.candidates else "현재 정보로 초안을 시도했지만 검토를 통과한 문구가 없습니다. 아래 사유를 확인해주세요."
+        passed = any(c.status == "검토통과" for c in result.candidates)
+        message = ("요청하신 방향으로 광고 초안을 만들고 검토했습니다." if passed else
+                   "광고 초안을 작성했지만 사용 전 확인이 필요합니다. 아래 검토 사유를 확인해주세요." if result.candidates else
+                   "현재 요청으로 초안을 작성하고 다시 검토했지만 통과한 문구가 없습니다. 아래에 구체적인 사유를 표시했습니다.")
         return {"response": ChatResponse(intent="generate", message=message, context=context, generation=result)}
 
     def _review(self, state: ChatState):
