@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Optional
 
 from pydantic import BaseModel, Field
@@ -41,6 +42,29 @@ def _load_json(path) -> list[dict[str, Any]]:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
 
 
+def find_functional_ceiling(functional_type: str | None, ceilings: dict[str, str]) -> str | None:
+    """기능성 유형 → 심사 효능 문구(표현 상한). '미백'·'피부 미백'처럼 표기가 달라도,
+    '피부 미백, 주름 개선'처럼 두 가지여도 찾는다 (두 가지면 ' / '로 잇는다)."""
+    if not functional_type:
+        return None
+    generic = {"피부", "증상", "완화", "개선", "도움", "차단"}
+    found: list[str] = []
+    for part in [p.strip() for p in re.split(r"[,/·+]", functional_type) if p.strip()]:
+        for kind, text in ceilings.items():
+            keys = [w for w in kind.split() if w not in generic]
+            if kind in part or part in kind or (keys and all(k in part for k in keys)):
+                if text not in found:
+                    found.append(text)
+                break
+    return " / ".join(found) or None
+
+
+def load_claim_assets() -> tuple[dict[str, str], list[dict[str, Any]]]:
+    """(기능성 유형 → 심사 효능 문구, 효능별 표현 사다리)"""
+    ceilings = {item["type"]: item["ceiling"] for item in _load_json(settings.FUNCTIONAL_CLAIMS_PATH)}
+    return ceilings, _load_json(settings.CLAIM_LADDER_PATH)
+
+
 class CopySuggester:
     """문구 제안기. llm 을 주입하면(테스트 등) 그 객체의 invoke 를 사용한다."""
 
@@ -55,10 +79,7 @@ class CopySuggester:
         self._llm = llm
         self.model_name = model_name or settings.OPENAI_MODEL_NAME
         self.temperature = temperature
-        self.functional_ceilings = {
-            item["type"]: item["ceiling"] for item in _load_json(settings.FUNCTIONAL_CLAIMS_PATH)
-        }
-        self.claim_ladder = _load_json(settings.CLAIM_LADDER_PATH)
+        self.functional_ceilings, self.claim_ladder = load_claim_assets()
         self._verifier = verifier
         self._rule_engine = rule_engine
 
@@ -93,18 +114,7 @@ class CopySuggester:
         return self._rule_engine
 
     def _ceiling(self, functional_type: str) -> str | None:
-        """'피부 미백' 같은 유형 이름과 제품의 '미백' 표기가 달라도 찾는다."""
-        if not functional_type:
-            return None
-        for kind, text in self.functional_ceilings.items():
-            if kind in functional_type or functional_type in kind:
-                return text
-        generic = {"피부", "증상", "완화", "개선", "도움", "차단"}
-        for kind, text in self.functional_ceilings.items():
-            keys = [w for w in kind.split() if w not in generic]
-            if keys and all(k in functional_type for k in keys):
-                return text
-        return None
+        return find_functional_ceiling(functional_type, self.functional_ceilings)
 
     def _verify(self, text: str, product: dict[str, Any], copy_text: str, level: int | None) -> tuple[bool, str]:
         return self.verifier.verify_suggestion(
