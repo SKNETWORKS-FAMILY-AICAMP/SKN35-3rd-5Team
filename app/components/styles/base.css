@@ -524,7 +524,8 @@
 .bw-side-h .bw-i { --bw-i-size: 16px; }
 .bw-side-note { font-weight: 400; color: var(--bw-faint); }
 .bw-side-empty { padding: 2px 6px; font-size: var(--fs-small); color: var(--bw-faint); }
-.st-key-nav { gap: 1px; }
+.st-key-nav { gap: 1px; margin-top: 12px; }
+.bw-nav-h { margin: 12px 0 2px; padding: 0 10px; font-size: var(--fs-meta); font-weight: 600; color: var(--bw-muted); }
 .st-key-nav a { min-height: 36px; padding: 0 10px; border-radius: var(--bw-r); gap: 10px; }
 .st-key-nav a:hover { background: rgba(23, 32, 27, .045); }
 .st-key-nav a p, .st-key-nav a span { font-size: var(--fs-small); color: var(--bw-ink); }
@@ -601,6 +602,28 @@ article.bw-ai[data-live="1"] [data-cites]:focus-visible { outline: 2px solid var
 .bw-cite.is-sweep::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: rgba(31, 90, 71, .14);
   transform-origin: left center; pointer-events: none; animation: bw-sweep 1.1s var(--bw-ease) both; }
 @keyframes bw-sweep { 0% { transform: scaleX(0); opacity: 1; } 40% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+
+/* 입력 중 검사 (components/live_check.py) — 입력창 자리에 겹친 밑줄 층. 글자는 투명, 입력창 글자와 같은 자리에 맞춘다.
+   body 에 붙어 화면에 고정되고(스크롤은 스크립트가 따라감), 상단 바 · 팝업 · 사이드바보다는 아래에 깔린다 */
+.bw-lc-bd { position: fixed; z-index: 2; margin: 0; pointer-events: none; color: transparent; overflow: hidden;
+  white-space: pre-wrap; overflow-wrap: break-word; word-break: normal; border-style: solid; border-color: transparent; }
+.bw-lc-mark { --bw-ul: transparent; background-image: linear-gradient(var(--bw-ul), var(--bw-ul)); background-repeat: no-repeat;
+  background-position: 0 100%; background-size: 100% 2px; padding-bottom: 2px; }
+.bw-lc-mark.is-risk { --bw-ul: var(--bw-risk-under); }
+.bw-lc-mark.is-caution { --bw-ul: var(--bw-caution-under); }
+.bw-lc-mark.is-verified { background-image: repeating-linear-gradient(90deg, var(--bw-accent) 0 2px, transparent 2px 4px); }
+.bw-lc-sum { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0 0 8px; font-size: var(--fs-meta); line-height: 1.5; color: var(--bw-muted); }
+.bw-lc-sum.is-empty { display: none; }
+.bw-lc-sum .k { font-weight: 600; color: var(--bw-ink-2); }
+.bw-lc-sum .n { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+.bw-lc-sum .n::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.bw-lc-sum .n.is-risk { color: var(--bw-risk); }
+.bw-lc-sum .n.is-caution { color: var(--bw-caution); }
+.bw-lc-sum .n.is-verified, .bw-lc-sum .n.is-clear { color: var(--bw-accent-text); }
+.bw-lc-sum .w { color: var(--bw-ink-2); }
+.bw-lc-sum .w b { font-weight: 600; color: var(--bw-ink); }
+.bw-lc-sum .note { color: var(--bw-faint); }
+.st-key-bulkin .bw-lc-sum { margin: 8px 0 0; }
 
 /* 검토 진행 (받은 이벤트만) */
 .bw-live { margin: 10px 0 0 var(--bw-indent); padding: 12px 16px; border: 1px solid var(--bw-line); border-radius: var(--bw-r-lg); background: var(--bw-surface); display: grid; gap: 8px; }
@@ -703,6 +726,61 @@ article.bw-ai[data-live="1"] [data-cites]:focus-visible { outline: 2px solid var
 .st-key-starters > [data-testid="stElementContainer"]:nth-child(4) { animation-delay: .26s; }
 .st-key-starters button [data-testid="stIconMaterial"] { transition: transform .2s var(--bw-ease); }
 .st-key-starters button:hover [data-testid="stIconMaterial"] { transform: translate(2px, -2px); }
+
+/* ── 팀원 화면 맞춤 (통합 챗봇 · 광고문 생성 · 예상 매출 · 시장 근거) ─────────────
+   팀원 파이썬과 chat.css 는 그대로 두고 '근거 편집실' 규칙(종이색 · 선 · 반경 12px 이하 · 그림자 없음 · 강조색 하나)만 덧입힌다.
+   chat.css 는 이 파일보다 뒤에 붙고 챗봇 팝업은 앱 바깥 층에 그려지므로 html body 를 앞에 붙여 이긴다.
+   예상 매출의 「오르면 빨강 ▲ · 내리면 파랑 ▼」는 팀원이 정한 표시 규칙이라 바꾸지 않는다(인라인 스타일). */
+
+/* 제목 단계 — st.title · st.subheader · 마크다운 #### 를 다른 화면(20 · 17 · 15 · 13.5px)과 같은 단계로 */
+html body [data-testid="stHeadingWithActionElements"] h1 { font-size: var(--fs-title); font-weight: 700; line-height: 1.35; letter-spacing: -0.015em; padding: 2px 0 2px; }
+html body [data-testid="stHeadingWithActionElements"] h2 { font-size: var(--fs-title); font-weight: 700; line-height: 1.4; padding: 14px 0 2px; }
+html body [data-testid="stHeadingWithActionElements"] h3 { font-size: var(--fs-em); font-weight: 700; line-height: 1.45; padding: 12px 0 2px; }
+html body [data-testid="stHeadingWithActionElements"] h4 { font-size: var(--fs-body); font-weight: 700; line-height: 1.5; padding: 10px 0 2px; }
+html body [data-testid="stHeadingWithActionElements"] h5, html body [data-testid="stHeadingWithActionElements"] h6 { font-size: var(--fs-small); font-weight: 700; padding: 8px 0 2px; }
+
+/* 경고 · 안내 상자 — 넓은 색 면 대신 종이 위 얇은 왼쪽 선 */
+html body [data-testid="stAlertContainer"] { background: var(--bw-surface); border: 1px solid var(--bw-line); border-left: 3px solid var(--bw-line-strong);
+  border-radius: var(--bw-r); padding: 10px 14px; }
+html body [data-testid="stAlertContainer"] p { font-size: var(--fs-small); line-height: 1.65; color: var(--bw-ink-2); }
+html body [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) { border-left-color: var(--bw-caution); }
+html body [data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) { border-left-color: var(--bw-risk); }
+html body [data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]),
+html body [data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) { border-left-color: var(--bw-accent); }
+
+/* 통합 챗봇 — 메신저 색(회청 배경 · 노란 말풍선 · 큰 반경 · 그림자)을 검토 대화와 같은 말로 */
+html body .st-key-chat_shell_full { border-radius: var(--bw-r-xl); border-color: var(--bw-line); background: var(--bw-surface); box-shadow: none; }
+html body .st-key-chat_header_full, html body .st-key-chat_header_mini, html body .bw-chat-context,
+html body .st-key-chat_composer_full, html body .st-key-chat_mini [data-testid="stForm"] { background: var(--bw-surface); }
+html body .bw-chat-profile-avatar, html body .bw-chat-welcome-avatar,
+html body [class*="st-key-chat_assistant_"] [data-testid="stChatMessageAvatarCustom"] { border-radius: 50%; border: 1px solid var(--bw-line); background: var(--bw-surface); }
+html body .bw-chat-profile-avatar img, html body .bw-chat-welcome-avatar img { border-radius: 50%; }
+html body .bw-chat-profile strong { font-size: var(--fs-em); color: var(--bw-ink); }
+html body .bw-chat-profile div > span, html body .bw-chat-context, html body .bw-chat-sender, html body .bw-chat-examples { color: var(--bw-muted); }
+html body .bw-chat-context-dot { background: var(--bw-accent); }
+html body .st-key-chat_messages_full, html body .st-key-chat_messages_mini { background: var(--bw-bg); border-top: 1px solid var(--bw-line) !important; }
+html body .bw-chat-date span { background: transparent; color: var(--bw-faint); border: 1px solid var(--bw-line); border-radius: var(--bw-r-sm); }
+html body .bw-chat-welcome-bubble, html body [class*="st-key-chat_bubble_assistant_"] {
+  background: var(--bw-surface); border: 1px solid var(--bw-line); border-radius: 2px var(--bw-r-lg) var(--bw-r-lg) var(--bw-r-lg); color: var(--bw-ink); }
+html body [class*="st-key-chat_bubble_user_"] { background: var(--bw-subtle); border-radius: var(--bw-r-lg) var(--bw-r-lg) 2px var(--bw-r-lg); }
+html body [class*="st-key-chat_bubble_"] [data-testid="stMarkdownContainer"] p { font-size: var(--fs-body); color: var(--bw-ink); }
+html body [class*="st-key-chat_bubble_"] pre { border-radius: var(--bw-r); background: var(--bw-subtle); }
+html body [class*="st-key-chat_bubble_"] [data-testid="stExpander"] details { border-color: var(--bw-line); border-radius: var(--bw-r); }
+html body .bw-chat-time, html body .bw-chat-composer-note { color: var(--bw-faint); }
+html body .bw-chat-typing span { background: var(--bw-accent); }
+html body .st-key-chat_composer_full { border-top-color: var(--bw-line); }
+html body .st-key-chat_composer_full [data-testid="stChatInput"] { border-radius: var(--bw-r-xl); border-color: var(--bw-line); background: var(--bw-surface); }
+html body [data-testid="stPopoverBody"]:has(.st-key-chat_mini) { border-radius: var(--bw-r-xl); border-color: var(--bw-line-strong); box-shadow: none; }
+html body .st-key-chat_mini [data-testid="stTextInputRootElement"] { border-radius: var(--bw-r); background: var(--bw-surface); border-color: var(--bw-line); }
+html body .st-key-chat_mini [data-testid="stFormSubmitButton"] button { border-radius: var(--bw-r); background: var(--bw-accent); }
+/* 여는 버튼: 오른쪽 아래로(왼쪽 아래는 사이드바 데이터 상태를 가렸다), 테두리만. 통합 챗봇 화면에서는 같은 기능이라 숨긴다 */
+html body .st-key-chat_launcher { left: auto; right: 22px; bottom: 22px; }
+html body .st-key-chat_launcher [data-testid="stPopoverButton"] { width: 52px; height: 52px; min-height: 52px; background-size: 46px 46px;
+  background-color: var(--bw-surface); border: 1px solid var(--bw-line-strong); box-shadow: none; }
+html body .st-key-chat_launcher [data-testid="stPopoverButton"]:hover { background-color: var(--bw-surface); border-color: var(--bw-accent-line); box-shadow: none; }
+html body:has(.st-key-chat_shell_full) .st-key-chat_launcher { display: none; }
+/* 팝업이 열려 있는 동안 여는 버튼의 「통합 챗봇 열기」 툴팁이 팝업 입력창을 가리지 않게 */
+html body:has(.st-key-chat_launcher [data-testid="stPopoverButton"][aria-expanded="true"]) [role="tooltip"] { display: none; }
 
 /* ── 좁은 폭 ─────────────────────────────────────────────────────────── */
 @container (max-width: 480px) {

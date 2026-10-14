@@ -18,7 +18,7 @@ from datetime import datetime
 
 import streamlit as st
 
-from app.components import blocks, progress, suggest, threads
+from app.components import blocks, live_check, progress, suggest, threads
 from app.components.cards import assistant_live, assistant_message, error_message, user_message, welcome
 from app.components.context import current
 from app.components.icons import icon
@@ -176,6 +176,7 @@ with center, st.container(key="center"):
     with st.container(key="composer", gap=None):
         html(f'<div class="bw-composer-ctx">{icon("science", 15)}<span>검토 기준</span><b>{esc(_ctx_line(ctx))}</b>'
              '<span class="hint">왼쪽 「프로젝트」에서 바꿉니다</span></div>')
+        html(live_check.slot("bw_chat"))   # 입력하는 동안 바로 밑줄 — 요약 한 줄
         prompt = st.chat_input("검토할 광고 문구를 입력하거나 붙여 넣으세요", key="bw_chat", max_chars=5000)
         if prompt and prompt.strip():
             threads.ask(prompt.strip(), ctx, product)
@@ -186,6 +187,7 @@ with center, st.container(key="center"):
             st.page_link(pages["library"], label="근거 원문 찾아보기", icon=":material/menu_book:")
 
     html(LINK_SCRIPT, js=True)   # 위험 표현 ↔ 오른쪽 근거 연동 (한 번만 붙는다)
+    html(live_check.script(product, ["bw_chat"]), js=True)   # 입력창 글자 아래 밑줄 (브라우저에서 바로 검사)
 
 with right, st.container(key="aside"):
     if last:
