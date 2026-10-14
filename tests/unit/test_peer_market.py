@@ -30,6 +30,25 @@ def test_unrelated_product_gets_no_peers():
     assert find_peers({"name": "데일리 프레시 샴푸", "key_ingredients": []}) == []
 
 
+def test_hydrating_toner_does_not_borrow_serums_with_shared_ingredients():
+    toner = {"name": "수분 진정 수딩 토너", "form": "토너",
+             "key_ingredients": ["히알루론산", "판테놀"]}
+    peers = find_peers(toner)
+    assert len(peers) == 1
+    assert peers[0]["product_id"] == "MKT_ANUA_HEARTLEAF_HA_TONER_250_RENEWAL"
+    assert peers[0]["form"] == "토너"
+    assert set(peers[0]["shared_ingredients"]) == {"히알루론산", "판테놀"}
+    assert all(c["level"] is None for c in peers[0]["copies"])
+
+
+def test_existing_pdrn_toner_is_connected_without_cross_form_matches():
+    toner = {"name": "PDRN 수딩 토너", "form": "토너", "key_ingredients": ["PDRN"]}
+    peers = find_peers(toner)
+    assert len(peers) == 1
+    assert peers[0]["product_id"] == "MKT_ROUNDLAB_PDRN_TONER"
+    assert peers[0]["shared_ingredients"] == ["PDRN"]
+
+
 def test_appeal_summary_counts_types_and_judgements():
     rows = {r["type"]: r for r in appeal_summary(find_peers(VITAMIN_A_AMPOULE))}
     numeric = rows["효능 수치형"]

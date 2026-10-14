@@ -113,8 +113,8 @@ def test_generation_rewrites_failed_review_with_bounded_retries():
     graph = build_generation_graph(rule_engine=RuleEngine(), rewriter=QueryRewriter(),
                                    retriever=FakeRetriever(), verifier=CopyVerifier(),
                                    generator=generator, reviewer=review)
-    state = graph.invoke({"instruction": "선크림 광고를 만들어줘", "product": {
-        "product_id": "P1", "name": "선크림", "category": "일반", "owned_evidence": []},
+    state = graph.invoke({"instruction": "세럼 광고를 만들어줘", "product": {
+        "product_id": "P1", "name": "타임리스 펩타이드 세럼", "category": "일반", "owned_evidence": []},
         "channel": "SNS", "tone": "재치 있는", "length": "한 줄", "keywords": []})
     assert len(calls) == 3
     assert state["status"] == "생성보류"

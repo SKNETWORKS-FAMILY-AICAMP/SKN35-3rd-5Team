@@ -193,5 +193,7 @@ class ReviewService:
             candidates=final_state.get("candidates", []),
             citations=citations,
             warnings=final_state.get("warnings", []),
+            market_references=final_state.get("market_references", []),
+            ingredient_profiles=final_state.get("ingredient_profiles", []),
             timing=ExecutionTiming(total_ms=(time.perf_counter() - start_t) * 1000),
         )
