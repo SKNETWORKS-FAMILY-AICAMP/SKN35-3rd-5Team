@@ -319,7 +319,7 @@
   "revenue_loss": null,
   "verified_against_raw": true,
   "rule_asset_hashes": {
-    "data/assets/banned_terms.json": "f3d3ed597ef3b8c7a9e8d0c7752a8929d1c0dbb58edfca5e092211d3e4d74056",
+    "data/assets/banned_terms.json": "7aaa47e428076ee16179f9e9ae4d50ef25525eb06a56cdc56ef8b285e7d9712d",
     "data/assets/rule_patterns.json": "9b2ee1508d4ddaf64024df200650f5a55420a8276e9369b371fbf7128775002f"
   }
 }

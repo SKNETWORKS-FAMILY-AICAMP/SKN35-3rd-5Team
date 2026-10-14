@@ -3,7 +3,8 @@
 화면이 부르는 유일한 데이터 함수 모음. Mock 과 실제 API 를 같은 모양(app/services/contract.py)으로 돌려준다.
 
 백엔드 담당자가 바꿀 곳
-- 모드 전환: 환경변수 UI_DATA_MODE = "mock"(기본) | "api".
+- 모드 전환: 환경변수 UI_DATA_MODE = "mock"(기본) | "api" | "local".
+  local = 별도 서버 없이 FastAPI 앱(api.main)을 이 프로세스 안에서 그대로 실행한다 (무료 배포용, 응답은 api 와 같음).
 - API 주소: cosmetic_agent.common.config.settings.API_BASE_URL (.env 의 API_BASE_URL). 기본 http://localhost:8000.
 - 엔드포인트: POST /review · POST /review/bulk · GET /search · GET /health — 아래 _post/_get 을 부르는 함수만 보면 된다.
 - 진행 이벤트: review_events() — POST /review/stream(NDJSON)이 있으면 단계·토큰을 그대로 흘리고, 없으면(404)
@@ -39,11 +40,14 @@ class BackendError(Exception):
 
 # ── 모드 · 연결 ─────────────────────────────────────────────────────
 def data_mode() -> str:
-    """"mock"(기본) 또는 "api"."""
-    return "api" if os.getenv("UI_DATA_MODE", "mock").strip().lower() == "api" else "mock"
+    """"mock"(기본) · "api" · "local"."""
+    mode = os.getenv("UI_DATA_MODE", "mock").strip().lower()
+    return mode if mode in ("api", "local") else "mock"
 
 
 def api_base_url() -> str:
+    if data_mode() == "local":
+        return "내장 에이전트"
     try:
         from cosmetic_agent.common.config import settings
 
@@ -52,9 +56,34 @@ def api_base_url() -> str:
         return os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
 
 
+_LOCAL_CLIENT = None
+
+
+def _local_client():
+    """local 모드: FastAPI 앱을 한 번만 띄워(lifespan 실행) 같은 프로세스에서 호출한다."""
+    global _LOCAL_CLIENT
+    if _LOCAL_CLIENT is None:
+        if str(_REPO) not in sys.path:
+            sys.path.insert(0, str(_REPO))
+        from fastapi.testclient import TestClient
+
+        from api.main import app
+
+        client = TestClient(app, raise_server_exceptions=False)
+        client.__enter__()  # 시작 이벤트: 검토 서비스·그래프를 한 번 준비
+        _LOCAL_CLIENT = client
+    return _LOCAL_CLIENT
+
+
+def _send(method: str, path: str, *, timeout: float, **kwargs):
+    if data_mode() == "local":
+        return _local_client().request(method, path, **kwargs)
+    return httpx.request(method, f"{api_base_url()}{path}", timeout=timeout, **kwargs)
+
+
 def _get(path: str, *, params: dict | None = None, timeout: float = 30.0):
     try:
-        res = httpx.get(f"{api_base_url()}{path}", params=params, timeout=timeout)
+        res = _send("GET", path, params=params, timeout=timeout)
         res.raise_for_status()
         return res.json()
     except httpx.HTTPStatusError as err:
@@ -73,7 +102,7 @@ def _get(path: str, *, params: dict | None = None, timeout: float = 30.0):
 
 def _post(path: str, payload: dict, *, timeout: float = 60.0):
     try:
-        res = httpx.post(f"{api_base_url()}{path}", json=payload, timeout=timeout)
+        res = _send("POST", path, json=payload, timeout=timeout)
         res.raise_for_status()
         return res.json()
     except httpx.HTTPStatusError as err:
@@ -92,6 +121,13 @@ def health() -> dict:
     """{mode, ok, label, detail} — 화면 오른쪽 위·사이드바 아래 상태 표시."""
     if data_mode() == "mock":
         return {"mode": "mock", "ok": True, "label": "데모 데이터", "detail": "백엔드 연결 전, Mock 응답으로 동작합니다"}
+    if data_mode() == "local":
+        try:
+            info = _get("/health", timeout=60.0)
+            return {"mode": "local", "ok": True, "label": "에이전트 실행 중",
+                    "detail": f"내장 실행 · {info.get('service', '')} {info.get('version', '')}".strip()}
+        except Exception as err:  # noqa: BLE001 - 초기화 실패도 화면에 그대로 보여 준다
+            return {"mode": "local", "ok": False, "label": "에이전트 시작 실패", "detail": str(err)[:200]}
     try:
         info = _get("/health", timeout=2.0)
         return {"mode": "api", "ok": True, "label": "API 연결됨", "detail": f"{api_base_url()} · {info.get('service', '')} {info.get('version', '')}".strip()}
@@ -111,6 +147,7 @@ def list_products() -> list[dict]:
             if profile:
                 product["ingredients"] = sorted(names(profile))
                 product["ingredient_source"] = profile["source_url"]
+                product["key_ingredients"] = list(profile.get("focus_ingredients", []))
     return products
 
 
@@ -206,6 +243,10 @@ def review_events(copy_text: str, product: dict) -> Iterator[dict]:
     if data_mode() == "mock":
         yield from mock.review_iter(copy_text, product)
         return
+    if data_mode() == "local":  # 내장 실행에는 스트림 엔드포인트가 없다
+        yield {"type": "wait"}
+        yield {"type": "result", "resp": review_copy(copy_text, product)}
+        return
     payload = {"copy_text": copy_text, "product": product}
     try:
         with httpx.stream("POST", f"{api_base_url()}/review/stream", json=payload,
@@ -235,6 +276,29 @@ def review_copy(copy_text: str, product: dict) -> dict:
         return mock.review(copy_text, product)
     resp = _post("/review", {"copy_text": copy_text, "product": product})
     return _with_rule_highlights(resp, product)
+
+
+def generate_copy(
+    instruction: str,
+    product: dict,
+    *,
+    channel: str = "상세페이지",
+    tone: str = "고급스러운",
+    length: str = "한 줄",
+    keywords: list[str] | None = None,
+) -> dict:
+    """현재 검토 기준으로 신규 광고 문구 후보를 생성한다."""
+    payload = {
+        "instruction": instruction,
+        "product": product,
+        "channel": channel,
+        "tone": tone,
+        "length": length,
+        "keywords": keywords or [],
+    }
+    if data_mode() == "mock":
+        return mock.generate_copy(**payload)
+    return _post("/generate", payload, timeout=180.0)
 
 
 def split_sentences(full_text: str) -> list[str]:

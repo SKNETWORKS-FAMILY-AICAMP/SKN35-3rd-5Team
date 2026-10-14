@@ -185,3 +185,21 @@ def test_functional_claims_keep_suggester_contract():
     types = {i["type"] for i in items}
     assert all(i["ceiling"] for i in items)
     assert {p["functional_type"] for p in products if p["functional_type"]} <= types
+
+
+def test_functional_product_cannot_claim_removal_or_instant_effect():
+    """기능성 제품이어도 '기미가 사라짐'·'바르기만 해도' 같은 심사 범위 초과·즉효 단정은 불가."""
+    from cosmetic_agent.domain.rules import RuleEngine
+
+    engine = RuleEngine()
+    level, hits = engine.check_banned_terms("바르기만 해도 기미가 싹 사라지는 미백 앰플", "기능성", "피부 미백")
+    assert level == 2 and {h["id"] for h in hits} >= {"B067", "B068"}
+    assert engine.check_banned_terms("피부의 미백에 도움을 주는 앰플", "기능성", "피부 미백")[0] == 0
+
+
+def test_functional_type_spelling_variants_are_exempt():
+    from cosmetic_agent.domain.rules import RuleEngine
+
+    engine = RuleEngine()
+    for functional_type in ("미백", "피부 미백", "피부 미백, 주름 개선"):
+        assert engine.check_banned_terms("피부의 미백에 도움을 주는 앰플", "기능성", functional_type)[0] == 0

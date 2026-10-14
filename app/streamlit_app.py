@@ -3,7 +3,7 @@
 Beaurette — 화장품 광고 문구 검토 AI 의 Streamlit 진입 파일.
 
 실행 (저장소 루트에서): uv run streamlit run app/streamlit_app.py
-데이터 모드: 환경변수 UI_DATA_MODE=mock(기본) | api  — 연결 지점은 app/services/backend.py
+데이터 모드: 환경변수 UI_DATA_MODE=api(기본) | mock  — 연결 지점은 app/services/backend.py
 """
 import sys
 from pathlib import Path
@@ -38,6 +38,7 @@ def _health() -> dict:
 
 PAGES = {
     "review": st.Page(str(APP_DIR / "views" / "review.py"), title="검토 대화", icon=":material/forum:", default=True),
+    "generate": st.Page(str(APP_DIR / "views" / "generate.py"), title="광고문 생성", icon=":material/edit_note:"),
     "bulk": st.Page(str(APP_DIR / "views" / "bulk.py"), title="상세페이지 검토", icon=":material/article:"),
     "library": st.Page(str(APP_DIR / "views" / "library.py"), title="규정 · 가이드라인", icon=":material/menu_book:"),
     "market": st.Page(str(APP_DIR / "views" / "market.py"), title="시장 근거 · 문구 비교", icon=":material/analytics:"),

@@ -10,7 +10,7 @@ from app.services import backend
 ])
 def test_search_error_displays_server_detail(monkeypatch, payload, expected):
     response = httpx.Response(503, json=payload, request=httpx.Request("GET", "http://test/search"))
-    monkeypatch.setattr(backend.httpx, "get", lambda *args, **kwargs: response)
+    monkeypatch.setattr(backend, "_send", lambda *args, **kwargs: response)
     with pytest.raises(backend.BackendError) as error:
         backend._get("/search")
     assert expected in str(error.value)

@@ -748,3 +748,49 @@ def search(query: str, scope: str = "공통", limit: int = 8) -> list[dict]:
                          "effective_date": c["effective_date"], "matched_terms": matched, "score": round(score, 3)},
         })
     return out
+
+
+def generate_copy(
+    instruction: str,
+    product: dict,
+    *,
+    channel: str = "상세페이지",
+    tone: str = "고급스러운",
+    length: str = "한 줄",
+    keywords: list[str] | None = None,
+) -> dict:
+    """화면 개발용 결정적 생성 예시. 실제 AI 생성이 아니며 mock=True를 표시한다."""
+    started = time.perf_counter()
+    name = product.get("name") or "이 제품"
+    functional = product.get("functional_type") if product.get("category") == "기능성" else None
+    keyword = next((word.strip() for word in (keywords or []) if word.strip()), "")
+    feature = f"{functional}에 도움을 주는 " if functional else "매일 편안하게 사용할 수 있는 "
+    accent = f"{keyword}, " if keyword else ""
+    drafts = [
+        ("strong", f"{accent}{feature}{name}"),
+        ("balanced", f"매일의 피부 루틴을 탄탄하게 채우는 {name}"),
+        ("safe", f"부드러운 사용감으로 피부를 가꾸는 {name}"),
+    ]
+    candidates = [
+        {
+            "text": text,
+            "tier": tier,
+            "rationale": f"{channel} 채널의 {tone} 분위기에 맞춘 {length} 문구입니다.",
+            "used_evidence": [],
+            "cited_ids": [],
+            "verified": True,
+            "verify_note": "Mock 규칙 검사 통과",
+        }
+        for tier, text in drafts
+    ]
+    seed = hashlib.sha1(f"{instruction}|{product.get('product_id')}|{channel}|{tone}".encode()).hexdigest()[:8]
+    return {
+        "request_id": f"MOCK_GEN_{seed}",
+        "status": "생성완료",
+        "product_id": product.get("product_id", ""),
+        "candidates": candidates,
+        "citations": [],
+        "warnings": [],
+        "timing": {"retrieval_ms": 0.0, "llm_ms": 0.0, "total_ms": (time.perf_counter() - started) * 1000},
+        "mock": True,
+    }

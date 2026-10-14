@@ -96,6 +96,8 @@ def build_suggest_user_prompt(
         f"- 이름: {product.get('name', '')}",
         f"- 구분: {category}",
     ]
+    if product.get("key_ingredients"):
+        lines.append(f"- 주요 성분 (함유 사실만 표현 가능, 원료 효능을 완제품 효능처럼 쓰지 않음): {', '.join(product['key_ingredients'])}")
     if category == "기능성":
         lines.append(f"- 심사(보고) 기능성: {product.get('functional_type') or '미기재'}")
         if functional_ceiling:
