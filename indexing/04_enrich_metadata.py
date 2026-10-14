@@ -1,25 +1,32 @@
-"""
-[04_enrich_metadata.py]
-조문 청크에 식별자(ID), 권위도(Authority), 적용범위(Scope) 메타데이터를 부여하는 스크립트.
-"""
-from typing import Any
+"""03 단계 청크 파일에 검색용 규제 메타데이터를 부착한다."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+from metadata_enrichment import enrich_chunk_metadata
 
 
-def enrich_chunk_metadata(chunk: dict[str, Any], doc_type: str, authority: int) -> dict[str, Any]:
-    """청크에 표준 메타데이터 스키마를 부여합니다.
+def main() -> None:
+    parser = argparse.ArgumentParser(description="검색용 청크 메타데이터를 보강합니다.")
+    parser.add_argument("--input", type=Path, default=Path("data/02_processed/chunks.jsonl"))
+    parser.add_argument("--output", type=Path, default=Path("data/02_processed/chunks.jsonl"))
+    args = parser.parse_args()
 
-    ID 규칙: {DOC_TYPE}_{문서약칭}_{조항}
-    예: LAW_시행규칙_별표5-2가
-    """
-    # TODO (팀원 구현 영역):
-    enriched = {
-        "id": chunk.get("id", "UNKNOWN_ID"),
-        "source": chunk.get("source", ""),
-        "doc_type": doc_type,        # 법령, 고시, 지침, 사례
-        "authority": authority,      # 1, 2, 3, 4
-        "article": chunk.get("article", ""),
-        "product_scope": chunk.get("product_scope", "공통"), # 공통, 일반, 기능성
-        "effective_date": chunk.get("effective_date", "2024-01-01"),
-        "content": chunk.get("content", ""),
-    }
-    return enriched
+    chunks = [
+        enrich_chunk_metadata(json.loads(line))
+        for line in args.input.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(
+        "".join(json.dumps(chunk, ensure_ascii=False) + "\n" for chunk in chunks),
+        encoding="utf-8",
+    )
+    print(f"[04_enrich] {len(chunks)}개 청크 메타데이터 보강: {args.output}")
+
+
+if __name__ == "__main__":
+    main()
