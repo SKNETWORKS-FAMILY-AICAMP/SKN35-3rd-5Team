@@ -13,14 +13,14 @@
 │   ├── 02_processed/   # 정제된 청크 및 BM25 인덱스 파일
 │   ├── assets/         # 금지어 사전, 표현 사다리, 가상 제품 카드 JSON
 │   └── golden_set/     # Dev / Holdout 평가 벤치마크 데이터
-├── docker/             # Qdrant 등 인프라 컨테이너 설정
+├── docker/             # 선택 사항: 로컬 개발용 Qdrant 컨테이너 설정
 ├── eval/               # R0~R4 베이스라인 평가 파이프라인
 ├── finetune/           # QLoRA 기반 판정 모델 독립 학습 파이프라인
 ├── indexing/           # 오프라인 데이터 파이프라인 (01~05)
 ├── src/cosmetic_agent/ # 핵심 비즈니스 로직 (Clean Architecture & LangGraph)
 │   ├── common/         # 환경변수, 로깅, 커스텀 예외
 │   ├── domain/         # Pydantic 결과 계약, 규칙 엔진, 문구 검증기
-│   ├── rag/            # Qdrant + BM25 RRF 하이브리드 검색, 질의 변환
+│   ├── rag/            # Qdrant Cloud + BM25 RRF 하이브리드 검색, 질의 변환
 │   ├── models/         # Rule / GPT Few-shot / QLoRA 판정 모델 인터페이스
 │   ├── workflow/       # LangGraph 9단계 StateGraph 노드/엣지
 │   └── service.py      # 싱글톤 파사드 서비스
@@ -38,7 +38,7 @@
 | 역할 | 맡는 폴더 및 파일 | 주요 작업 내용 |
 | :--- | :--- | :--- |
 | **팀장 · 통합** | • `src/cosmetic_agent/workflow/graph.py`<br>• `src/cosmetic_agent/workflow/edges.py`<br>• `src/cosmetic_agent/service.py`<br>• `api/` 전체<br>• `configs/base.yaml`, `README.md` | • LangGraph 전체 노드·엣지 연결 및 루프 조건 완성<br>• FastAPI 엔드포인트 연동 및 문장 분할 배치 처리<br>• 전체 모듈 통합 및 일정/품질 관리 |
-| **데이터 · 규칙** | • `data/01_raw/`, `data/02_processed/`<br>• `data/assets/*.json` (4종 + 제품카드)<br>• `indexing/` (01~05 스크립트)<br>• `src/cosmetic_agent/rag/` 전체 | • 법령/고시 PDF 수집 및 조(Article) 단위 정규식 청킹<br>• Qdrant + BM25 인덱스 생성 파이프라인 완성<br>• `banned_terms.json`, `claim_ladder.json` 실제 데이터 채우기<br>• RRF 하이브리드 검색 알고리즘 구현 |
+| **데이터 · 규칙** | • `data/01_raw/`, `data/02_processed/`<br>• `data/assets/*.json` (4종 + 제품카드)<br>• `indexing/` (01~05 스크립트)<br>• `src/cosmetic_agent/rag/` 전체 | • 법령/고시 PDF 수집 및 조(Article) 단위 정규식 청킹<br>• Qdrant Cloud + BM25 인덱스 생성 파이프라인 완성<br>• `banned_terms.json`, `claim_ladder.json` 실제 데이터 채우기<br>• RRF 하이브리드 검색 알고리즘 구현 |
 | **프롬프트 · 판정** | • `src/cosmetic_agent/workflow/prompts.py`<br>• `src/cosmetic_agent/workflow/nodes.py`<br>• `src/cosmetic_agent/models/gpt_judge.py`<br>• `src/cosmetic_agent/domain/schemas.py`<br>• `src/cosmetic_agent/domain/verifier.py` | • GPT 판정 및 대안 문구 생성 프롬프트 엔지니어링<br>• Pydantic `ReviewResult` 계약 검증 규칙 추가<br>• 제안 문구의 숫자 날조 및 금지어 역검증(`verifier.py`) 로직 구현<br>• 혼동쌍 분석을 통한 Few-shot 예시 튜닝 |
 | **평가** | • `data/golden_set/` (dev, holdout)<br>• `eval/metrics/eval_metrics.py`<br>• `eval/run_eval.py`<br>• `tests/` 단위/통합 테스트 | • 30~50건 골든셋(Dev/Holdout) 정답 라벨링<br>• R0(규칙) → R1(Zero-shot) → R2(Few-shot) → R4(최종) 비교 평가 실행기 작성<br>• 단위 테스트(`test_rules`, `test_schemas`) 확장 |
 | **파인튜닝** | • `finetune/dataset/`<br>• `finetune/recipes/qlora_qwen.py`<br>• `src/cosmetic_agent/models/ft_judge.py`<br>• `finetune/MODEL_CARD.md` | • GPT 활용 300~500건 판정 학습 데이터 증강 및 수동 검수<br>• Train/Dev 데이터 누수(Leakage) 점검<br>• Colab T4 기반 Qwen-3B 4-bit QLoRA 학습 실행<br>• 서빙 어댑터 연동 및 모델 카드 작성 |
@@ -89,26 +89,54 @@
 
 ## 4. 개발 및 실행 가이드
 
-### 1) 환경 변수 설정
+### 1) Qdrant Cloud 준비
+
+이 프로젝트의 기본 벡터 데이터베이스는 로컬 Docker가 아닌 **Qdrant Cloud**입니다.
+
+1. Qdrant Cloud에서 클러스터를 생성합니다.
+2. 클러스터의 HTTPS Endpoint와 API Key를 발급받습니다.
+3. API Key는 저장소에 커밋하지 말고 로컬 `.env` 또는 배포 서비스의 Secret 환경변수로 관리합니다.
+
+Qdrant 컬렉션은 별도로 수동 생성하지 않아도 됩니다. `indexing/05_build_indexes.py`가 컬렉션이 없으면 생성하고, 기존 컬렉션이 있으면 청크를 멱등적으로 upsert합니다.
+
+### 2) 환경 변수 설정
 ```bash
 cp .env.example .env
-# .env 파일을 열어 OPENAI_API_KEY 등을 입력합니다.
+# .env 파일에 OpenAI 및 Qdrant Cloud 접속 정보를 입력합니다.
 ```
 
-### 2) 패키지 설치
+필수 설정 예시:
+
+```dotenv
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+
+QDRANT_URL=https://your-cluster-id.region.cloud.qdrant.io
+QDRANT_API_KEY=your_qdrant_cloud_api_key_here
+QDRANT_COLLECTION_NAME=cosmetic_ad_rules_v2
+```
+
+### 3) 패키지 설치
 `uv`를 사용하여 가상환경 및 의존성을 동기화합니다:
 ```bash
 uv sync --extra dev
 ```
 
-### 3) 로컬 인프라 (Qdrant) 실행
+### 4) 데이터 파이프라인 실행 (오프라인 1회)
+
+청킹 결과를 만든 뒤 OpenAI 임베딩을 생성하여 Qdrant Cloud에 저장하고, BM25 인덱스를 로컬 파일로 생성합니다.
+
 ```bash
-docker compose -f docker/docker-compose.yml up -d
+uv run python indexing/03_chunk_articles.py
+uv run python indexing/05_build_indexes.py
 ```
 
-### 4) 데이터 파이프라인 실행 (오프라인 1회)
+> `data/02_processed/bm25_index.pkl`은 실행 환경에 필요한 검색 인덱스입니다. 배포 시 파일을 함께 제공하거나 배포 빌드 과정에서 다시 생성해야 합니다.
+
+인덱싱 결과 검증:
+
 ```bash
-uv run python indexing/run_pipeline.py
+uv run python scripts/validate_rag.py
 ```
 
 ### 5) 서버 및 대시보드 실행
