@@ -102,6 +102,24 @@ def build_suggest_user_prompt(
         lines.append(f"- 심사(보고) 기능성: {product.get('functional_type') or '미기재'}")
         if functional_ceiling:
             lines.append(f"- 심사 효능 표현 상한: {functional_ceiling}")
+    if product.get("ingredients"):
+        lines += [
+            "", "[현재 제품의 제공 전성분]", ", ".join(product["ingredients"]),
+            "성분 함유 사실과 완제품 효능 실증은 별개다. 목록에 없는 성분을 추가하지 말 것.",
+            "외부 제품의 함량·개선율·시험 결과·기능성 효능은 이 제품에 옮기지 말 것.",
+        ]
+        from ..domain.ingredients import matched_references
+
+        _, references, _ = matched_references(product.get("product_id", ""))
+        for ref in references:
+            lines += [
+                "[성분 일치 시장 참고 · 규정/실증 근거 아님]",
+                f"참고 제품: {ref['profile']['name']}",
+                f"공통 주요 소구 성분: {', '.join(ref['comparison']['shared_focus'])}",
+                f"참고 원문: {ref['profile']['reference_copies'][0]['text']}",
+                f"현재 전성분에서 확인되지 않은 참고 제품의 주요 성분: {', '.join(ref['comparison']['reference_only_focus'])}",
+                "참고 원문에서는 공통 성분을 드러내는 표현 방식만 참고하고, 다른 성분·효능·수치는 사용하지 말 것.",
+            ]
     lines += [
         "",
         "[보유 근거]",

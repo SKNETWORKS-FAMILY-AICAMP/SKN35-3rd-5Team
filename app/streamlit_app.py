@@ -36,16 +36,20 @@ def _health() -> dict:
     return backend.health()
 
 
+# 홈(소개 페이지)이 첫 화면이고, 「시작하기」로 검토 대화에 들어간다. 홈에는 사이드바가 없다.
+HOME = st.Page(str(APP_DIR / "views" / "home.py"), title="홈", icon=":material/home:", default=True)
 PAGES = {
-    "review": st.Page(str(APP_DIR / "views" / "review.py"), title="검토 대화", icon=":material/forum:", default=True),
+    "review": st.Page(str(APP_DIR / "views" / "review.py"), title="검토 대화", icon=":material/forum:"),
     "generate": st.Page(str(APP_DIR / "views" / "generate.py"), title="광고문 생성", icon=":material/edit_note:"),
     "bulk": st.Page(str(APP_DIR / "views" / "bulk.py"), title="상세페이지 검토", icon=":material/article:"),
     "library": st.Page(str(APP_DIR / "views" / "library.py"), title="규정 · 가이드라인", icon=":material/menu_book:"),
+    "market": st.Page(str(APP_DIR / "views" / "market.py"), title="시장 근거 · 문구 비교", icon=":material/analytics:"),
 }
 st.session_state["bw_pages"] = PAGES
 st.session_state["bw_health"] = _health()
 
-page = st.navigation(list(PAGES.values()), position="hidden")
+page = st.navigation([HOME, *PAGES.values()], position="hidden")
 inject_base_css()
-render_sidebar(PAGES, st.session_state["bw_health"])
+if page.url_path != HOME.url_path:
+    render_sidebar(PAGES, st.session_state["bw_health"])
 page.run()

@@ -1,0 +1,35 @@
+{
+  "collected_date": "2026-10-14",
+  "method": "공식 전성분 문자열을 정규화해 구성의 공통점·차이만 비교. 함량·침투·효능 동등성은 계산하지 않음.",
+  "profiles": {
+    "MKT_KIEHLS_UFC": {
+      "name": "키엘 울트라 훼이셜 크림", "form": "cream", "market": "KR",
+      "source_url": "https://www.kiehls.co.kr/kr/울트라-훼이셜-크림-125ml-세트/2610_UFC125ml_set.html",
+      "locator": "제품 상세 전성분·주요성분·기능성 심사필 여부", "complete_list": true,
+      "delimiter": "space",
+      "ingredient_text": "정제수 글리세린 다이메티콘 스쿠알란 비스-피이지-18메틸에터다이메틸실레인 수크로오스스테아레이트 스테아릴알코올 피이지-8스테아레이트 미리스틸미리스테이트 살구씨오일 페녹시에탄올 아보카도오일 글리세릴스테아레이트 세틸알코올 쌀겨오일 올리브오일 클로페네신 스테아릭애씨드 팔미틱애씨드 카보머 아크릴레이트/C10-30알킬아크릴레이트크로스폴리머 트라이소듐에틸렌다이아민다이석시네이트 스위트아몬드오일 잔탄검 에틸헥실글리세린 소듐하이드록사이드 토코페롤 돌콩오일 슈도알테로모나스발효추출물 미리스틱애씨드 하이드록시팔미토일스핑가닌 살리실릭애씨드 해바라기씨오일 로즈마리잎추출물 시트릭애씨드",
+      "focus_ingredients": ["스쿠알란"],
+      "focus_basis": "공식 주요성분 중 전성분명과 직접 일치하는 스쿠알란만 선별. 세라마이딘·빙하당단백질 상업명은 동일 성분으로 추정 매핑하지 않음.",
+      "reference_copies": [{"text": "울트라 훼이셜 크림", "analysis": "제품명 소구", "number_transfer_allowed": false}]
+    },
+    "MKT_KIEHLS_BARRIER": {
+      "name": "키엘 울트라 훼이셜 어드밴스드 리페어 베리어 크림", "form": "cream", "market": "KR",
+      "source_url": "https://www.kiehls.co.kr/kr/ultra-facial-advanced-repair-barrier-cream/WW0231KIE.html",
+      "locator": "전성분·주요성분", "complete_list": true, "delimiter": "space",
+      "ingredient_text": "정제수 부틸렌글라이콜 글리세린 카프릴릭/카프릭트라이글리세라이드 베헤닐알코올 펜틸렌글라이콜 나이아신아마이드 다이카프릴릴카보네이트 세테아릴알코올 트레할로오스 수크로오스폴리스테아레이트 C12-16알코올 아크릴레이트/C10-30알킬아크릴레이트크로스폴리머 트로메타민 토코페롤 하이드록시에틸아크릴레이트/소듐아크릴로일다이메틸타우레이트코폴리머 세라마이드엔피 알란토인 하이드로제네이티드폴리아이소부텐 팔미틱애씨드 하이드로제네이티드레시틴 카보머 베타-글루칸 에틸헥실글리세린 아데노신 카프릴릴글라이콜 슈도알테로모나스발효추출물 솔비탄아이소스테아레이트 세틸팔미테이트 백미꽃추출물 콜로이달오트밀 솔비탄올리베이트 솔비탄팔미테이트 C14-22알코올 C12-20알킬글루코사이드 살리실릭애씨드 소듐하이드록사이드",
+      "focus_ingredients": ["베타-글루칸", "콜로이달오트밀"], "focus_basis": "공식 주요성분; 클로이드 오트밀 표기는 전성분의 콜로이달오트밀로 대응",
+      "reference_copies": [{"text": "피부 장벽 개선 +44%", "analysis": "외부 제품 시험에 의존하는 수치형 소구. 현재 제품으로 전용 불가", "number_transfer_allowed": false}]
+    },
+    "MKT_BIOSSANCE_OMEGA": {
+      "name": "Biossance Squalane + Omega Repair Cream", "form": "cream", "market": "US",
+      "source_url": "https://www.biossance.com/p/squalane-and-omega-repair-cream-100ml/15743028/",
+      "locator": "Ingredients / Leading ingredients / 상품명", "complete_list": true, "delimiter": "comma",
+      "ingredient_text": "Water, Squalane, Glycerin, Caprylic/Capric Triglyceride, Isoamyl Laurate, Butyrospermum Parkii (Shea) Butter, Sorbitan Olivate, Cetearyl Olivate, Ceramide NP, Jojoba Esters, Sodium Hyaluronate, Euterpe Oleracea Sterols, Linoleic Acid, Oleic Acid, Linolenic Acid, Ethyl Linoleate, Tocopherol, Isoamyl Cocoate, Cetyl Palmitate, Sorbitan Palmitate, Cetearyl Alcohol, Ethylhexylglycerin, Carbomer, Sodium Hydroxide, Phenoxyethanol, Sodium Gluconate",
+      "focus_ingredients": ["Squalane", "Ceramide NP", "Sodium Hyaluronate", "Linoleic Acid", "Oleic Acid", "Linolenic Acid", "Euterpe Oleracea Sterols"],
+      "focus_basis": "공식 Leading Ingredients와 전성분 직접 대응. 함량 미공개",
+      "reference_copies": [{"text": "Squalane + Omega Repair Cream", "analysis": "스쿠알란·오메가 성분명 중심 제품명 소구. 공통 스쿠알란만 참고; 오메가 배합·장벽 효능은 전용하지 않음", "number_transfer_allowed": false}],
+      "market_note": "미국 공식 페이지의 해외 표현 참고. 한국 광고 허용성·한국 판매 SKU와 동일성 미확인"
+    }
+  },
+  "project_profile_ids": {"PUBLIC_KIEHLS_UFC": "MKT_KIEHLS_UFC"}
+}

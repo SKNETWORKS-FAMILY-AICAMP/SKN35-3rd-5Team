@@ -24,6 +24,8 @@ class ProductCard(BaseModel):
     functional_type: Optional[str] = None
     key_ingredients: list[str] = Field(default_factory=list, description="주요 성분 (예: 나이아신아마이드, 판테놀)")
     owned_evidence: list[OwnedEvidence] = Field(default_factory=list)
+    ingredients: list[str] = Field(default_factory=list, description="제공된 전성분명. 효능 시험 근거와 구분")
+    ingredient_source: Optional[str] = None
 
 
 class Citation(BaseModel):

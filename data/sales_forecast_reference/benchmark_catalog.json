@@ -1,0 +1,44 @@
+[
+  {
+    "dataset_id": "hillstrom_2008",
+    "source_id": "HILLSTROM_2008",
+    "expected_rows": 64000,
+    "domain": "mens/womens merchandise retail email;cosmetics 아님",
+    "treatment": "Mens E-Mail/Womens E-Mail/No E-Mail 무작위 배정",
+    "outcomes": [
+      "visit",
+      "conversion",
+      "spend"
+    ],
+    "post_period": "2주",
+    "can_validate": [
+      "구매자 비율 추정",
+      "고객당 금액·불확실성",
+      "발송 대 미발송 실험 비교"
+    ],
+    "cannot_validate": [
+      "화장품 문구 효과",
+      "원화 매출",
+      "판매 상품 개수",
+      "세럼 제품별 전환율"
+    ],
+    "download_requested": true
+  },
+  {
+    "dataset_id": "criteo_uplift_unbiased",
+    "source_id": "CRITEO_UPLIFT",
+    "expected_rows": 13979592,
+    "downloaded": false,
+    "reason": "압축 약297MB;원시 수집은 보류",
+    "outcomes": [
+      "visit",
+      "conversion"
+    ],
+    "cannot_validate": [
+      "광고 원문·이미지에 따른 매출",
+      "상품 개수",
+      "금액 예측"
+    ],
+    "warning": "구버전 누수 수정본 선택.비균일 서브샘플링으로 원래 절대 광고 증분 수준 복원 불가"
+  }
+]

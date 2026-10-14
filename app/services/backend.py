@@ -87,7 +87,15 @@ def _get(path: str, *, params: dict | None = None, timeout: float = 30.0):
         res.raise_for_status()
         return res.json()
     except httpx.HTTPStatusError as err:
-        raise BackendError(f"서버가 오류를 돌려줬습니다 (HTTP {err.response.status_code}).", err) from err
+        detail = ""
+        try:
+            detail = err.response.json().get("detail", "")
+        except (ValueError, AttributeError):
+            pass
+        message = detail if isinstance(detail, str) and detail else (
+            f"서버가 오류를 돌려줬습니다 (HTTP {err.response.status_code})."
+        )
+        raise BackendError(message, err) from err
     except httpx.HTTPError as err:
         raise BackendError(f"검토 서버({api_base_url()})에 연결하지 못했습니다. 서버가 켜져 있는지 확인하세요.", err) from err
 
@@ -130,7 +138,17 @@ def health() -> dict:
 # ── 제품 ────────────────────────────────────────────────────────────
 def list_products() -> list[dict]:
     """심사할 제품 목록(data/assets/mock_products.json). 백엔드에 제품 API 가 없어 두 모드가 같다."""
-    return [dict(p, owned_evidence=[dict(ev) for ev in p.get("owned_evidence", [])]) for p in ds.mock_products()]
+    from cosmetic_agent.domain.ingredients import matched_references, names
+
+    products = [dict(p, owned_evidence=[dict(ev) for ev in p.get("owned_evidence", [])]) for p in ds.mock_products()]
+    for product in products:
+        if product.get("sample_kind") == "public_product_analysis":
+            profile, _, _ = matched_references(product["product_id"])
+            if profile:
+                product["ingredients"] = sorted(names(profile))
+                product["ingredient_source"] = profile["source_url"]
+                product["key_ingredients"] = list(profile.get("focus_ingredients", []))
+    return products
 
 
 def unlock_hint(product: dict, evidence: dict) -> str | None:

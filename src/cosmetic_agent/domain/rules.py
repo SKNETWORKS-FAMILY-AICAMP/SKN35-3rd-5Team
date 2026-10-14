@@ -43,15 +43,26 @@ SURVEY_KEYWORDS = ("만족", "설문", "선호", "응답", "소비자 조사", "
 # 실증규정 제5조 제1호: 조사기관은 사업자와 독립적이어야 한다.
 IN_HOUSE_KEYWORDS = ("자사", "사내", "자체")
 
+# 수치가 효능 주장인지 가르는 서술어 (함량 표기와 구분)
+_EFFICACY_RE = re.compile(r"개선|감소|증가|향상|효과|흡수|지속|완화|제거|입증|만족|높|빠르|깊|강해|케어")
+
 _GENERIC_WORDS = {"피부", "모발", "손상된", "손상", "개선", "도움"}
 
 
-def _matches_functional(functional_type: str, exempt: list[str] | None) -> bool:
+def functional_types(value: str | list[str] | tuple[str, ...] | None) -> list[str]:
+    """기능성 유형을 목록으로 정규화. '미백;주름 개선' 같은 복수 기능성(2중 기능성)도 받는다."""
+    if not value:
+        return []
+    items = value if isinstance(value, (list, tuple)) else re.split(r"[;,/·+]|\s및\s", str(value))
+    return [item.strip() for item in items if item and item.strip()]
+
+
+def _matches_functional(functional_type: str | list[str] | tuple[str, ...] | None, exempt: list[str] | None) -> bool:
     """심사받은 기능성 유형이 규칙의 예외 목록에 해당하는지.
     '미백'·'피부 미백'처럼 표기가 달라도, '피부 미백, 주름 개선'처럼 두 가지여도 맞춘다."""
     if not exempt:
         return False
-    parts = [p.strip() for p in re.split(r"[,/·+]|\s및\s", functional_type) if p.strip()]
+    parts = functional_types(functional_type)
     return any(part == e or part in e or e in part for part in parts for e in exempt if len(part) >= 2)
 
 
@@ -134,7 +145,7 @@ class RuleEngine:
         }
 
     @staticmethod
-    def _is_exempt(rule: dict[str, Any], text: str, category: str, functional_type: str | None) -> bool:
+    def _is_exempt(rule: dict[str, Any], text: str, category: str, functional_type: str | list[str] | None) -> bool:
         """기능성 심사 범위 안의 표현이거나, 지침 단서 조항(예: '보습'+'일시적')을 만족하면 예외"""
         if category == "기능성" and functional_type and _matches_functional(functional_type, rule.get("exempt_functional")):
             return True
@@ -146,7 +157,7 @@ class RuleEngine:
         self,
         text: str,
         product_category: str,
-        functional_type: str | None = None,
+        functional_type: str | list[str] | None = None,
     ) -> tuple[int, list[dict[str, Any]]]:
         """금지 표현 사전과 정규식 매칭하여 규칙 수준과 적발 항목을 반환합니다.
 
@@ -176,13 +187,21 @@ class RuleEngine:
     def _number_hits(self, text: str, evidences: list[dict[str, Any]]) -> list[dict[str, Any]]:
         # Separate sentences may legitimately cite different tests. Never pool their numbers.
         fragments = re.split(r"(?<=[.!?])\s+|\n+", text)
-        return [hit for fragment in fragments for hit in self._number_claim_hits(fragment, evidences)]
+        return [hit for fragment in fragments for hit in self._number_claim_hits(fragment, evidences, context=text)]
 
-    def _number_claim_hits(self, text: str, evidences: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def _number_claim_hits(self, text: str, evidences: list[dict[str, Any]],
+                           context: str | None = None) -> list[dict[str, Any]]:
         tokens = _number_tokens(text)
         if not tokens:
             return []
+        # 줄바꿈으로 수치만 떨어진 경우('팔자 주름\n-18.49%')는 전체 문구에서 효능을 찾는다
         claim = self.detect_claim_type(text)
+        if claim == "일반" and context:
+            claim = self.detect_claim_type(context)
+        scope = context or text
+        if claim == "일반" and not _EFFICACY_RE.search(scope) and all(t.endswith("%") for t in tokens):
+            # '레티놀 2%', '레티날 0.2퍼센트' 같은 함량 표기는 효능 수치가 아니다
+            return []
         relevant = [e for e in evidences if claim != "일반" and self.detect_claim_type(str(e.get("item") or "")) == claim]
         valid = [e for e in relevant if not _is_survey(e) and not _is_in_house(e)]
 
@@ -226,8 +245,10 @@ class RuleEngine:
     # ------------------------------------------------------------------ 3) 실증·비교·과장 (level 1)
     def _supported(self, rule: dict[str, Any], matched: str, text: str, product: dict[str, Any],
                    valid: list[dict[str, Any]]) -> bool:
-        functional_type = product.get("functional_type")
-        if product.get("category") == "기능성" and functional_type in (rule.get("functional_supports") or []):
+        supports = rule.get("functional_supports") or []
+        if product.get("category") == "기능성" and any(
+            t in supports for t in functional_types(product.get("functional_type"))
+        ):
             return True
         bodies = [_compact(_evidence_text(e)) for e in valid]
         rule_id = rule.get("id", "")
@@ -281,11 +302,12 @@ class RuleEngine:
                 return entry
         return {}
 
-    def get_functional_ceiling(self, functional_type: str | None) -> dict[str, Any]:
+    def get_functional_ceiling(self, functional_type: str | list[str] | None) -> dict[str, Any]:
         """기능성 유형별 심사받은 효능 천장 문구"""
-        if not functional_type:
+        types = functional_types(functional_type)
+        if not types:
             return {}
-        return next((e for e in self.functional_claims if e.get("type") == functional_type), {})
+        return next((e for e in self.functional_claims if e.get("type") in types), {})
 
     # ------------------------------------------------------------------ 5) 종합 판정
     def evaluate(self, text: str, product: dict[str, Any]) -> dict[str, Any]:
