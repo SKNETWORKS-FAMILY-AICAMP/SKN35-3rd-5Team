@@ -625,6 +625,12 @@ article.bw-ai[data-live="1"] [data-cites]:focus-visible { outline: 2px solid var
 .bw-live-text { font-size: var(--fs-body); line-height: 1.65; color: var(--bw-ink); }
 .bw-caret { display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -2px; background: var(--bw-accent); animation: bw-blink 1s infinite steps(1); }
 .bw-live-meta { font-size: var(--fs-meta); color: var(--bw-faint); }
+/* 경과 시간 — 브라우저가 센다(서버 갱신과 무관). 카드가 다시 그려져도 --bw-t(실측 경과)만큼 앞당겨 이어간다.
+   정수 보간은 반올림이라 0.5초 늦게 시작해 내림처럼 보이게. 정보라서 동작 줄이기에서도 멈추지 않는다 */
+@property --bw-sec { syntax: "\3C integer>"; inherits: false; initial-value: 0; }   /* 꺾쇠를 그대로 쓰면 st.html 정화기가 스타일 블록을 통째로 지운다 → \3C 로 쓴다 */
+@keyframes bw-count { from { --bw-sec: 0; } to { --bw-sec: 3600; } }
+.bw-clock { counter-reset: bw-sec var(--bw-sec); animation: bw-count 3600s linear both; animation-delay: calc(.5s - var(--bw-t, 0s)); }
+.bw-clock::after { content: "경과 " counter(bw-sec) "초"; }
 @keyframes bw-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
 
 /* 확장 블록 (ui.blocks 가 있을 때만) */

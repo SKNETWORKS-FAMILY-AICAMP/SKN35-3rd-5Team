@@ -52,7 +52,9 @@ def _bubble_label(ctx: dict) -> str:
 
 
 def _run(thread: dict, message: dict, slot) -> None:
-    """대기 중인 질문에 답한다. 검토는 별도 스레드에서 돌리고, 받은 이벤트만 진행 카드에 그린다."""
+    """대기 중인 질문에 답한다. 검토는 별도 스레드에서 돌리고, 받은 이벤트만 진행 카드에 그린다.
+    카드는 처음 한 번과 이벤트가 올 때만 다시 보낸다 — 경과 시간은 브라우저가 세므로 기다리는 동안 서버는 쉰다
+    (0.15초마다 카드를 다시 보내면 CPU 가 작은 배포 서버에서 갱신이 몰렸다 끊겨 숫자가 멈춰 보였다)."""
     events: queue.Queue = queue.Queue()
 
     def work() -> None:
@@ -68,21 +70,25 @@ def _run(thread: dict, message: dict, slot) -> None:
     demo = backend.data_mode() == "mock"
     pace = 0.08 * MOCK_DELAY if demo else 0.0
     state, t0 = progress.Progress(), time.perf_counter()
+
+    def draw() -> None:
+        slot.html(f'<div class="bw">{progress.card(state, elapsed=None if demo else time.perf_counter() - t0, demo=pace > 0)}</div>')
+
+    draw()
     while True:
         try:
             event = events.get(timeout=0.15)
         except queue.Empty:
-            event = None
-        if event and event["type"] == "result":
+            continue
+        if event["type"] == "result":
             threads.answer(thread, {"role": "assistant", "resp": event["resp"], "at": datetime.now(), "ctx": message["ctx"]})
             return
-        if event and event["type"] == "error":
+        if event["type"] == "error":
             threads.answer(thread, {"role": "error", "message": event["message"], "at": datetime.now()})
             return
-        if event:
-            state.apply(event)
-        slot.html(f'<div class="bw">{progress.card(state, elapsed=None if demo else time.perf_counter() - t0, demo=pace > 0)}</div>')
-        if event and pace and event["type"] == "stage":
+        state.apply(event)
+        draw()
+        if pace and event["type"] == "stage":
             time.sleep(pace)
 
 
