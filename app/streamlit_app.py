@@ -41,9 +41,8 @@ def _health(mode: str) -> dict:
 HOME = st.Page(str(APP_DIR / "views" / "home.py"), title="홈", icon=":material/home:", default=True)
 PAGES = {
     "chat": st.Page(str(APP_DIR / "views" / "chat.py"), title="통합 챗봇", icon=":material/chat_bubble:"),
-    "generate": st.Page(str(APP_DIR / "views" / "generate.py"), title="성분으로 문구 만들기", icon=":material/auto_awesome:"),
+    "generate": st.Page(str(APP_DIR / "views" / "generate.py"), title="광고문 생성", icon=":material/auto_awesome:"),
     "review": st.Page(str(APP_DIR / "views" / "review.py"), title="검토 대화", icon=":material/forum:"),
-    "project_generate": st.Page(str(APP_DIR / "views" / "project_generate.py"), title="제품 기준 광고문 생성", icon=":material/edit_note:"),
     "bulk": st.Page(str(APP_DIR / "views" / "bulk.py"), title="상세페이지 검토", icon=":material/article:"),
     "library": st.Page(str(APP_DIR / "views" / "library.py"), title="규정 · 가이드라인", icon=":material/menu_book:"),
     "market": st.Page(str(APP_DIR / "views" / "market.py"), title="시장 근거 · 문구 비교", icon=":material/analytics:"),

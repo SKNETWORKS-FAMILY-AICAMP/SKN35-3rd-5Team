@@ -6,6 +6,7 @@ import streamlit as st
 
 from app.components.brand import avatar_img, avatar_uri
 from app.components.context import current
+from app.components.generation import render_generation
 from app.components.layout import clock, esc
 from app.components.theme import inject_css
 from app.services import backend
@@ -73,22 +74,12 @@ def _response(response: dict) -> None:
         _review(response["review"])
         st.caption("자동 검토는 법률 준수를 보장하지 않습니다.")
     if response.get("generation"):
-        generation = response["generation"]
-        for warning in generation.get("warnings", []):
-            st.caption(warning)
-        for index, candidate in enumerate(generation.get("candidates", []), 1):
-            st.markdown(f"**후보 {index} · {candidate['status']}**")
-            if candidate["status"] == "검토통과":
-                st.code(candidate["text"], language=None)
-            else:
-                with st.expander("확인이 필요한 초안"):
-                    st.write(candidate["text"])
-            for note in candidate.get("notes", []):
-                st.write(note)
-            if candidate.get("review"):
-                with st.expander(f"후보 {index} 검토 상세"):
-                    _review(candidate["review"])
-        st.caption(generation["disclaimer"])
+        render_generation(response["generation"])
+    if response.get("citations"):
+        with st.expander("답변 근거"):
+            for citation in response["citations"]:
+                st.write(f"{citation['source']} · {citation['article']}")
+                st.caption(citation.get("content_snippet") or "")
 
 
 def _send(message: str, product: dict) -> None:
@@ -130,10 +121,10 @@ def render_chat(*, compact: bool = False) -> None:
             st.html(f'<div class="bw-chat-welcome"><span class="bw-chat-welcome-avatar">'
                     f'{avatar_img(38, alt="뷰렛 토끼")}</span><div><div class="bw-chat-sender">뷰렛</div>'
                     '<div class="bw-chat-welcome-bubble">안녕하세요, 뷰렛이에요 👋<br>'
-                    '검토할 광고 문구나 제품 성분을 보내주세요.<br>같이 더 좋은 문구를 만들어봐요.</div>'
+                    '어떤 광고를 만들고 싶은지 말해주세요.<br>성분을 몰라도 초안부터 만들어드릴게요.</div>'
                     '<div class="bw-chat-examples"><span>이렇게 말해보세요</span>'
                     '<p>“이 광고 문구, 검토하고 고쳐줘”</p>'
-                    '<p>“판테놀 함유 크림의 SNS 문구 만들어줘”</p></div></div></div>')
+                    '<p>“선크림 광고를 짧고 발랄하게 만들어줘”</p></div></div></div>')
         for index, turn in enumerate(chat["messages"]):
             role = turn["role"]
             with st.container(key=f"chat_{role}_{scope}_{index}"), \

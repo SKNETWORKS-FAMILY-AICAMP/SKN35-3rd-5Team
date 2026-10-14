@@ -3,16 +3,24 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from .generation import GenerateResponse, IngredientName
-from .schemas import ProductCard, RequiredText, ReviewResponse
+from .generation import IngredientName
+from .schemas import (
+    Citation,
+    GenerateResponse,
+    ProductCard,
+    RequiredText,
+    ReviewResponse,
+)
 
 
 class ChatContext(BaseModel):
     ingredients: list[IngredientName] = Field(default_factory=list, max_length=100)
-    channel: Literal["SNS", "상세페이지", "배너"] = "SNS"
-    tone: Literal["담백한", "감성적인", "발랄한", "눈길 끄는"] = "담백한"
+    channel: Literal["SNS", "상세페이지", "배너", "검색광고", "라이브커머스"] = "SNS"
+    tone: str = Field(default="담백한", min_length=1, max_length=100)
+    length: Literal["한 줄", "짧은 문단", "상세 설명"] = "짧은 문단"
     product_name: str = Field(default="나의 화장품", max_length=100)
-    brief: str = Field(default="", max_length=1000)
+    brief: str = Field(default="", max_length=2000)
+    product_description: str = Field(default="", max_length=2000)
     last_copies: list[str] = Field(default_factory=list, max_length=3)
 
 
@@ -30,8 +38,9 @@ class ChatRequest(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    intent: Literal["review", "generate", "clarify"]
+    intent: Literal["review", "generate", "clarify", "answer"]
     message: str
     context: ChatContext
     review: ReviewResponse | None = None
     generation: GenerateResponse | None = None
+    citations: list[Citation] = Field(default_factory=list)
