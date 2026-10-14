@@ -83,4 +83,5 @@ def test_clean_copy_strips_formatting_artifacts():
     from cosmetic_agent.models.project_copy_generator import clean_copy
 
     assert clean_copy("**제목**\n살리실릭애씨드 함유! [제품을 보여주며 감탄]") == "제목\n살리실릭애씨드 함유!"
+    assert clean_copy("### 저녁 루틴\n\n토너로 마무리 #편안한보습") == "저녁 루틴\n토너로 마무리 #편안한보습"
     assert material_claim_notes("자연을 담아낸 촉촉한 케어", GENERAL)

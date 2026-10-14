@@ -77,4 +77,6 @@ def clean_copy(text: str) -> str:
     """광고 문구에 섞여 나오는 마크다운 강조·무대 지시([제품을 보여주며])·이스케이프 줄바꿈을 지운다."""
     text = text.replace("\\n", "\n").replace("**", "")
     text = re.sub(r"\[[^\]\n]{1,30}\]", "", text)
+    text = re.sub(r"(?m)^#{1,6}\s+", "", text)  # 마크다운 제목. 해시태그(#보습)는 공백이 없어 남는다
+    text = re.sub(r"\n{2,}", "\n", text)
     return re.sub(r"[ \t]{2,}", " ", text).strip()
