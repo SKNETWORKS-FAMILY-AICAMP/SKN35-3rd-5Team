@@ -83,8 +83,8 @@ def test_selected_generated_copy_is_shared_with_forecast(monkeypatch):
     assert not app.exception
     pid, record = next(iter(app.session_state["bw_generation_records"].items()))
     expected = record["response"]["candidates"][1]["text"]
-    next(s for s in app.selectbox if s.label == "매출 시나리오에 쓸 후보").select(1).run()
-    next(b for b in app.button if b.label == "이 문구를 매출 시나리오에 사용").click().run()
+    # 후보마다 달린 선택 버튼(준호)으로 두 번째 후보를 예상 매출에 보낸다
+    app.button(key="select_generated_1").click().run()
     assert not app.exception
     assert next(t.value for t in app.text_area if t.label == "선택한 생성 문구") == expected
     # 기존 수치 근거를 해제하면 다른 화면에서 이전 결과를 재사용하지 않는다.

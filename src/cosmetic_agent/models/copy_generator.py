@@ -52,9 +52,9 @@ ATTENTION_STYLE = """선택된 스타일: 눈길 끄는.
 
 # 생성 입력에는 함량·흡수 시험 필드가 없다. 규정 키워드 검사만으로
 # 놓칠 수 있는 제품 사실 날조도 따로 막는다 (법령상 금지어 목록은 아님).
-# 바르는 느낌(부드럽게 발리는, 감싸는)은 사용감 표현이라 막지 않고, 수분 공급처럼 효능에 가까운 말은 막는다.
+# 바르는 느낌(부드럽게 발리는, 감싸는)과 수분 공급·채움(화장품의 기본 보습 효능)은 막지 않는다. '수분을 선물'처럼 꾸민 말은 막는다.
 UNSUPPORTED_AMOUNT = re.compile(r"듬뿍|풍부|고농[축도]|고함량|농축")
-UNSUPPORTED_SENSORY = re.compile(r"스며|흡수|침투|피부\s*속|수분을\s*(선물|공급|채우)")
+UNSUPPORTED_SENSORY = re.compile(r"스며|흡수|침투|피부\s*속|수분을\s*선물")
 
 
 def grounding_notes(text: str, request: GenerateRequest) -> list[str]:

@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "selection_note": "초기 추천 기능을 위한 10개 성분·성분군. 사용 빈도 순위에 대한 통계 표본은 아님.",
-  "usage": "역할·표현 설계 참고. 성분 연구는 자사 완제품 효능 입증이나 광고 허가를 의미하지 않음.",
+  "usage": "역할·표현 설계 참고. 성분 연구는 자사 완제품 효능 입증이나 광고 허가를 의미하지 않음. benefit_phrases는 성분 설명·결과감 표현 예시이며 수치·기간·장벽·진정 주장을 더하지 않는다.",
   "cards": [
     {
       "ingredient_id": "hyaluronic_acid",
@@ -43,7 +43,12 @@
         "수치·기간·비교우위",
         "장벽·붉은기 등 구체적 개선 주장"
       ],
-      "functional_gate": null
+      "functional_gate": null,
+      "benefit_phrases": [
+        "수분을 끌어당겨 머금는 성분",
+        "당기는 피부에 수분을 채워 촉촉하게",
+        "세안 직후 비어 있는 수분을 채우는 첫 단계"
+      ]
     },
     {
       "ingredient_id": "panthenol",
@@ -79,7 +84,12 @@
         "수치·기간·비교우위",
         "장벽·붉은기 등 구체적 개선 주장"
       ],
-      "functional_gate": null
+      "functional_gate": null,
+      "benefit_phrases": [
+        "건조해진 피부를 편안하게 가꾸는",
+        "보습감을 더해 피부를 부드럽게",
+        "거칠어진 피부결을 촉촉하게 정돈"
+      ]
     },
     {
       "ingredient_id": "retinol",
@@ -113,7 +123,11 @@
         "수치·기간·비교우위",
         "장벽·붉은기 등 구체적 개선 주장"
       ],
-      "functional_gate": "주름 개선"
+      "functional_gate": "주름 개선",
+      "benefit_phrases": [
+        "비타민A계 성분을 담은 피부결 케어",
+        "꾸준히 가꾸는 매끄러운 피부결"
+      ]
     },
     {
       "ingredient_id": "niacinamide",
@@ -149,7 +163,11 @@
         "수치·기간·비교우위",
         "장벽·붉은기 등 구체적 개선 주장"
       ],
-      "functional_gate": "미백"
+      "functional_gate": "미백",
+      "benefit_phrases": [
+        "비타민B3계 성분을 담은 데일리 케어",
+        "정돈된 피부 인상을 위한"
+      ]
     },
     {
       "ingredient_id": "pdrn",
@@ -189,7 +207,10 @@
         "수치·기간·비교우위",
         "장벽·붉은기 등 구체적 개선 주장"
       ],
-      "functional_gate": null
+      "functional_gate": null,
+      "benefit_phrases": [
+        "확인된 원료명을 담은 데일리 케어"
+      ]
     },
     {
       "ingredient_id": "glycerin",
@@ -224,7 +245,11 @@
         "수치·기간·비교우위",
         "장벽·붉은기 등 구체적 개선 주장"
       ],
-      "functional_gate": null
+      "functional_gate": null,
+      "benefit_phrases": [
+        "수분을 붙잡아 두는 보습 성분",
+        "건조한 피부에 촉촉함을 더하는"
+      ]
     },
     {
       "ingredient_id": "ceramides",
@@ -268,7 +293,11 @@
         "수치·기간·비교우위",
         "장벽·붉은기 등 구체적 개선 주장"
       ],
-      "functional_gate": null
+      "functional_gate": null,
+      "benefit_phrases": [
+        "피부 지질과 닮은 보습 성분",
+        "건조한 피부를 촉촉하게 감싸 가꾸는"
+      ]
     },
     {
       "ingredient_id": "squalane",
@@ -302,7 +331,11 @@
         "수치·기간·비교우위",
         "장벽·붉은기 등 구체적 개선 주장"
       ],
-      "functional_gate": null
+      "functional_gate": null,
+      "benefit_phrases": [
+        "피부를 부드럽게 감싸는 오일 성분",
+        "건조해 거칠어진 피부를 유연하게"
+      ]
     },
     {
       "ingredient_id": "adenosine",
@@ -335,7 +368,10 @@
         "수치·기간·비교우위",
         "장벽·붉은기 등 구체적 개선 주장"
       ],
-      "functional_gate": "주름 개선"
+      "functional_gate": "주름 개선",
+      "benefit_phrases": [
+        "꾸준히 가꾸는 탄탄해 보이는 피부 인상"
+      ]
     },
     {
       "ingredient_id": "centella",
@@ -376,7 +412,11 @@
         "수치·기간·비교우위",
         "장벽·붉은기 등 구체적 개선 주장"
       ],
-      "functional_gate": null
+      "functional_gate": null,
+      "benefit_phrases": [
+        "건조해진 피부를 편안하게 가꾸는",
+        "촉촉하고 차분한 마무리감"
+      ]
     }
   ]
 }

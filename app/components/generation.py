@@ -2,7 +2,8 @@
 import streamlit as st
 
 
-def render_generation(response: dict) -> None:
+def render_generation(response: dict, on_select=None, select_label: str = "이 문구를 매출 시나리오에 사용") -> None:
+    """on_select(index) 를 주면 검토를 통과한 후보마다 선택 버튼을 단다 (광고문 생성 → 예상 매출 연결)."""
     if response.get("mock"):
         st.info("디자인 확인용 데모 결과입니다. 실제 AI 생성·검토 결과가 아닙니다.")
     for warning in response.get("warnings", []):
@@ -19,6 +20,9 @@ def render_generation(response: dict) -> None:
             st.write(candidate["evidence_note"])
         if status == "검토통과":
             st.code(candidate["text"] + ("\n\n" + candidate["evidence_note"] if candidate.get("evidence_note") else ""), language=None)
+            if on_select and st.button(f"후보 {index} · {select_label}", key=f"select_generated_{index - 1}",
+                                       type="primary", icon=":material/trending_up:"):
+                on_select(index - 1)
         else:
             with st.expander("확인이 필요한 초안"):
                 st.write(candidate["text"])

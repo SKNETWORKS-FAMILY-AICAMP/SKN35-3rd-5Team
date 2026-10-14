@@ -3,11 +3,12 @@ import re
 
 import streamlit as st
 
-from app.components.context import current
+from app.components.context import current, register_product
 from app.components.generation import render_generation
 from app.components.ingredient_roles import render_ingredient_roles
 from app.services import backend, generation_results
 from cosmetic_agent.generation.creative import creative_catalog
+from cosmetic_agent.market_reference import form_of
 
 st.title("광고문 생성")
 st.caption("원하는 제품과 광고 방향을 말해주세요. 성분을 몰라도 초안부터 만들고, 규정과 확인된 제품 근거로 검토합니다.")
@@ -58,13 +59,31 @@ if submitted:
         except backend.BackendError as error:
             st.error(error.message)
 saved = st.session_state.get("bw_generation")
+
+
+def use_in_forecast(index: int) -> None:
+    """선택한 후보를 예상 매출 시나리오 3번에 연결한다.
+    내 제품이면 그 제품 기록에, 초안이면 입력한 제품 정보로 내 제품을 만들어 연결한다."""
+    target = product
+    if not use_project:
+        drafts = st.session_state.setdefault("bw_generation_drafts", {})
+        key = (product.get("name"), product.get("category"), product.get("functional_type"), tuple(payload["ingredients"]))
+        existing = next((p for p in st.session_state.get("bw_custom_products", []) if p["product_id"] == drafts.get(key)), None)
+        target = existing or register_product({
+            "name": product.get("name") or "나의 화장품", "category": product.get("category", "일반"),
+            "functional_type": product.get("functional_type"), "key_ingredients": payload["ingredients"],
+            "form": form_of(product.get("name") or ""), "owned_evidence": [],
+        })
+        drafts[key] = target["product_id"]
+        st.session_state["bw_pid"] = target["product_id"]
+    generation_results.save(target, saved["response"], saved["payload"])
+    generation_results.choose(target, index)
+    st.switch_page(st.session_state["bw_pages"]["forecast"])
+
+
 if saved and saved["payload"] == payload:
-    render_generation(saved["response"])
-    candidates = saved["response"].get("candidates", [])
-    if use_project and candidates and saved["response"].get("status") == "생성완료":
-        pick = st.selectbox("매출 시나리오에 쓸 후보", range(len(candidates)), format_func=lambda i: f"후보 {i + 1}")
-        if st.button("이 문구를 매출 시나리오에 사용", icon=":material/trending_up:"):
-            generation_results.choose(product, pick)
-            st.switch_page(st.session_state["bw_pages"]["forecast"])
+    render_generation(saved["response"], on_select=use_in_forecast)
+    if not use_project and saved["response"].get("candidates"):
+        st.caption("선택하면 입력한 제품명·구분·성분으로 왼쪽 「내 제품」에 제품이 만들어지고, 예상 매출 시나리오에서 비슷한 시장 제품과 비교합니다.")
 elif saved:
     st.info("입력 또는 검토 기준이 바뀌었습니다. 다시 생성하면 현재 기준으로 검토합니다.")

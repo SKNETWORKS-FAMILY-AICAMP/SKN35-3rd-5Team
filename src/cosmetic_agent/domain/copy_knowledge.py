@@ -137,6 +137,8 @@ def sensory_phrases(product: dict[str, Any] | None = None) -> list[str]:
         makeup = bool(re.search(r"쿠션|파운데이션|팩트|립|틴트|색조|베이스", name))
         out = [t for t in out if (hair or not re.search(r"모발|두피|머릿결", t)) and (makeup or "색조" not in t)
                and (not hair or not re.search(r"피부톤|피부로", t))]
+    # 진정은 실증 없이 쓰지 않는다 (준호 '일반 화장품 효능 어휘' 기준과 맞춤)
+    out = [t for t in out if "진정" not in t]
     return list(dict.fromkeys(out))
 
 
