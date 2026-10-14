@@ -22,6 +22,7 @@ class ProductCard(BaseModel):
     name: RequiredText
     category: Literal["일반", "기능성"]
     functional_type: Optional[str] = None
+    key_ingredients: list[str] = Field(default_factory=list, description="주요 성분 (예: 나이아신아마이드, 판테놀)")
     owned_evidence: list[OwnedEvidence] = Field(default_factory=list)
 
 
