@@ -4,14 +4,19 @@ from typing import Any
 
 from ..domain.rules import RuleEngine
 from ..domain.verifier import CopyVerifier
+from ..market_reference import ingredient_groups
 from ..models.copy_generator import CopyGenerator
 from ..rag.hybrid import HybridRetriever
 from ..rag.query_rewriter import QueryRewriter
+from .ingredients import ingredient_profiles, ingredient_prompt
+from .market import market_prompt, market_references
 from .state import AdGenerationState
 
 
 def parse_generation_node(state: AdGenerationState) -> dict[str, Any]:
-    return {"query_retry": 0, "generation_retry": 0, "warnings": []}
+    return {"query_retry": 0, "generation_retry": 0, "warnings": [],
+            "market_references": market_references(state["product"]),
+            "ingredient_profiles": ingredient_profiles(state["product"])}
 
 
 def build_generation_query_node(
@@ -65,6 +70,8 @@ def generate_candidates_node(
             keywords=state["keywords"],
             evidence_text=state.get("evidence_text", ""),
             retry_note=" / ".join(notes) if notes else None,
+            market_reference_text=market_prompt(state.get("market_references", [])),
+            ingredient_reference_text=ingredient_prompt(state.get("ingredient_profiles", [])),
         )
         return {"drafts": drafts, "generation_error": ""}
     except Exception as error:  # noqa: BLE001 - 자격증명이나 외부 응답 본문은 노출하지 않는다
@@ -84,6 +91,19 @@ def verify_candidates_node(
     candidates: list[dict[str, Any]] = []
     rejected: list[str] = list(state.get("rejected_notes") or []) if not state.get("drafts") else []
     for draft in state.get("drafts", []):
+        allowed_ids = {r["reference_id"] for r in state.get("market_references", [])}
+        if set(draft.get("market_reference_ids", [])) - allowed_ids:
+            rejected.append("시장 참고 사례 ID가 제공된 자료와 일치하지 않습니다.")
+            continue
+        ingredient_ids = {p["reference_id"] for p in state.get("ingredient_profiles", [])}
+        if set(draft.get("ingredient_reference_ids", [])) - ingredient_ids:
+            rejected.append("성분 역할 참고 ID가 등록 성분 자료와 일치하지 않습니다.")
+            continue
+        declared = " ".join([product.get("name", ""), *product.get("key_ingredients", []), *product.get("ingredients", [])])
+        extra = ingredient_groups(draft.get("text", "")) - ingredient_groups(declared)
+        if extra:
+            rejected.append("우리 제품에서 확인되지 않은 성분 소구: " + ", ".join(sorted(extra)))
+            continue
         passed, note = verifier.verify_suggestion(
             draft.get("text", ""),
             product.get("owned_evidence", []),

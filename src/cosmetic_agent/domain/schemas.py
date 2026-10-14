@@ -30,6 +30,7 @@ class ProductCard(BaseModel):
     owned_evidence: list[OwnedEvidence] = Field(default_factory=list)
     ingredients: list[str] = Field(default_factory=list, description="제공된 전성분명. 효능 시험 근거와 구분")
     ingredient_source: Optional[str] = None
+    form: str | None = None
 
 
 class Citation(BaseModel):
@@ -127,6 +128,10 @@ class GeneratedCandidate(BaseModel):
     cited_ids: list[str] = Field(default_factory=list)
     verified: bool = True
     verify_note: str = "검증 통과"
+    market_reference_ids: list[str] = Field(default_factory=list)
+    market_application: str = ""
+    ingredient_reference_ids: list[str] = Field(default_factory=list)
+    ingredient_application: str = ""
 
 
 class GenerateResponse(BaseModel):
@@ -138,3 +143,5 @@ class GenerateResponse(BaseModel):
     warnings: list[str] = Field(default_factory=list)
     timing: ExecutionTiming
     mock: bool = False
+    market_references: list[dict] = Field(default_factory=list)
+    ingredient_profiles: list[dict] = Field(default_factory=list)

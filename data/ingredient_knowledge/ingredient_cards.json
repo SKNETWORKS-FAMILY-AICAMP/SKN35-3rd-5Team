@@ -1,0 +1,382 @@
+{
+  "version": "1.0",
+  "selection_note": "초기 추천 기능을 위한 10개 성분·성분군. 사용 빈도 순위에 대한 통계 표본은 아님.",
+  "usage": "역할·표현 설계 참고. 성분 연구는 자사 완제품 효능 입증이나 광고 허가를 의미하지 않음.",
+  "cards": [
+    {
+      "ingredient_id": "hyaluronic_acid",
+      "name": "히알루론산",
+      "aliases": [
+        "히알루론산",
+        "하이알루로닉애씨드",
+        "소듐하이알루로네이트",
+        "소듐히알루로네이트",
+        "하이드롤라이즈드하이알루로닉애씨드",
+        "하이드롤라이즈드소듐하이알루로네이트",
+        "소듐아세틸레이티드하이알루로네이트",
+        "포타슘하이알루로네이트",
+        "Hyaluronic Acid",
+        "Sodium Hyaluronate"
+      ],
+      "roles": [
+        "수분 결합",
+        "보습 설계"
+      ],
+      "research_summary": "수분을 결합하는 성질과 특정 히알루론산 제형의 피부 수분 관련 연구가 있다.",
+      "evidence_kind": "사람 대상 특정 제형 연구",
+      "study_conditions": "76명 여성의 눈가에 서로 다른 분자량의 0.1% 제형을 60일 적용한 연구. 분자량·농도·제형이 다른 제품으로 결과를 전용하지 않는다.",
+      "copy_angles": [
+        "수분을 담은 데일리 케어",
+        "촉촉하게 가꾸는 루틴"
+      ],
+      "avoid_claims": [
+        "진피 침투",
+        "주름 제거",
+        "지속시간·개선율 확정"
+      ],
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/22052267/",
+      "source_title": "Efficacy of cream-based novel formulations of hyaluronic acid of different molecular weights in anti-wrinkle treatment",
+      "accessed_on": "2026-10-14",
+      "allowed_as_owned_evidence": false,
+      "allowed_as_regulatory_evidence": false,
+      "requires_product_evidence": [
+        "수치·기간·비교우위",
+        "장벽·붉은기 등 구체적 개선 주장"
+      ],
+      "functional_gate": null
+    },
+    {
+      "ingredient_id": "panthenol",
+      "name": "판테놀",
+      "aliases": [
+        "판테놀",
+        "Panthenol",
+        "Dexpanthenol",
+        "덱스판테놀"
+      ],
+      "roles": [
+        "보습",
+        "피부 컨디셔닝 연구"
+      ],
+      "research_summary": "덱스판테놀을 포함한 특정 제형에서 각질층 수분과 수분 손실 지표를 평가한 연구가 있다.",
+      "evidence_kind": "사람 대상 특정 제형 연구",
+      "study_conditions": "무작위 이중맹검 기제 대조 연구의 7일 도포 조건. 덱스판테놀 연구를 모든 판테놀 배합·농도에 동일 적용하지 않는다.",
+      "copy_angles": [
+        "편안한 데일리 보습 루틴",
+        "촉촉하게 가꾸는 케어"
+      ],
+      "avoid_claims": [
+        "상처 치료",
+        "피부 재생",
+        "붉은기·장벽 개선 확정"
+      ],
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/10965426/",
+      "source_title": "Effect of topically applied dexpanthenol on epidermal barrier function and stratum corneum hydration",
+      "accessed_on": "2026-10-14",
+      "allowed_as_owned_evidence": false,
+      "allowed_as_regulatory_evidence": false,
+      "requires_product_evidence": [
+        "수치·기간·비교우위",
+        "장벽·붉은기 등 구체적 개선 주장"
+      ],
+      "functional_gate": null
+    },
+    {
+      "ingredient_id": "retinol",
+      "name": "레티놀",
+      "aliases": [
+        "레티놀",
+        "Retinol"
+      ],
+      "roles": [
+        "비타민A계 성분",
+        "피부결·주름 관련 연구"
+      ],
+      "research_summary": "특정 레티놀 제형의 피부 노화 징후·잔주름 관련 임상 연구가 있다.",
+      "evidence_kind": "사람 대상 특정 제형 연구",
+      "study_conditions": "평균 87세 36명의 팔 피부에 0.4% 로션을 최대 주 3회·24주 적용. 레티날·레티노산·레티닐 에스터와 같은 물질로 취급하지 않는다.",
+      "copy_angles": [
+        "레티놀을 담은 피부결 케어 루틴",
+        "꾸준히 가꾸는 나이트 루틴"
+      ],
+      "avoid_claims": [
+        "주름 삭제",
+        "콜라겐 생성 보장",
+        "시술 대체"
+      ],
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/17515510/",
+      "source_title": "Improvement of naturally aged skin with vitamin A (retinol)",
+      "accessed_on": "2026-10-14",
+      "allowed_as_owned_evidence": false,
+      "allowed_as_regulatory_evidence": false,
+      "requires_product_evidence": [
+        "수치·기간·비교우위",
+        "장벽·붉은기 등 구체적 개선 주장"
+      ],
+      "functional_gate": "주름 개선"
+    },
+    {
+      "ingredient_id": "niacinamide",
+      "name": "나이아신아마이드",
+      "aliases": [
+        "나이아신아마이드",
+        "Niacinamide",
+        "Nicotinamide",
+        "니코틴아마이드"
+      ],
+      "roles": [
+        "비타민B3계 성분",
+        "피부톤·피부 외관 관련 연구"
+      ],
+      "research_summary": "특정 나이아신아마이드 제형에서 피부톤 및 노화 외관 지표를 평가한 연구가 있다.",
+      "evidence_kind": "사람 대상 특정 제형 연구",
+      "study_conditions": "여성 50명, 5% 제형과 기제의 얼굴 반쪽 비교·12주·하루 두 번 조건. 이 연구만으로 자사 미백 효능이나 시험 수치를 승인하지 않는다.",
+      "copy_angles": [
+        "나이아신아마이드를 담은 데일리 케어",
+        "맑고 정돈된 피부 인상을 위한 루틴"
+      ],
+      "avoid_claims": [
+        "기미 제거",
+        "미백 효과 자동 인정",
+        "색소 치료"
+      ],
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/16029679/",
+      "source_title": "Niacinamide: A B vitamin that improves aging facial skin appearance",
+      "accessed_on": "2026-10-14",
+      "allowed_as_owned_evidence": false,
+      "allowed_as_regulatory_evidence": false,
+      "requires_product_evidence": [
+        "수치·기간·비교우위",
+        "장벽·붉은기 등 구체적 개선 주장"
+      ],
+      "functional_gate": "미백"
+    },
+    {
+      "ingredient_id": "pdrn",
+      "name": "PDRN",
+      "aliases": [
+        "PDRN",
+        "피디알엔",
+        "Polydeoxyribonucleotide",
+        "소듐디엔에이",
+        "Sodium DNA",
+        "Hydrolyzed DNA",
+        "하이드롤라이즈드디엔에이"
+      ],
+      "roles": [
+        "원료 정체성 확인",
+        "연구 조건 구분"
+      ],
+      "research_summary": "확인한 연구는 PDRN·비타민C·나이아신아마이드 복합액을 미세침으로 전달한 동물 모델이다. 일반 도포 화장품의 독립 효능 근거로 쓰지 않는다.",
+      "evidence_kind": "동물·세포 / 복합 성분 / 전달 보조 조건",
+      "study_conditions": "UV-B 동물 모델과 미세침 전달 조건. PN·PDRN을 구분하고 Sodium DNA·Hydrolyzed DNA 표기만으로 분자량·순도·PDRN 동일성을 확정하지 않는다.",
+      "copy_angles": [
+        "확인된 원료명을 중심으로 소개",
+        "피부를 가꾸는 데일리 루틴"
+      ],
+      "avoid_claims": [
+        "연어주사 효과",
+        "피부 재생",
+        "진피 전달",
+        "콜라겐 생성·탄력 개선 보장"
+      ],
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/35209068/",
+      "source_title": "A Mixture of Topical Forms of Polydeoxyribonucleotide, Vitamin C, and Niacinamide Attenuated Skin Pigmentation and Increased Skin Elasticity by Modulating Nuclear Factor Erythroid 2-like 2",
+      "accessed_on": "2026-10-14",
+      "allowed_as_owned_evidence": false,
+      "allowed_as_regulatory_evidence": false,
+      "requires_product_evidence": [
+        "수치·기간·비교우위",
+        "장벽·붉은기 등 구체적 개선 주장"
+      ],
+      "functional_gate": null
+    },
+    {
+      "ingredient_id": "glycerin",
+      "name": "글리세린",
+      "aliases": [
+        "글리세린",
+        "Glycerin",
+        "Glycerol"
+      ],
+      "roles": [
+        "습윤제",
+        "보습 설계"
+      ],
+      "research_summary": "수분을 끌어당기는 습윤제로 사용되며 특정 제형에서 피부 수분 증가를 평가했다.",
+      "evidence_kind": "사람 대상 특정 제형 연구",
+      "study_conditions": "건강한 성인 17명, 20% 크림·10일 기제 대조 연구. 수분 지표와 달리 TEWL·자극 민감도 변화는 확인하지 못했다.",
+      "copy_angles": [
+        "일상 속 촉촉한 보습 케어",
+        "수분을 담은 베이직 루틴"
+      ],
+      "avoid_claims": [
+        "장벽 복구 보장",
+        "자극 차단",
+        "질병 치료"
+      ],
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/18498456/",
+      "source_title": "The influence of a cream containing 20% glycerin and its vehicle on skin barrier properties",
+      "accessed_on": "2026-10-14",
+      "allowed_as_owned_evidence": false,
+      "allowed_as_regulatory_evidence": false,
+      "requires_product_evidence": [
+        "수치·기간·비교우위",
+        "장벽·붉은기 등 구체적 개선 주장"
+      ],
+      "functional_gate": null
+    },
+    {
+      "ingredient_id": "ceramides",
+      "name": "세라마이드",
+      "aliases": [
+        "세라마이드",
+        "세라마이드엔피",
+        "세라마이드NP",
+        "세라마이드에이피",
+        "세라마이드이오피",
+        "세라마이드엔에스",
+        "세라마이드엔지",
+        "Ceramide NP",
+        "Ceramide AP",
+        "Ceramide EOP",
+        "Ceramide NS",
+        "Ceramide NG"
+      ],
+      "roles": [
+        "피부 지질 관련 성분군",
+        "장벽·보습 설계 연구"
+      ],
+      "research_summary": "특정 세라마이드 복합 보습 제형의 피부 수분 및 각질층 지질을 평가한 연구가 있다.",
+      "evidence_kind": "사람 대상 복합 제형 연구",
+      "study_conditions": "건조한 다리 피부의 무작위 평가자 맹검 분할 적용 연구. 세라마이드 종류·지질 배합·제형 차이를 유지하며 단일 원료의 독립 효과로 해석하지 않는다.",
+      "copy_angles": [
+        "세라마이드를 담은 보습 루틴",
+        "건조한 피부를 촉촉하게 가꾸는 케어"
+      ],
+      "avoid_claims": [
+        "손상 장벽 완전 복구",
+        "아토피 치료",
+        "장벽 개선율 자동 부여"
+      ],
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/32272513/",
+      "source_title": "The Effect of a Ceramide-Containing Product on Stratum Corneum Lipid Levels in Dry Legs",
+      "accessed_on": "2026-10-14",
+      "allowed_as_owned_evidence": false,
+      "allowed_as_regulatory_evidence": false,
+      "requires_product_evidence": [
+        "수치·기간·비교우위",
+        "장벽·붉은기 등 구체적 개선 주장"
+      ],
+      "functional_gate": null
+    },
+    {
+      "ingredient_id": "squalane",
+      "name": "스쿠알란",
+      "aliases": [
+        "스쿠알란",
+        "Squalane"
+      ],
+      "roles": [
+        "에몰리언트",
+        "피부 윤활·유연화"
+      ],
+      "research_summary": "화장품에서 피부를 부드럽게 하는 에몰리언트·윤활 용도로 사용된다.",
+      "evidence_kind": "성분 평가기관 용도 자료",
+      "study_conditions": "CIR 성분 평가 보고서의 화장품 용도 설명. 안전성 평가를 자사 제품의 보습 지속·장벽 개선 임상으로 바꾸지 않는다. Squalene(스쿠알렌)과 구분한다.",
+      "copy_angles": [
+        "부드럽게 감싸는 보습 루틴",
+        "유연한 피부결을 위한 케어"
+      ],
+      "avoid_claims": [
+        "무조건 무자극",
+        "모공 막힘 없음 보장",
+        "장벽 개선 수치"
+      ],
+      "source_url": "https://cir-reports.cir-safety.org/view-attachment/?id=a9f0cc9e-8d74-ec11-8943-0022482f06a6",
+      "source_title": "Final Report on the Safety Assessment of Squalane and Squalene",
+      "accessed_on": "2026-10-14",
+      "allowed_as_owned_evidence": false,
+      "allowed_as_regulatory_evidence": false,
+      "requires_product_evidence": [
+        "수치·기간·비교우위",
+        "장벽·붉은기 등 구체적 개선 주장"
+      ],
+      "functional_gate": null
+    },
+    {
+      "ingredient_id": "adenosine",
+      "name": "아데노신",
+      "aliases": [
+        "아데노신",
+        "Adenosine"
+      ],
+      "roles": [
+        "주름 관련 제형 연구"
+      ],
+      "research_summary": "아데노신 함유 제형을 대상으로 눈가·미간 외관 지표를 평가한 연구가 있다.",
+      "evidence_kind": "사람 대상 특정 제형 연구",
+      "study_conditions": "45~65세 여성 126명, 아데노신 크림·필름·대조 제형, 하루 두 번·두 달 비교. 기능성 범위 및 자사 제품 시험 확인이 별도로 필요하다.",
+      "copy_angles": [
+        "아데노신을 담은 꾸준한 피부 관리",
+        "탄탄해 보이는 피부 인상을 위한 루틴"
+      ],
+      "avoid_claims": [
+        "주름 완전 제거",
+        "보톡스 대체",
+        "탈모 치료"
+      ],
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/18489289/",
+      "source_title": "Evaluation of anti-wrinkle efficacy of adenosine-containing products using the FOITS technique",
+      "accessed_on": "2026-10-14",
+      "allowed_as_owned_evidence": false,
+      "allowed_as_regulatory_evidence": false,
+      "requires_product_evidence": [
+        "수치·기간·비교우위",
+        "장벽·붉은기 등 구체적 개선 주장"
+      ],
+      "functional_gate": "주름 개선"
+    },
+    {
+      "ingredient_id": "centella",
+      "name": "병풀 성분군",
+      "aliases": [
+        "병풀",
+        "병풀추출물",
+        "병풀잎추출물",
+        "Centella Asiatica Extract",
+        "Centella Asiatica Leaf Extract",
+        "마데카소사이드",
+        "Madecassoside",
+        "아시아티코사이드",
+        "Asiaticoside"
+      ],
+      "roles": [
+        "보습·피부 컨디셔닝 연구",
+        "편안한 케어 설계"
+      ],
+      "research_summary": "특정 병풀추출물 제형의 수분·수분 손실 및 유발 자극 모델을 평가한 연구가 있다.",
+      "evidence_kind": "사람 대상 추출물 제형 연구",
+      "study_conditions": "25명, 2.5%·5% 추출물의 크림·하이드로겔, 하루 두 번·4주 조건. 마데카소사이드·아시아티코사이드는 관련 분자이나 추출물 전체와 같은 물질·효능으로 보지 않는다.",
+      "copy_angles": [
+        "병풀 성분을 담은 편안한 케어",
+        "차분하게 마무리하는 데일리 루틴"
+      ],
+      "avoid_claims": [
+        "항염·상처 치료",
+        "피부염 개선",
+        "무자극·붉은기 개선 보장"
+      ],
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/27168678/",
+      "source_title": "Moisturizing and Antiinflammatory Properties of Cosmetic Formulations Containing Centella asiatica Extract",
+      "accessed_on": "2026-10-14",
+      "allowed_as_owned_evidence": false,
+      "allowed_as_regulatory_evidence": false,
+      "requires_product_evidence": [
+        "수치·기간·비교우위",
+        "장벽·붉은기 등 구체적 개선 주장"
+      ],
+      "functional_gate": null
+    }
+  ]
+}

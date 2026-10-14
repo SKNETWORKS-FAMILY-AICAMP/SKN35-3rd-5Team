@@ -28,6 +28,7 @@ from app.components.theme import inject_css
 from app.services.peer_market import (appeal_summary, candidate_copies, find_peers,
                                       judge_candidates, price_benchmark, product_profile, FORMS, form_of, load_market_products)
 from app.services.product_market import latest_review_pair
+from app.services import generation_results
 from app.services.revenue_scenario import DISPLAY_LABEL, build_scenario
 
 health = st.session_state["bw_health"]
@@ -257,37 +258,50 @@ with st.container(key="pagebody"):
     else:
         st.caption("비교할 시장 제품이 있어야 문구를 분석할 수 있어요.")
 
-    # ------------------------------------------------------------------ ③ 추천 문구
-    step("3", "우리 제품에 쓸 최적 문구", "우리 제품의 성분 · 기능성 · 보유 실증으로만 후보를 만들고 규칙으로 다시 판정했어요.")
-    judged = judge_candidates(product, candidate_copies(product), peers)
-    best = next((j for j in judged if j["recommended"]), None)
-    for j in judged:
-        label, color = LEVEL_TEXT.get(j["level"], LEVEL_TEXT[None])
-        border = "2px solid #0f5c55" if j["recommended"] else "1px solid #dedbd4"
-        crown = '<span style="color:#0f5c55;font-weight:700">★ 추천 · </span>' if j["recommended"] else ""
-        peer_note = (f"경쟁 제품 {j['peer_products']}개가 쓰는 유형 · 인기 상위 {j['peer_popular']}개"
-                     if peers else "경쟁 제품 비교 없음")
-        extra = f" · 다음 단계에 필요한 자료: {j['next_test']}" if j.get("next_test") else ""
-        st.html(
-            f'<div style="border:{border};border-radius:12px;padding:14px 18px;margin:8px 0;background:#fffdf8">'
-            f'<div style="font-size:12px;color:#667085">{crown}{escape(j["type"])} · {escape(peer_note)}</div>'
-            f'<div style="font-size:19px;font-weight:700;color:#182230;margin:4px 0">{escape(j["copy"])}</div>'
-            f'<div style="font-size:12px;color:#667085">{escape(j["why"])}{escape(extra)} · 규칙 판정 '
-            f'<b style="color:{ {"green": SAFE, "orange": CAUTION, "red": RISK}.get(color, FLAT) }">{escape(label)}</b></div></div>'
+    # ------------------------------------------------------------------ ③ 공통 생성 결과
+    step("3", "선택한 광고 문구", "광고문 생성에서 시장 사례·우리 제품 자료·규정을 참고한 결과를 그대로 사용합니다.")
+    saved, stale = generation_results.record(product)
+    best = None
+    if stale:
+        st.warning("제품 정보 또는 선택한 실증 자료가 바뀌었습니다. 광고문 생성에서 다시 생성해 주세요.")
+    elif saved and saved["response"].get("status") == "생성완료" and saved["response"].get("candidates"):
+        candidates = saved["response"]["candidates"]
+        index = st.selectbox(
+            "매출 시나리오에 사용할 생성 문구", range(len(candidates)),
+            index=saved["selected"],
+            format_func=lambda i: candidates[i]["text"],
+            key=f"fc_generated_{pid}_{saved['response']['request_id']}_{saved['selected']}",
         )
-    if not any(j["type"] == "효능 수치형" for j in judged):
-        st.caption("보유 실증(시험 수치)을 등록하면 ‘효능 수치형’ 후보가 추가돼요. 경쟁 상위 제품들이 가장 많이 쓰는 강한 표현이에요.")
+        generation_results.choose(product, index)
+        chosen = generation_results.selected(product)
+        best = {"copy": chosen["text"]}
+        st.write(chosen["text"])
+        st.caption(chosen.get("verify_note") or "생성 단계 검증 통과")
+        if chosen.get("market_application"):
+            st.write("시장 표현 반영: " + chosen["market_application"])
+        if chosen.get("ingredient_application"):
+            st.write("성분 역할 반영: " + chosen["ingredient_application"])
+        refs = {r["reference_id"]: r for r in saved["response"].get("market_references", [])}
+        for ref_id in chosen.get("market_reference_ids", []):
+            ref = refs.get(ref_id)
+            if ref:
+                st.caption(f"참고 {ref_id} · {ref['brand']} · {ref['copy_text']}")
+        st.caption("생성 조건: " + " · ".join(str(saved["conditions"].get(k, "")) for k in ("channel", "tone", "length")))
+    else:
+        st.info("이 제품으로 생성한 문구가 없습니다. 광고문 생성에서 후보를 만든 뒤 선택해 주세요.")
+    if st.button("광고문 생성으로 이동", key="fc_open_generation"):
+        st.switch_page(st.session_state["bw_pages"]["generate"])
 
     # ------------------------------------------------------------------ ④ 예상 매출
     step("4", "문구를 바꿨을 때의 매출 시나리오", "지금 쓰려는 문구(원문)와 추천 문구를 비교해요. " + DISPLAY_LABEL + ".")
     review = latest_review_pair(st.session_state.get("bw_threads"), pid)
-    default_orig = (review or {}).get("original") or f"바르는 순간 주름이 사라지는 {product['name']}"
+    default_orig = (review or {}).get("original") or ""
     c1, c2 = st.columns(2)
     with c1:
         original = st.text_area("지금 쓰려는 문구 (원문)", value=default_orig, height=80, key=f"fc_orig_{pid}",
                                 help="검토 대화에서 이 제품으로 검토한 문구가 있으면 그 문구가 먼저 들어와요")
     with c2:
-        recommended = st.text_area("추천 문구", value=best["copy"] if best else "", height=80,
+        recommended = st.text_area("선택한 생성 문구", value=best["copy"] if best else "", height=80, disabled=True,
                                    key=f"fc_rec_{pid}_{best['copy'] if best else ''}")
 
     bench = price_benchmark(peers) if peers else None

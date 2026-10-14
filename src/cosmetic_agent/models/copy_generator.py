@@ -18,6 +18,10 @@ class GeneratedDraft(BaseModel):
     rationale: str = ""
     used_evidence: list[str] = Field(default_factory=list)
     cited_ids: list[str] = Field(default_factory=list)
+    market_reference_ids: list[str] = Field(default_factory=list)
+    market_application: str = ""
+    ingredient_reference_ids: list[str] = Field(default_factory=list)
+    ingredient_application: str = ""
 
 
 class GenerationOutput(BaseModel):
