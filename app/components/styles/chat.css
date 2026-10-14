@@ -115,7 +115,9 @@
     background-color: #fff8ec; background-size: 52px 52px; background-position: center; background-repeat: no-repeat;
     border: 2px solid #fffefa; box-shadow: 0 4px 20px #283e2f24;
     transition: transform .16s ease, box-shadow .16s ease;
+    cursor: grab; touch-action: none; user-select: none;
 }
+.st-key-chat_launcher[data-bw-dragging="true"] [data-testid="stPopoverButton"] { cursor: grabbing; transform: none; transition: none; }
 .st-key-chat_launcher [data-testid="stPopoverButton"]:hover { background-color: #fff8ec; transform: translateY(-2px); box-shadow: 0 6px 24px #283e2f33; }
 .st-key-chat_launcher [data-testid="stPopoverButton"] p { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .st-key-chat_launcher [data-testid="stPopoverButton"] [data-testid="stIconMaterial"],
@@ -124,7 +126,22 @@
     padding: 0; background: #fffefa; border-radius: 20px; border: 1px solid #dce3df;
     box-shadow: 0 12px 48px #203c2d26; overflow: auto;
 }
+[data-testid="stPopoverBody"][data-bw-chat-positioned="true"]:has(.st-key-chat_mini) {
+    position: fixed !important; left: var(--bw-chat-popup-x) !important; top: var(--bw-chat-popup-y) !important;
+    transform: none !important; z-index: 1000000;
+    max-height: var(--bw-chat-popup-max-height) !important; max-width: var(--bw-chat-popup-max-width) !important;
+}
 .st-key-chat_mini { width: 360px; max-width: calc(100vw - 64px); gap: 0 !important; }
+.st-key-chat_mini > [data-testid="stLayoutWrapper"]:has(> .st-key-chat_messages_mini) {
+    height: var(--bw-chat-popup-messages-height, min(260px, max(80px, calc(var(--bw-chat-popup-max-height, 100dvh) - 184px)))); flex: none;
+}
+.st-key-chat_mini .st-key-chat_messages_mini { height: 100% !important; min-height: 0; max-height: none; }
+.st-key-chat_header_mini [data-testid="stHorizontalBlock"],
+.st-key-chat_mini [data-testid="stForm"] [data-testid="stHorizontalBlock"] { flex-wrap: nowrap; }
+.st-key-chat_header_mini [data-testid="stColumn"]:first-child,
+.st-key-chat_mini [data-testid="stForm"] [data-testid="stColumn"]:first-child { flex: 1 1 0; min-width: 0; width: auto; }
+.st-key-chat_header_mini [data-testid="stColumn"]:last-child,
+.st-key-chat_mini [data-testid="stForm"] [data-testid="stColumn"]:last-child { flex: 0 0 44px; min-width: 0; width: 44px; }
 .st-key-chat_mini .bw-chat-context { padding: 4px 18px 12px; }
 .st-key-chat_mini [data-testid="stForm"] { border: none; border-radius: 0; padding: 14px 16px; background: #fffefa; }
 .st-key-chat_mini [data-testid="stTextInputRootElement"] { border-radius: 14px; background: #f3f6f2; border-color: #e0e6df; }

@@ -1,14 +1,13 @@
 """
 [app/components/sidebar.py]
-왼쪽 사이드바 — 브랜드 · 새 대화 · 작업(화면 이동) · 프로젝트(제품·실증 자료) · 데이터 상태.
+왼쪽 사이드바 — 브랜드 · 작업(화면 이동) · 프로젝트(제품·실증 자료) · 데이터 상태.
 (최근 대화 목록은 화면을 단순하게 하려고 뺐다. 대화 기록 기능(threads)은 그대로 있다.)
 """
 from __future__ import annotations
 
 import streamlit as st
 
-from app.components import threads
-from app.components.brand import lockup_img
+from app.components.brand import lockup_uri
 from app.components.context import render_project
 from app.components.layout import esc, html
 
@@ -16,14 +15,11 @@ def _section(title: str, right: str = "") -> None:
     html(f'<div class="bw-side-h"><span>{esc(title)}</span>{right}</div>')
 
 
-def render_sidebar(pages: dict[str, st.Page], health: dict) -> None:
+def render_sidebar(pages: dict[str, st.Page], health: dict, *, home: st.Page) -> None:
     """pages: {"review": Page, "generate": Page, "bulk": Page, "library": Page}."""
     with st.sidebar:
-        html(f'<div class="bw-brand">{lockup_img(36)}</div>')
-
-        if st.button("새 대화", icon=":material/edit_square:", key="new_review", width="stretch"):
-            threads.start_new()
-            st.switch_page(pages["review"])
+        with st.container(key="brand_home"):
+            st.page_link(home, label=f"![Beaurette]({lockup_uri()})", icon="", help="첫 화면으로 이동", width="content")
 
         _section("작업")
         with st.container(key="nav", gap=None):
