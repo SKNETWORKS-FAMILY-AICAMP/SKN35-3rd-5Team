@@ -36,7 +36,11 @@
   --bw-accent-text: #1B4D3C;
   --bw-nav-on: #E6E1D5;
 
-  /* 상태 — 채도 낮춤. 면이 아니라 점·선·밑줄로 */
+  /* 상태 — 채도 낮춤. 면이 아니라 점·선·밑줄로.
+     통과(사용 가능 · 역검증 통과)는 포인트 색과 따로 둔다 — 홈은 포인트가 호박색이라 '실증 필요'(호박)와 겹치지 않게 숲색 그대로 */
+  --bw-pass: #1F5A47;
+  --bw-pass-soft: #E4ECE5;
+  --bw-pass-text: #1B4D3C;
   --bw-risk: #A8471F;
   --bw-risk-bg: #F6E8DF;
   --bw-risk-line: #EBCDBC;
@@ -125,7 +129,7 @@
 .bw-tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
 .bw-tag.is-risk    { color: var(--bw-risk);        background: var(--bw-risk-bg); }
 .bw-tag.is-caution { color: var(--bw-caution);     background: var(--bw-caution-bg); }
-.bw-tag.is-pass    { color: var(--bw-accent-text); background: var(--bw-accent-soft); }
+.bw-tag.is-pass    { color: var(--bw-pass-text); background: var(--bw-pass-soft); }
 .bw-tag.is-hold    { color: var(--bw-hold);        background: var(--bw-hold-bg); }
 .bw-tag.is-plain   { color: var(--bw-ink-2);       background: var(--bw-subtle); }
 .bw-tag.is-sm { height: 22px; padding: 0 7px 0 6px; gap: 5px; }
@@ -263,14 +267,14 @@
 }
 .bw-quote.is-risk    { border-left-color: var(--bw-risk-under); }
 .bw-quote.is-caution { border-left-color: var(--bw-caution-under); }
-.bw-quote.is-pass    { border-left-color: var(--bw-accent); }
+.bw-quote.is-pass    { border-left-color: var(--bw-pass); }
 .bw-quote.is-hold    { border-left-color: var(--bw-hold-line); }
 /* 밑줄은 배경으로 긋는다 — 도착할 때 교정 펜처럼 왼쪽→오른쪽으로 그어지게 (background-size 0 → 100%) */
 .bw-mark { --bw-ul: transparent; background-image: linear-gradient(var(--bw-ul), var(--bw-ul)); background-repeat: no-repeat;
   background-position: 0 100%; background-size: 100% 2px; padding-bottom: 2px; }
 .bw-mark.is-risk { color: var(--bw-risk); --bw-ul: var(--bw-risk-under); }
 .bw-mark.is-caution { --bw-ul: var(--bw-caution-under); }
-.bw-mark.is-verified { background-image: repeating-linear-gradient(90deg, var(--bw-accent) 0 2px, transparent 2px 4px); }
+.bw-mark.is-verified { background-image: repeating-linear-gradient(90deg, var(--bw-pass) 0 2px, transparent 2px 4px); }
 
 /* 문제 표현 */
 .bw-issues > li { padding: 10px 0 11px; border-top: 1px dashed var(--bw-line); }
@@ -611,7 +615,7 @@ article.bw-ai[data-live="1"] [data-cites]:focus-visible { outline: 2px solid var
   background-position: 0 100%; background-size: 100% 2px; padding-bottom: 2px; }
 .bw-lc-mark.is-risk { --bw-ul: var(--bw-risk-under); }
 .bw-lc-mark.is-caution { --bw-ul: var(--bw-caution-under); }
-.bw-lc-mark.is-verified { background-image: repeating-linear-gradient(90deg, var(--bw-accent) 0 2px, transparent 2px 4px); }
+.bw-lc-mark.is-verified { background-image: repeating-linear-gradient(90deg, var(--bw-pass) 0 2px, transparent 2px 4px); }
 .bw-lc-sum { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0 0 8px; font-size: var(--fs-meta); line-height: 1.5; color: var(--bw-muted); }
 .bw-lc-sum.is-empty { display: none; }
 .bw-lc-sum .k { font-weight: 600; color: var(--bw-ink-2); }
@@ -619,7 +623,7 @@ article.bw-ai[data-live="1"] [data-cites]:focus-visible { outline: 2px solid var
 .bw-lc-sum .n::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .bw-lc-sum .n.is-risk { color: var(--bw-risk); }
 .bw-lc-sum .n.is-caution { color: var(--bw-caution); }
-.bw-lc-sum .n.is-verified, .bw-lc-sum .n.is-clear { color: var(--bw-accent-text); }
+.bw-lc-sum .n.is-verified, .bw-lc-sum .n.is-clear { color: var(--bw-pass-text); }
 .bw-lc-sum .w { color: var(--bw-ink-2); }
 .bw-lc-sum .w b { font-weight: 600; color: var(--bw-ink); }
 .bw-lc-sum .note { color: var(--bw-faint); }

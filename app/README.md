@@ -80,7 +80,8 @@ app/
     data_sources.py       data/ 원문(법령 XML · 관리지침 · 적발 사례 · 규칙 자산) 읽기
     contract.py           화면이 받는 데이터 모양(TypedDict)과 예시 응답
   static/                 글꼴(Pretendard · IBM Plex Mono · 홈용 Inter · Noto Sans KR, OFL) · 로고 · 캐릭터(rabbit-*.webp) · 홈의 검토 화면 캡처(landing/)
-                          landing/editorial-*.webp — 홈 화보 · 사진 띠 (AI 생성: ChatGPT 이미지 생성, 글자 · 로고 · 사람 없음)
+                          landing/editorial-*.webp — 홈 화보 · 사진 띠 · 마무리 띠 (AI 생성: ChatGPT 이미지 생성, 글자 · 로고 · 사람 없음)
+                          landing/skin-*.webp — 홈 「피부에 닿는 문구」 실사 컷 (AI 생성 인물 — 실존 인물 아님, 화면에 'AI 생성' 표기)
                           brand/cursor-serum*.png — 홈 커서(세럼 스포이드, 직접 그림 32 · 64px)
 ```
 

@@ -29,7 +29,8 @@ from app.services.data_sources import case_title
 
 _LANDING_DIR = Path(__file__).resolve().parents[1] / "static" / "landing"
 
-SECTIONS = [("bw-demo", "검토 장면"), ("bw-problem", "문제"), ("bw-how", "검토 방식"), ("bw-features", "기능"), ("bw-sources", "근거 자료")]
+SECTIONS = [("bw-demo", "검토 장면"), ("bw-problem", "문제"), ("bw-how", "검토 방식"), ("bw-features", "기능"),
+            ("bw-forecast", "예상 매출"), ("bw-sources", "근거 자료")]
 
 # 히어로 예시 — views/review.py 의 시작 문구와 같다. 판정은 그때그때 Mock 엔진 결과를 쓴다
 DEMO_COPIES = [
@@ -127,8 +128,10 @@ def _photo(name: str) -> str:
 
 
 def _head(no: str, eyebrow: str, title_html: str, desc: str = "") -> str:
+    """섹션 머리 — no 가 비면 번호 없이 선만(번호 섹션 사이에 끼는 장)."""
     p = f"<p>{esc(desc)}</p>" if desc else ""
-    return (f'<div class="bw-h-sh rv"><div class="ey"><span class="no">{no}</span>{esc(eyebrow)}</div>'
+    mark = f'<span class="no">{no}</span>' if no else '<span class="no is-blank" aria-hidden="true"></span>'
+    return (f'<div class="bw-h-sh rv"><div class="ey">{mark}{esc(eyebrow)}</div>'
             f'{_display(title_html)}{p}</div>')
 
 
@@ -165,8 +168,8 @@ def hero_scene() -> str:
     (토끼는 2026-10-14 CEO "첫 화면에 토끼는 빼자, 난잡하다"로 뺐다.) 장식이라 화면 읽기에서는 뺀다."""
     motes = "".join(f'<i class="mote m{i}"></i>' for i in range(1, 6))
     return ('<div class="bw-h-scene" aria-hidden="true"><div class="ph">'
-            '<img class="photo" src="/app/static/landing/editorial-studio.webp" alt="">'
-            '<span class="stream"></span><i class="drop"></i><i class="drop d2"></i><i class="splash"></i><i class="splash d2"></i>'   # 흘러내리는 세럼 · 떨어지는 방울 · 바닥 물결
+            '<img class="photo" src="/app/static/landing/editorial-studio.webp?v=2" alt="">'
+            '<span class="stream"></span><i class="drop"></i><i class="drop d2"></i>'   # 흘러내리는 세럼 · 떨어지는 방울 · 바닥 물결
             f'<span class="glint"></span><span class="caustic"></span>{motes}'
             '</div></div>')
 
@@ -209,6 +212,33 @@ def photo_band(name: str, alt: str, caption: str) -> str:
     """잡지 펼침면 같은 전폭 사진 띠 — 화면에 들어오면 커튼처럼 열리고, 스크롤에 따라 사진이 천천히 움직인다."""
     return (f'<figure class="bw-h bw-h-photo rv" data-par><div class="img" role="img" aria-label="{esc(alt)}" '
             f'style="background-image:url({_photo(name)})"></div><figcaption>{esc(caption)}</figcaption></figure>')
+
+
+# 피부에 바르는 실사 컷(AI 생성) → 그 장면에 따라붙는 표현(금지 표현 사전 id). 왼쪽 세로 한 장 · 오른쪽 가로 두 장
+_SKIN = [
+    ("neck", "목선에 흰 크림을 손끝으로 펴 바르는 모습", "B061"),
+    ("cheek", "눈을 감고 볼에 흰 크림을 펴 바르는 모습", "B030"),
+    ("hand", "손등 위로 유리 스포이드에서 세럼 한 방울이 떨어지는 모습", "B032"),
+]
+
+
+def skin_spread(terms: list[dict]) -> str:
+    """피부에 닿는 문구 — 바르는 장면 사진마다 금지 표현 → 바꿔 쓸 표현(금지 표현 사전 term · fix_hint 그대로)."""
+    by_id = {t.get("id"): t for t in terms}
+    figs = []
+    for i, (name, alt, tid) in enumerate(_SKIN, 1):
+        t = by_id.get(tid)
+        chip = ""
+        if t and t.get("fix_hint"):
+            kind = (t.get("type") or "").replace("오인", " 오인")
+            chip = (f'<figcaption class="chip"><s>{esc(t["term"])}</s>{icon("arrow_forward", 14)}<b>{esc(t["fix_hint"])}</b>'
+                    f'<small>{esc(kind)} · 금지 표현 사전 {esc(tid)}</small></figcaption>')
+        figs.append(f'<figure class="f{i} rv"><div class="bw-h-pic" role="img" aria-label="{esc(alt)}" '
+                    f'style="background-image:url(/app/static/landing/skin-{name}.webp)"></div>{chip}</figure>')
+    return ('<section class="bw-h bw-h-skin" aria-label="피부에 닿는 문구">'
+            + _head("", "피부에 닿는 문구", "피부에 닿기 전에,<br><em>문구</em>부터 검토합니다",
+                    "바르는 장면마다 따라붙는 표현이 있습니다. 사진마다 그 표현이 금지 표현 사전에서 어떻게 바뀌는지 붙였습니다.")
+            + f'<div class="bw-h-skin-grid">{"".join(figs)}</div><p class="bw-h-credit">이미지 · AI 생성</p></section>')
 
 
 def demo_section(exs: list[dict], product_name: str, n_evidence: int) -> str:
@@ -288,6 +318,8 @@ def problem(cases: list[dict]) -> str:
         rows.append(f'<li class="rv"><span class="d">{esc(c.get("date", ""))}</span>'
                     f'<span class="t">{title}</span><span class="n">{n}{sub}</span></li>')
     return (f'<section id="bw-problem" class="bw-h bw-h-sec bw-h-ink">' + ticker(cases)
+            + photo_band("amber", "짙은 어둠 속 빛나는 호박색 구체 앞, 황동 선반 위에 놓인 호박색 유리 세럼 병과 크림 단지, 크림빛 난초 한 송이",
+                         "병이 아무리 고급스러워도 — 행정처분은 문구 한 줄에서 시작됩니다")
             + _head("02", "문제", "광고 문구 한 줄이<br><em>행정처분</em>으로 이어집니다",
                     f"식약처는 온라인 부당광고를 점검해 적발 결과를 발표합니다. 아래는 이 서비스가 근거로 쓰는 발표 {len(cases)}건입니다.")
             + f'<ul class="bw-h-cols">{cols}</ul>'
@@ -348,7 +380,77 @@ def features(ex: dict, pair: dict, rows: list[dict]) -> str:
             + f'<ul class="bw-h-features">{lis}</ul></section>')
 
 
-# ── 04 근거 자료 ────────────────────────────────────────────────────
+# ── 05 예상 매출 시나리오 ───────────────────────────────────────────
+# 팀원 화면(views/forecast.py · 사이드바 「근거 · 예측」)을 홈에서 소개한다 — 그 화면의 네 단계를 예시 제품의 실제 계산 결과로 펼친다.
+# 계산은 home.py 가 같은 서비스(peer_market · revenue_scenario)로 하고, 여기는 결과 dict → HTML 만.
+# 오르내림 표시는 그 화면의 규칙 그대로: 오르면 빨강 ▲ · 내리면 파랑 ▼ · 변화 없음 회색 ■.
+_LEVEL = {0: ("쓸 수 있음", "pass"), 1: ("근거 필요", "caution"), 2: ("쓰면 안 됨", "risk")}
+
+
+def _won(v: float) -> str:
+    v = abs(v)
+    return f"{v / 1e8:,.2f}억 원" if v >= 1e8 else f"{v / 1e4:,.0f}만 원" if v >= 1e4 else f"{v:,.0f}원"
+
+
+def _fc_side(cls: str, title: str, copy: str, scen: dict) -> str:
+    label, tone = _LEVEL.get(scen["inputs"]["level"], ("판단 보류", "hold"))
+    risk = scen["revenue_at_risk_if_unchanged"]
+    if risk["status"] == "no_violation":
+        amt, note = '<i class="flat" aria-label="변화 없음">■</i><b>없음</b>', "규칙상 처분 대상 표현이 없습니다"
+    elif risk["status"] == "needs_review":
+        amt, note = '<i class="flat" aria-label="변화 없음">■</i><b>개별 검토</b>', risk.get("note") or "처분표와 연결되지 않은 조항"
+    else:
+        upper = not (risk.get("amount_krw") or risk.get("estimate_krw"))
+        amount = risk.get("amount_krw") or risk.get("estimate_krw") or risk["upper_bound_krw"]
+        amt = (f'<i class="dn" aria-label="하락">▼</i><b>{"최대 " if upper else ""}{_won(amount["mid"])}</b>')
+        note = (f'{risk["condition"]} {risk["sanction"]} {risk["months"]}개월'
+                + (" · 모든 매출이 광고에서 온다고 가정한 최대" if upper else ""))
+    return (f'<div class="side {cls}"><span class="k">{esc(title)}</span><p class="q">{esc(copy)}</p>{tag(label, tone, small=True)}'
+            f'<div class="amt"><span class="l">적발되면 잃을 수 있는 매출</span>{amt}</div><p class="m">{esc(note)}</p></div>')
+
+
+def forecast(fc: dict) -> str:
+    """05 예상 매출 시나리오 — 비슷한 시장 제품 → 경쟁 문구 → 최적 문구 → 예상 매출(처분 위험 · 문구 교체 폭)."""
+    p, peers, bench, best = fc["product"], fc["peers"], fc["bench"], fc["best"]
+    before, after = fc["before"], fc["after"]
+    hard = next((r for r in sorted(fc["summary"], key=lambda r: -r["products"])
+                 if r["products"] and r["caution"] + r["risky"] > r["safe"]), None)
+    price_note = f" · 가격 {bench['min']:,}~{bench['max']:,}원" if bench else ""
+    steps = [
+        ("비슷한 시장 제품 찾기", f"{len(peers)}개", " · ".join(x["brand"] for x in peers[:5]) + price_note),
+        ("경쟁 제품 문구 분석", f"{hard['peers']}개 중 {hard['products']}개 제품" if hard else f"{len(fc['summary'])}개 유형",
+         f"「{hard['type']}」 문구를 쓰지만 수집 문구 대부분이 ‘근거 필요’ 판정" if hard else "문구 유형별 사용 현황과 규칙 판정"),
+        ("우리 제품 최적 문구", _LEVEL[best["level"]][0] if best["level"] in _LEVEL else "판단 보류", f"“{best['copy']}”"),
+        ("예상 매출", _won(before["monthly_revenue_krw"]["mid"]),
+         f"판매가 {p['price_krw']:,}원 × 월 {fc['units']['mid']:,}개(평소 가정) · 원문과 추천 문구를 나란히"),
+    ]
+    lis = "".join(f'<li><span class="node">{i}</span><div><h3>{esc(t)}</h3><b class="v">{esc(v)}</b><p>{esc(d)}</p></div></li>'
+                  for i, (t, v, d) in enumerate(steps, 1))
+    band = before["copy_change_band"]
+    pct, krw = band["change_magnitude_pct"], band["change_magnitude_krw"]
+    span = max(pct["p75"], 1)
+    bars = "".join(f'<i class="b{k}" style="--w:{pct[q] / span * 50:.1f}%"></i>' for k, q in ((3, "p75"), (2, "median"), (1, "p25")))
+    card = (
+        '<div class="bw-h-fc-card rv"><div class="bar"><span>예시 제품 · ' + esc(p["name"]) + '</span>'
+        '<span class="mono">' + esc(fc["label"]) + '</span></div>'
+        '<div class="cmp">' + _fc_side("is-before", "원문 그대로", fc["original"], before)
+        + _fc_side("is-after", "추천 문구로 바꾸면", best["copy"], after) + '</div>'
+        f'<div class="band"><div class="h"><span>문구를 바꾸면 매출이 움직일 수 있는 폭</span><span class="mono">보통 움직일 때</span></div>'
+        f'<div class="scale" aria-hidden="true">{bars}<i class="mid"></i></div>'
+        f'<div class="ends"><span class="dn">▼ −{pct["median"]}% · {_won(krw["median"])}</span>'
+        f'<span class="up">▲ +{pct["median"]}% · {_won(krw["median"])}</span></div>'
+        f'<p class="m">공개 A/B 실험 148건의 문구 효과 크기(조금 · 보통 · 많이 움직일 때 {pct["p25"]}% · {pct["median"]}% · {pct["p75"]}%)를 빌려 온 가정 범위입니다. '
+        '방향은 정해지지 않았고, 추천 문구가 매출을 올린다고 보장하지 않습니다.</p></div>'
+        f'<p class="note">판매량(월 {fc["units"]["low"]:,} · {fc["units"]["mid"]:,} · {fc["units"]["high"]:,}개) · 1차 위반 · 광고 기준은 예시 가정입니다. '
+        '예상 매출 화면에서 「예시로 해보기 · 비타민A 앰플」을 누르면 같은 계산을 직접 바꿔 볼 수 있습니다.</p></div>')
+    return ('<section id="bw-forecast" class="bw-h bw-h-sec">'
+            + _head("05", "예상 매출 시나리오", "문구 하나가<br><em>매출</em>을 얼마나 움직일까",
+                    "비슷한 시장 제품과 비교해 쓸 수 있는 가장 강한 문구를 고르고, 원문 그대로 적발되면 잃을 수 있는 매출과 "
+                    "문구를 바꿨을 때 움직일 수 있는 폭을 계산합니다. 아래는 예시 제품의 실제 계산 결과입니다.")
+            + f'<div class="bw-h-fc"><ol class="bw-h-fc-steps rv">{lis}</ol>{card}</div></section>')
+
+
+# ── 06 근거 자료 ────────────────────────────────────────────────────
 def sources(stats: dict, docs: list[dict]) -> str:
     kinds = stats.get("law_kinds") or {}
     kind_note = " · ".join(f"{k} {v}" for k, v in sorted(kinds.items(), key=lambda kv: kv[0] != "법령"))
@@ -368,7 +470,7 @@ def sources(stats: dict, docs: list[dict]) -> str:
         f'<p>{esc(" · ".join(x for x in (d.get("org", ""), d.get("version") or d.get("date") or "") if x))}</p></li>'
         for d in laws)
     return (f'<section id="bw-sources" class="bw-h bw-h-sec">'
-            + _head("05", "근거 자료", "답변의 근거는<br>이 <em>문서들</em>에서 찾습니다",
+            + _head("06", "근거 자료", "답변의 근거는<br>이 <em>문서들</em>에서 찾습니다",
                     "법령은 국가법령정보센터, 고시 · 지침 · 사례는 식약처 공개 자료에서 받았습니다.")
             + photo_band("documents", "숲색 · 테라코타 인덱스 탭이 붙은 서류 묶음과 만년필이 놓인 책상",
                          "법령 · 고시 · 지침 · 적발 사례 — 조항 단위로 나눠 색인했습니다")
@@ -376,6 +478,15 @@ def sources(stats: dict, docs: list[dict]) -> str:
 
 
 # ── 마지막 안내 · 푸터 ──────────────────────────────────────────────
+def closing() -> str:
+    """마무리 띠 — 짙은 바탕(잉크 띠와 같은 색 규칙), 왼쪽 한 줄 · 오른쪽 난초 접사(AI 생성)."""
+    return ('<section class="bw-h bw-h-ink bw-h-close" aria-label="마무리">'
+            + '<div class="txt">' + _head("", "Beaurette", "화려한 말보다<br><em>근거 있는 말</em>로",
+                                          "금지 표현은 걸러 내고, 가진 실증 자료로 쓸 수 있는 표현까지만 제안합니다.") + '</div>'
+            + '<figure class="pic rv"><div class="bw-h-pic" role="img" aria-label="어둠 속에서 가운데가 빛나는 숲색 난초 접사" '
+            f'style="background-image:url({_photo("orchid")})"></div><figcaption>이미지 · AI 생성</figcaption></figure></section>')
+
+
 def cta_text() -> str:
     return (f'<div class="bw-h bw-h-cta"><span class="pic">{_rabbit(136)}</span>'
             '<div>' + _display("검토할 문구가 있나요?") +
@@ -521,3 +632,194 @@ _MOTION_JS = """<script>
 </script>"""
 
 MOTION_SCRIPT = _MOTION_JS.replace("__SAY__", json.dumps(SAY, ensure_ascii=False))
+
+
+# ── 스포이드 방울 · 물결 ─────────────────────────────────────────────
+# 홈 커서(세럼 스포이드)의 끝에서 방울이 맺혀 떨어진다 — 누르면 한 방울, 사진 위에 멈춰 있으면 1.9초마다(한 번 멈출 때 4방울까지).
+# 사진(히어로 화보 · 사진 띠 · 피부 펼침면 · 마무리 띠)에 떨어지면 그 자리에서 물결이 퍼지고, 사진 위로 마우스를 움직이면 지나간 자리가 잔물결로 일렁인다.
+# 물결은 사진 위에 얹은 WebGL 캔버스가 그린다 — 물결이 있을 때만 그리고 보인다(평소엔 원래 사진 그대로).
+# 종이 바탕에 떨어지면 동그란 물결 테만 번진다. 마우스가 있는 기기에서만, 동작 줄이기면 아무것도 하지 않는다.
+# 정화기 때문에 스크립트 안에서 꺾쇠 바로 뒤에 글자를 붙이지 않는다(비교는 꼭 띄어 쓴다).
+_DRIP_JS = r"""<script>
+(function () {
+  if (window.__bwDrip) return;
+  window.__bwDrip = true;
+  var mm = window.matchMedia;
+  if (!mm || mm('(prefers-reduced-motion: reduce)').matches || !mm('(hover: hover) and (pointer: fine)').matches) return;
+
+  var MAXW = 12, LIFE = 2.6;
+  var VS = 'attribute vec2 a; varying vec2 v; void main() { v = vec2(a.x * 0.5 + 0.5, 0.5 - a.y * 0.5); gl_Position = vec4(a, 0.0, 1.0); }';
+  var FS = [
+    'precision mediump float;',
+    'uniform sampler2D u_tex; uniform vec2 u_size; uniform vec4 u_map; uniform vec4 u_w[12]; uniform int u_n;',
+    'varying vec2 v;',
+    'void main() {',
+    '  vec2 p = v * u_size; vec2 disp = vec2(0.0); float lit = 0.0;',
+    '  for (int i = 0; i != 12; i++) {',
+    '    if (i == u_n) break;',
+    '    vec4 w = u_w[i]; vec2 d = p - w.xy; float r = length(d) + 0.0001;',
+    '    float x = r - w.z * 230.0; float s = 14.0 + w.z * 36.0;',
+    '    float env = exp(-x * x / (2.0 * s * s)) * exp(-w.z * 1.6) * min(1.0, w.z * 8.0);',
+    '    float h = sin(x * 0.16) * env * w.w;',
+    '    disp += d / r * h; lit += cos(x * 0.16) * env * w.w;',
+    '  }',
+    '  vec2 t = (p + disp) / u_size * u_map.xy + u_map.zw;',
+    '  vec4 c = texture2D(u_tex, clamp(t, vec2(0.001), vec2(0.999)));',
+    '  c.rgb += lit * 0.012;',
+    '  gl_FragColor = vec4(c.rgb, 1.0);',
+    '}'
+  ].join(' ');
+
+  var surfaces = [];
+  function onHome() { return !!document.querySelector('.st-key-home_top'); }
+
+  function shader(gl, type, src) {
+    var s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s);
+    return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+  }
+  function attach() {
+    surfaces = surfaces.filter(function (s) {
+      if (s.el.isConnected) return true;
+      s.cv.remove();
+      var x = s.gl.getExtension('WEBGL_lose_context'); if (x) x.loseContext();
+      return false;
+    });
+    document.querySelectorAll('.bw-h-scene .photo, .bw-h-photo .img, .bw-h-pic').forEach(function (el) {
+      if (el.hasAttribute('data-rip')) return;
+      el.setAttribute('data-rip', '1');
+      var band = el.tagName !== 'IMG';
+      var src = band ? (el.style.backgroundImage.match(/url\(["']?([^"')]+)/) || [])[1] : (el.currentSrc || el.src);
+      if (!src) return;
+      var cv = document.createElement('canvas');
+      cv.className = 'bw-rip';
+      cv.setAttribute('aria-hidden', 'true');
+      var gl = cv.getContext('webgl', { alpha: false, antialias: false });
+      if (!gl) return;
+      var vs = shader(gl, gl.VERTEX_SHADER, VS), fs = shader(gl, gl.FRAGMENT_SHADER, FS);
+      if (!vs || !fs) return;
+      var pr = gl.createProgram();
+      gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return;
+      gl.useProgram(pr);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+      var la = gl.getAttribLocation(pr, 'a');
+      gl.enableVertexAttribArray(la); gl.vertexAttribPointer(la, 2, gl.FLOAT, false, 0, 0);
+      var s = { el: el, cv: cv, gl: gl, band: band, waves: [], on: false, ready: false,
+                u: { size: gl.getUniformLocation(pr, 'u_size'), map: gl.getUniformLocation(pr, 'u_map'),
+                     w: gl.getUniformLocation(pr, 'u_w'), n: gl.getUniformLocation(pr, 'u_n') } };
+      var im = new Image();
+      im.onload = function () {
+        s.iw = im.naturalWidth; s.ih = im.naturalHeight;
+        gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im);
+        s.ready = true;
+      };
+      im.src = src;
+      cv.addEventListener('webglcontextlost', function () { s.ready = false; cv.remove(); });
+      if (band) el.appendChild(cv); else el.insertAdjacentElement('afterend', cv);
+      surfaces.push(s);
+    });
+  }
+
+  // 화면 좌표 → 사진 상자 안 좌표. 히어로 사진은 천천히 커지는 중이라(scale · transform-origin, CSS 값을 그대로 읽는다) 그만큼 되돌린다
+  function local(s, x, y) {
+    var w = s.el.offsetWidth, h = s.el.offsetHeight, lx, ly;
+    if (s.band) {
+      var r = s.el.getBoundingClientRect(); lx = x - r.left; ly = y - r.top;
+    } else {
+      var cs = getComputedStyle(s.el), R = s.el.parentElement.getBoundingClientRect(), k = parseFloat(cs.scale) || 1;
+      var o = cs.transformOrigin.split(' '), ox = parseFloat(o[0]) || 0, oy = parseFloat(o[1]) || 0;
+      lx = (x - R.left - ox) / k + ox; ly = (y - R.top - oy) / k + oy;
+    }
+    var edge = s.band ? 0 : 0.22;   // 히어로 사진 왼쪽 22% 는 종이색으로 흐려지는 자리
+    return { x: lx, y: ly, w: w, h: h, ok: w > 0 && lx >= w * edge && lx <= w && ly >= 0 && ly <= h };
+  }
+  function cover(s) {   // CSS cover 와 같은 자리 — 사진 띠는 스크롤 시차(--py)만큼 위아래로 밀려 있다
+    var w = s.w, h = s.h, k = Math.max(w / s.iw, h / s.ih), dw = s.iw * k, dh = s.ih * k, py = 0.5;
+    if (s.band) { var f = s.el.closest('[data-par]'); py = 0.5 + (parseFloat(f && f.style.getPropertyValue('--py')) || 0) * 0.4; }
+    return [w / dw, h / dh, -(w - dw) * 0.5 / dw, -(h - dh) * py / dh];
+  }
+  function wave(s, x, y, amp) {
+    if (!s.ready) return;
+    s.waves.push({ x: x, y: y, t0: performance.now(), a: amp });
+    if (s.waves.length > MAXW) s.waves.shift();
+    if (!s.on) { s.on = true; requestAnimationFrame(function () { draw(s); }); }
+  }
+  var buf = new Float32Array(MAXW * 4);
+  function draw(s) {
+    var now = performance.now();
+    s.waves = s.waves.filter(function (w) { return (now - w.t0) / 1000 < LIFE; });
+    if (!s.waves.length || !s.el.isConnected || !s.ready) { s.on = false; s.cv.classList.remove('on'); return; }
+    var gl = s.gl, cv = s.cv, dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    s.w = s.el.offsetWidth; s.h = s.el.offsetHeight;
+    var W = Math.max(1, Math.round(s.w * dpr)), H = Math.max(1, Math.round(s.h * dpr));
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    gl.viewport(0, 0, W, H);
+    gl.uniform2f(s.u.size, s.w, s.h);
+    gl.uniform4fv(s.u.map, cover(s));
+    buf.fill(0);
+    s.waves.forEach(function (w, i) { buf[i * 4] = w.x; buf[i * 4 + 1] = w.y; buf[i * 4 + 2] = (now - w.t0) / 1000; buf[i * 4 + 3] = w.a; });
+    gl.uniform4fv(s.u.w, buf); gl.uniform1i(s.u.n, s.waves.length);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    if (!s.band) cv.style.scale = getComputedStyle(s.el).scale;
+    cv.classList.add('on');
+    requestAnimationFrame(function () { draw(s); });
+  }
+  function hit(x, y) {
+    for (var i = 0; i != surfaces.length; i++) { var L = local(surfaces[i], x, y); if (L.ok) return { s: surfaces[i], L: L }; }
+    return null;
+  }
+
+  // 방울: 커서 끝(핫스팟)에서 맺혀 → 늘어나 떨어지고 → 14px 아래에 닿는다
+  function drop(x, y) {
+    var d = document.createElement('i');
+    d.className = 'bw-dropl'; d.style.left = x + 'px'; d.style.top = y + 'px';
+    document.body.appendChild(d);
+    setTimeout(function () { land(x, y + 14); }, 640);
+    setTimeout(function () { d.remove(); }, 950);
+  }
+  function land(x, y) {
+    if (!onHome()) return;
+    attach();
+    var h = hit(x, y);
+    if (h) { wave(h.s, h.L.x, h.L.y, 11); return; }
+    var r = document.createElement('i');
+    r.className = 'bw-ring'; r.style.left = x + 'px'; r.style.top = y + 'px';
+    document.body.appendChild(r);
+    setTimeout(function () { r.remove(); }, 1400);
+  }
+
+  var last = { x: -1, y: -1 }, wake = { x: -1e4, y: -1e4, t: 0 }, idle = 0, rests = 0;
+  function rest() {
+    if (!onHome() || document.hidden || rests >= 4) return;
+    attach();
+    if (!hit(last.x, last.y)) return;
+    rests += 1;
+    drop(last.x, last.y);
+    idle = setTimeout(rest, 1900);
+  }
+  document.addEventListener('mousemove', function (e) {
+    if (!onHome()) return;
+    last.x = e.clientX; last.y = e.clientY;
+    clearTimeout(idle); rests = 0; idle = setTimeout(rest, 750);
+    var now = performance.now();
+    if (now - wake.t < 45 || Math.abs(e.clientX - wake.x) + Math.abs(e.clientY - wake.y) < 30) return;
+    wake.x = e.clientX; wake.y = e.clientY; wake.t = now;
+    attach();
+    var h = hit(e.clientX, e.clientY);
+    if (h) wave(h.s, h.L.x, h.L.y, 2.4);
+  }, { passive: true });
+  document.addEventListener('mousedown', function (e) {
+    if (e.button === 0 && onHome()) drop(e.clientX, e.clientY);
+  }, { passive: true });
+  document.addEventListener('mouseleave', function () { clearTimeout(idle); });
+})();
+</script>"""
+
+DRIP_SCRIPT = _DRIP_JS
