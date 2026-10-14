@@ -16,7 +16,7 @@ LangChain 구조화 출력으로 요청과 대화 맥락을 해석하고, LangGr
 
 `POST /generate`는 `instruction`(작성 요청), `product`, 선택적 `ingredients`, `product_description`, `reference_copy`, `channel`, 자유로운 `tone`, `length`, `keywords`를 받습니다. 이전 `ingredients` 기반 요청도 같은 그래프로 처리하며 응답 계약은 `domain.schemas.GenerateResponse`로 통일했습니다. `POST /chat`은 `message`, 선택적 `context`, 최근 `history`, `product`를 받고 `review`/`generate`/`answer`/`clarify` 결과와 갱신된 맥락을 반환합니다. 성분 누락으로 생성 질문을 반복하지 않습니다.
 
-실제 실행에는 `.env`의 모델 API 키와 검색 인프라가 필요합니다. `UI_DATA_MODE=api`는 별도 FastAPI 서버를 사용하고, `local`은 FastAPI를 내장 실행합니다. 데모 모드에서 실제 AI 결과를 만들어 표시하지 않습니다. 대화는 Streamlit 세션 안에서 유지되며, 제품·실증 기준이 바뀌면 새 대화를 시작합니다.
+실제 실행에는 `.env`의 모델 API 키와 검색 인프라가 필요합니다. `UI_DATA_MODE=api`는 별도 FastAPI 서버를 사용하고, `local`은 FastAPI를 내장 실행합니다. 데모 모드에서 실제 AI 결과를 만들어 표시하지 않습니다. 대화는 Streamlit 세션 안에서 유지됩니다. 같은 대화에서 새 제품·새 주제로 넘어갈 수 있으며, 새 주제에는 이전 문구·제품 사실을 자동 적용하지 않습니다. 제품·실증 기준을 바꿔도 화면의 기록은 유지하고 현재 작업의 맥락만 새로 시작합니다. **새 대화** 버튼은 기록을 비우고 처음부터 시작할 때 사용합니다.
 
 ---
 

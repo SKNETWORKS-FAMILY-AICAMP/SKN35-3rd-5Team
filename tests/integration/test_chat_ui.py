@@ -79,3 +79,22 @@ def test_popup_and_full_page_share_conversation(monkeypatch):
     assert not page.exception
     assert calls[1]["context"] == {"ingredients": ["판테놀"]}
     assert calls[1]["history"][0]["content"] == "판테놀 광고문 만들어줘"
+
+
+def test_product_setting_change_preserves_transcript_and_starts_fresh_context(monkeypatch):
+    calls = []
+
+    def chat(payload):
+        calls.append(payload)
+        return {"intent": "answer", "message": "요청을 확인했어요", "context": {"ingredients": ["판테놀"]}}
+
+    monkeypatch.setattr(backend, "chat", chat)
+    page = AppTest.from_file(str(PAGE)).run()
+    page.chat_input[0].set_value("선크림 광고 써줘").run()
+    page.checkbox[0].check().run()
+    assert not page.exception
+    assert len(page.chat_message) == 2
+    page.chat_input[0].set_value("선택한 제품 광고를 써줘").run()
+    assert calls[1]["context"] == {}
+    assert calls[1]["history"] == []
+    assert len(page.chat_message) == 4
