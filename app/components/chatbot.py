@@ -1,0 +1,181 @@
+"""전체 화면과 작은 팝업이 공유하는 통합 챗봇."""
+import json
+from datetime import datetime, timedelta, timezone
+
+import streamlit as st
+
+from app.components.brand import avatar_img, avatar_uri
+from app.components.context import current
+from app.components.layout import clock, esc
+from app.components.theme import inject_css
+from app.services import backend
+
+KST = timezone(timedelta(hours=9))
+
+
+def chat_header(*, compact: bool = False) -> None:
+    """메신저 상단의 대화 상대 프로필."""
+    st.html(f'<div class="bw-chat-profile"><span class="bw-chat-profile-avatar">'
+            f'{avatar_img(44, alt="뷰렛 토끼")}</span><div><strong>뷰렛</strong>'
+            f'<span>{"광고 문구 도우미" if compact else "광고 문구를 함께 다듬는 AI 도우미"}</span></div></div>')
+
+
+def state() -> dict:
+    return st.session_state.setdefault("bw_chatbot_conversation", {"messages": [], "context": {}, "signature": None})
+
+
+def reset() -> None:
+    st.session_state.pop("bw_chatbot_conversation", None)
+
+
+def _product() -> dict:
+    if st.session_state.get("bw_chat_project", False):
+        return current()[0]
+    return {"product_id": "chat_draft", "name": "나의 화장품", "category": "일반", "owned_evidence": []}
+
+
+def _sync_product() -> dict:
+    product = _product()
+    signature = json.dumps(product, ensure_ascii=False, sort_keys=True)
+    chat = state()
+    if chat["signature"] is not None and chat["signature"] != signature:
+        reset()
+        chat = state()
+        st.info("제품 또는 실증 기준이 바뀌어 새 챗봇 대화를 시작합니다.")
+    chat["signature"] = signature
+    return product
+
+
+def _review(response: dict) -> None:
+    result = response["result"]
+    label = {0: "사용 가능", 1: "실증 필요", 2: "수정 필요"}.get(result.get("level"), "전문가 검토 필요")
+    st.markdown(f"**검토 결과 · {label}**")
+    st.caption("검토한 문구")
+    st.write(response["input_text"])
+    if result.get("review_notes"):
+        st.write(result["review_notes"])
+    if result.get("suggestion"):
+        st.caption("수정 제안")
+        st.code(result["suggestion"], language=None)
+    if result.get("next_test"):
+        st.info(result["next_test"])
+    with st.expander("검토 근거"):
+        for citation in result.get("citations", []):
+            st.write(f"{citation['source']} · {citation['article']}")
+            st.caption(citation.get("content_snippet") or "")
+        if not result.get("citations"):
+            st.caption("반환된 근거 조항이 없습니다.")
+
+
+def _response(response: dict) -> None:
+    st.write(response["message"])
+    if response.get("review"):
+        _review(response["review"])
+        st.caption("자동 검토는 법률 준수를 보장하지 않습니다.")
+    if response.get("generation"):
+        generation = response["generation"]
+        for warning in generation.get("warnings", []):
+            st.caption(warning)
+        for index, candidate in enumerate(generation.get("candidates", []), 1):
+            st.markdown(f"**후보 {index} · {candidate['status']}**")
+            if candidate["status"] == "검토통과":
+                st.code(candidate["text"], language=None)
+            else:
+                with st.expander("확인이 필요한 초안"):
+                    st.write(candidate["text"])
+            for note in candidate.get("notes", []):
+                st.write(note)
+            if candidate.get("review"):
+                with st.expander(f"후보 {index} 검토 상세"):
+                    _review(candidate["review"])
+        st.caption(generation["disclaimer"])
+
+
+def _send(message: str, product: dict) -> None:
+    if not message.strip():
+        st.warning("요청을 입력해주세요.")
+        return
+    chat = state()
+    history = []
+    for turn in chat["messages"][-12:]:
+        if turn["role"] == "user":
+            history.append({"role": "user", "content": turn["text"]})
+        else:
+            # 실행 결과와 상태도 전달해 후속 후보 참조를 지원한다.
+            history.append({"role": "assistant", "content": json.dumps(turn["response"], ensure_ascii=False)[:6000]})
+    try:
+        with st.spinner("요청을 읽고 처리하고 있습니다…"):
+            response = backend.chat({"message": message, "context": chat["context"], "history": history, "product": product})
+    except backend.BackendError as error:
+        st.error(error.message)
+        return
+    now = datetime.now(KST).isoformat()
+    chat["messages"].extend([{"role": "user", "text": message, "at": now},
+                             {"role": "assistant", "response": response, "at": now}])
+    chat["context"] = response["context"]
+    st.rerun()
+
+
+def render_chat(*, compact: bool = False) -> None:
+    inject_css("chat")
+    product = _sync_product()
+    chat = state()
+    scope = "mini" if compact else "full"
+    mode = " · 데모 모드" if backend.data_mode() != "api" else ""
+    st.html(f'<div class="bw-chat-context"><span class="bw-chat-context-dot"></span>'
+            f'{esc(product["name"])} · 실증 {len(product.get("owned_evidence", []))}건{mode}</div>')
+    with st.container(height=260 if compact else 350, border=False, autoscroll=True, key=f"chat_messages_{scope}"):
+        st.html(f'<div class="bw-chat-date"><span>{datetime.now(KST):%Y년 %m월 %d일}</span></div>')
+        if not chat["messages"]:
+            st.html(f'<div class="bw-chat-welcome"><span class="bw-chat-welcome-avatar">'
+                    f'{avatar_img(38, alt="뷰렛 토끼")}</span><div><div class="bw-chat-sender">뷰렛</div>'
+                    '<div class="bw-chat-welcome-bubble">안녕하세요, 뷰렛이에요 👋<br>'
+                    '검토할 광고 문구나 제품 성분을 보내주세요.<br>같이 더 좋은 문구를 만들어봐요.</div>'
+                    '<div class="bw-chat-examples"><span>이렇게 말해보세요</span>'
+                    '<p>“이 광고 문구, 검토하고 고쳐줘”</p>'
+                    '<p>“판테놀 함유 크림의 SNS 문구 만들어줘”</p></div></div></div>')
+        for index, turn in enumerate(chat["messages"]):
+            role = turn["role"]
+            with st.container(key=f"chat_{role}_{scope}_{index}"), \
+                    st.chat_message(role, avatar=avatar_uri() if role == "assistant" else None):
+                if role == "assistant":
+                    st.html('<div class="bw-chat-sender">뷰렛</div>')
+                with st.container(key=f"chat_bubble_{role}_{scope}_{index}"):
+                    if role == "user":
+                        st.write(turn["text"])
+                    else:
+                        _response(turn["response"])
+                if turn.get("at"):
+                    at = datetime.fromisoformat(turn["at"])
+                    st.html(f'<div class="bw-chat-time">{clock(at)}</div>')
+    if compact:
+        with st.form("chat_mini_form", clear_on_submit=True):
+            entry, send = st.columns([5, 1], gap="small", vertical_alignment="center")
+            with entry:
+                message = st.text_input("챗봇 요청", placeholder="뷰렛에게 메시지 보내기", max_chars=5000, label_visibility="collapsed")
+            with send:
+                submitted = st.form_submit_button("보내기", icon=":material/arrow_upward:", width="stretch")
+        if submitted:
+            _send(message, product)
+    else:
+        with st.container(key="chat_composer_full"):
+            message = st.chat_input("뷰렛에게 메시지 보내기", max_chars=5000, key="chat_full_input")
+            if message:
+                _send(message, product)
+            st.html('<div class="bw-chat-composer-note">Enter로 전송 · Shift + Enter로 줄바꿈</div>')
+
+
+def render_launcher(pages: dict) -> None:
+    inject_css("chat")
+    st.html(f'<style>.st-key-chat_launcher [data-testid="stPopoverButton"] '
+            f'{{background-image:url("{avatar_uri()}");}}</style>')
+    with st.container(key="chat_launcher"), \
+            st.popover("통합 챗봇 열기", icon=":material/chat_bubble:", help="통합 챗봇 열기"), \
+            st.container(key="chat_mini"):
+        with st.container(key="chat_header_mini"):
+            profile, expand = st.columns([4, 1], vertical_alignment="center")
+            with profile:
+                chat_header(compact=True)
+            with expand:
+                st.page_link(pages["chat"], label="전체", icon=":material/open_in_full:")
+        render_chat(compact=True)

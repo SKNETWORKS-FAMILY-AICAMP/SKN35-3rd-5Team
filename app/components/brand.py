@@ -33,6 +33,11 @@ def avatar_img(size: int = 32, *, alt: str = "") -> str:
     return f'<img src="{_data_uri("rabbit-avatar.webp")}" width="{size}" height="{size}" alt="{alt}">'
 
 
+def avatar_uri() -> str:
+    """챗봇 위젯과 버튼에서도 같은 토끼 얼굴 자산을 사용한다."""
+    return _data_uri("rabbit-avatar.webp")
+
+
 def character_img(height: int = 200, *, alt: str = "") -> str:
     """빈 상태용 캐릭터 전신."""
     return f'<img src="{_data_uri("rabbit-full.webp")}" style="height:{height}px;width:auto" alt="{alt}">'

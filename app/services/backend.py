@@ -21,6 +21,7 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import httpx
+from dotenv import dotenv_values
 
 from app.services import data_sources as ds
 from app.services import mock
@@ -40,9 +41,26 @@ class BackendError(Exception):
 
 # ── 모드 · 연결 ─────────────────────────────────────────────────────
 def data_mode() -> str:
-    """"mock"(기본) · "api" · "local"."""
-    mode = os.getenv("UI_DATA_MODE", "mock").strip().lower()
+    """실행 환경 > .env > mock. .env 변경은 화면을 다시 실행하면 반영한다."""
+    mode = os.getenv("UI_DATA_MODE")
+    if mode is None:
+        mode = dotenv_values(_REPO / ".env").get("UI_DATA_MODE")
+    mode = (mode or "mock").strip().lower()
     return mode if mode in ("api", "local") else "mock"
+
+
+def generate_copy(payload: dict) -> dict:
+    """성분 기반 실제 AI 생성. 데모에서는 생성 결과를 지어내지 않는다."""
+    if data_mode() not in ("api", "local"):
+        raise BackendError("현재 화면이 데모 모드입니다. .env에 UI_DATA_MODE=api를 설정하고 화면을 새로고침하세요. 실행 환경에 mock이 지정되어 있으면 api로 바꾼 뒤 Streamlit을 다시 실행하세요.")
+    return _post("/generate", payload, timeout=180.0)
+
+
+def chat(payload: dict) -> dict:
+    """통합 챗봇은 실제 요청 해석과 기존 검토·생성 엔진을 사용한다."""
+    if data_mode() not in ("api", "local"):
+        raise BackendError("챗봇 사용에는 API 모드가 필요합니다. UI_DATA_MODE=api로 설정하고 검토 서버를 실행해주세요.")
+    return _post("/chat", payload, timeout=240.0)
 
 
 def api_base_url() -> str:
@@ -278,7 +296,7 @@ def review_copy(copy_text: str, product: dict) -> dict:
     return _with_rule_highlights(resp, product)
 
 
-def generate_copy(
+def generate_project_copy(
     instruction: str,
     product: dict,
     *,
