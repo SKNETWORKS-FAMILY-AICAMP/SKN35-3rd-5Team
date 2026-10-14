@@ -39,6 +39,10 @@ class Evidence(TypedDict):
     item: str                   # 시험 항목
     value: str | None           # 결과 수치 ("4주 사용 후 보습력 42% 개선")
     institute: str | None       # 시험 기관
+    source_kind: NotRequired[str]
+    source_url: NotRequired[str | None]
+    conditions: NotRequired[str | None]
+    report_available: NotRequired[bool | None]
 
 
 class Product(TypedDict):

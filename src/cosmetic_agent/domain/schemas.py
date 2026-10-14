@@ -14,6 +14,10 @@ class OwnedEvidence(BaseModel):
     item: RequiredText = Field(description="시험 항목 (예: 피부 겉보습 개선)")
     value: Optional[str] = Field(default=None, description="수치 및 결과 (예: 42% 개선)")
     institute: Optional[str] = Field(default=None, description="시험 기관")
+    source_kind: Literal["provided_report", "public_brand_summary"] = "provided_report"
+    source_url: str | None = None
+    conditions: str | None = None
+    report_available: bool | None = None
 
 
 class ProductCard(BaseModel):
@@ -106,13 +110,24 @@ class ReviewResponse(BaseModel):
 
 
 class GenerateRequest(BaseModel):
-    """검토 기준을 사용한 광고 문구 생성 요청."""
-    instruction: RequiredText = Field(max_length=2000, description="생성 목적과 요청사항")
+    """자유로운 작성 요청과 선택적인 제품·성분 정보를 사용하는 통합 생성 계약."""
+    instruction: RequiredText = Field(max_length=5000, description="생성 목적과 요청사항")
     product: ProductCard
     channel: Literal["상세페이지", "SNS", "배너", "검색광고", "라이브커머스"] = "상세페이지"
     tone: RequiredText = "고급스러운"
     length: Literal["한 줄", "짧은 문단", "상세 설명"] = "한 줄"
     keywords: list[str] = Field(default_factory=list, max_length=10)
+    ingredients: list[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]] = Field(default_factory=list, max_length=100)
+    product_description: str = Field(default="", max_length=2000, description="사용자가 설명한 제품 콘셉트. 심사·실증을 대신하지 않음")
+    reference_copy: str = Field(default="", max_length=5000)
+
+    @model_validator(mode="before")
+    @classmethod
+    def accept_ingredient_request(cls, value):
+        # 이전 성분 입력 API도 같은 생성 그래프로 처리한다.
+        if isinstance(value, dict) and "instruction" not in value and value.get("ingredients"):
+            value = dict(value, instruction=value.get("brief") or "제공한 성분을 바탕으로 광고 문구를 작성해주세요.")
+        return value
 
 
 class GeneratedCandidate(BaseModel):
@@ -123,6 +138,9 @@ class GeneratedCandidate(BaseModel):
     cited_ids: list[str] = Field(default_factory=list)
     verified: bool = True
     verify_note: str = "검증 통과"
+    status: Literal["검토통과", "확인필요", "제외"] = "검토통과"
+    notes: list[str] = Field(default_factory=list)
+    review: ReviewResponse | None = None
 
 
 class GenerateResponse(BaseModel):
@@ -134,3 +152,4 @@ class GenerateResponse(BaseModel):
     warnings: list[str] = Field(default_factory=list)
     timing: ExecutionTiming
     mock: bool = False
+    disclaimer: str = "자동 검토는 법률 준수를 보장하지 않습니다. 제품 사실·기능성 심사·보유 실증과 최종 광고 맥락을 확인한 뒤 사용하세요."

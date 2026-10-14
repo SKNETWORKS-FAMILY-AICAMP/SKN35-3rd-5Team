@@ -84,6 +84,7 @@ class ReviewService:
             retriever=self.hybrid_retriever,
             verifier=self.verifier,
             generator=self.copy_generator,
+            reviewer=self.review_single,
         )
         logger.info("ReviewService 초기화 완료 (그래프 재사용 준비 완료)")
 
@@ -121,6 +122,10 @@ class ReviewService:
                 }
             )
 
+        review_notes = final_state.get("review_notes") or ""
+        if any(e.source_kind == "public_brand_summary" for e in product.owned_evidence):
+            review_notes = (review_notes + "\n공식몰 공개 시험 요약 기반 시연 검토입니다. 원보고서·시험기관·수치 산식은 미확보이며 최종 광고 사용 전 확인이 필요합니다.").strip()
+
         result = ReviewResult(
             status=status,
             level=level,
@@ -129,7 +134,7 @@ class ReviewService:
             citations=citation_rows,
             suggestion=final_state.get("suggestion"),
             next_test=final_state.get("next_test"),
-            review_notes=final_state.get("review_notes"),
+            review_notes=review_notes or None,
         )
 
         return ReviewResponse(
@@ -155,13 +160,18 @@ class ReviewService:
     def generate_copy(self, request: GenerateRequest) -> GenerateResponse:
         """선택된 제품·실증자료와 규정 근거 안에서 신규 광고 문구를 생성한다."""
         start_t = time.perf_counter()
+        product = request.product.model_copy(deep=True)
+        if request.ingredients:
+            product.key_ingredients = list(dict.fromkeys([*product.key_ingredients, *request.ingredients]))
         final_state = self.generation_graph.invoke({
             "instruction": request.instruction,
-            "product": request.product.model_dump(),
+            "product": product.model_dump(),
             "channel": request.channel,
             "tone": request.tone,
             "length": request.length,
             "keywords": request.keywords,
+            "product_description": request.product_description,
+            "reference_copy": request.reference_copy,
         })
 
         citations = []

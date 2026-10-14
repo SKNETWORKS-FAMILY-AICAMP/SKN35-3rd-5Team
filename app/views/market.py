@@ -58,7 +58,7 @@ with market_tab:
     st.markdown("#### 01 · 현재 제품의 근거")
     st.write(profile.get("purpose", "이 제품의 시장 참고 연결을 준비 중입니다."))
     if product.get("owned_evidence"):
-        with st.expander("보유 실증 보기 · 프로젝트 가상 자료"):
+        with st.expander("등록 실증 보기 · 출처와 원보고서 보유 여부 확인"):
             st.dataframe(
                 product["owned_evidence"],
                 hide_index=True,
@@ -71,7 +71,7 @@ with market_tab:
     ingredient_profile = profile.get("ingredient_profile")
     if ingredient_profile:
         st.caption(
-            "실제 제품의 공개 전성분을 분석합니다. 내부 보유 시험 보고서는 등록하지 않았습니다."
+            "실제 제품의 공개 전성분과 공식몰 시험 요약을 연결합니다. 내부 원보고서 보유를 의미하지 않습니다."
         )
         st.link_button("현재 제품 전성분 출처", ingredient_profile["source_url"])
         st.write(
