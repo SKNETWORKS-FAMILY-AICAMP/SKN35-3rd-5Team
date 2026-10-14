@@ -107,6 +107,11 @@ class ReviewService:
             input_text=copy_text,
             result=result,
             timing=ExecutionTiming(retrieval_ms=0.0, llm_ms=0.0, total_ms=total_ms),
+            candidates=final_state.get("candidates", []),
+            rejected_notes=final_state.get("rejected_notes", []),
+            used_evidence=final_state.get("used_evidence", []),
+            candidate_details=final_state.get("candidate_details", []),
+            experiment=final_state.get("experiment", {}),
         )
 
     def review_bulk(self, full_text: str, product: ProductCard) -> list[ReviewResponse]:

@@ -1,0 +1,28 @@
+﻿FROM python:3.11-slim
+
+WORKDIR /app
+
+# 시스템 필수 패키지 설치
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 패키지 빌드 파일 복사 및 의존성 설치
+COPY pyproject.toml README.md ./
+COPY src ./src
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir .
+
+# 설정 및 데이터 파일 복사
+COPY configs ./configs
+COPY data/assets ./data/assets
+COPY data/02_processed ./data/02_processed
+COPY api ./api
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app/src:/app
+
+EXPOSE 8000
+
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
