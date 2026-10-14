@@ -105,13 +105,22 @@ center, right = st.columns([1.85, 1], gap="large")
 
 with center, st.container(key="center"):
     page_header(thread["title"] if thread else "새 대화", "규정 문서를 근거로 답하는 광고 문구 검토 챗봇", health=health)
+    if any(ev.get("source_kind") == "public_brand_summary" for ev in product.get("owned_evidence", [])):
+        st.info("공식몰 공개 시험 요약을 연결한 시연입니다. 원보고서·시험기관·수치 산식 확인 전이며, 자동 판정은 최종 광고 승인이나 독립 검증을 의미하지 않습니다.")
 
     with st.container(key="thread"):
         if not thread:
             html(welcome(ctx["product_name"]))
             with st.container(key="starters", gap=None):
                 html('<div class="bw-starters-h">이런 문구로 시작해 보세요</div>')
-                for i, text in enumerate(STARTERS):
+                starters = STARTERS
+                if product.get("product_id") == "PUBLIC_KIEHLS_UFC":
+                    starters = [
+                        "도포 72시간 후 무도포 부위 대비 수분 유지력 23.5%를 보인 수분 크림",
+                        "바르는 순간 피부 장벽을 100% 복구하는 크림",
+                        "2주 사용 후 외부 자극에 의한 일시적 붉은기 29.3% 완화",
+                    ]
+                for i, text in enumerate(starters):
                     if st.button(text, key=f"example_{i}", icon=":material/north_east:", width="stretch"):
                         threads.ask(text, ctx, product)
                         st.rerun()
@@ -178,9 +187,22 @@ with right, st.container(key="aside"):
         docs = backend.reference_documents(resp["result"].get("citations", []))
         n = len(resp["result"].get("citations", []))
         html(rag_header(resp) + ladder_block(resp, fresh=arrived))
-        tab_ev, tab_docs, tab_proc = st.tabs([f"근거 {n}", f"원문 문서 {len(docs)}", "검토 과정"], key="asidetabs")
+        reviewed_product = next((m.get("product", {}) for m in reversed(thread["messages"]) if m["role"] == "user" and m["ctx"]["signature"] == last["ctx"]["signature"]), {})
+        public_summaries = [e for e in reviewed_product.get("owned_evidence", []) if e.get("source_kind") == "public_brand_summary"]
+        tab_ev, tab_trials, tab_docs, tab_proc = st.tabs([f"규정 근거 {n}", f"공개 시험 {len(public_summaries)}", f"원문 문서 {len(docs)}", "검토 과정"], key="asidetabs")
         with tab_ev:
             html(evidence_list(resp, fresh=arrived))
+        with tab_trials:
+            st.caption("이번 검토에 전달한 공식몰 공개 요약입니다. 법령 인용·원보고서 검증과 구분합니다.")
+            for i, evidence in enumerate(public_summaries):
+                with st.container(border=True):
+                    st.write(f'**{evidence["item"]}**')
+                    st.write(evidence["value"])
+                    st.caption(evidence.get("conditions") or "조건 미공개")
+                    if evidence.get("source_url"):
+                        st.link_button("공식 요약 확인", evidence["source_url"], key=f'review_ev_{last["at"]}_{i}')
+            if not public_summaries:
+                st.caption("이 응답에 전달된 공개 시험 요약이 없습니다.")
         with tab_docs:
             html(documents_list(docs))
         with tab_proc:

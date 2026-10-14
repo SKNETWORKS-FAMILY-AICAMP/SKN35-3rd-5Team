@@ -46,12 +46,14 @@ PAGES = {
     "project_generate": st.Page(str(APP_DIR / "views" / "project_generate.py"), title="제품 기준 광고문 생성", icon=":material/edit_note:"),
     "bulk": st.Page(str(APP_DIR / "views" / "bulk.py"), title="상세페이지 검토", icon=":material/article:"),
     "library": st.Page(str(APP_DIR / "views" / "library.py"), title="규정 · 가이드라인", icon=":material/menu_book:"),
-    "market": st.Page(str(APP_DIR / "views" / "market.py"), title="시장 근거 · 문구 비교", icon=":material/analytics:"),
+    "forecast": st.Page(str(APP_DIR / "views" / "forecast.py"), title="예상 매출 시나리오", icon=":material/calculate:"),
 }
+# 「시장 근거 · 문구 비교」는 예상 매출 시나리오의 참고 자료로 합쳤다. 주소(views/market.py)는 남기되 메뉴에는 보이지 않는다.
+MARKET = st.Page(str(APP_DIR / "views" / "market.py"), title="시장 근거 · 문구 비교", icon=":material/analytics:")
 st.session_state["bw_pages"] = PAGES
 st.session_state["bw_health"] = _health(backend.data_mode())
 
-page = st.navigation([HOME, *PAGES.values()], position="hidden")
+page = st.navigation([HOME, *PAGES.values(), MARKET], position="hidden")
 inject_base_css()
 if page.url_path != HOME.url_path:
     render_sidebar(PAGES, st.session_state["bw_health"])

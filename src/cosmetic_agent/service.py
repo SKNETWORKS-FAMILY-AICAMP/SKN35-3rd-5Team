@@ -121,6 +121,10 @@ class ReviewService:
                 }
             )
 
+        review_notes = final_state.get("review_notes") or ""
+        if any(e.source_kind == "public_brand_summary" for e in product.owned_evidence):
+            review_notes = (review_notes + "\n공식몰 공개 시험 요약 기반 시연 검토입니다. 원보고서·시험기관·수치 산식은 미확보이며 최종 광고 사용 전 확인이 필요합니다.").strip()
+
         result = ReviewResult(
             status=status,
             level=level,
@@ -129,7 +133,7 @@ class ReviewService:
             citations=citation_rows,
             suggestion=final_state.get("suggestion"),
             next_test=final_state.get("next_test"),
-            review_notes=final_state.get("review_notes"),
+            review_notes=review_notes or None,
         )
 
         return ReviewResponse(
