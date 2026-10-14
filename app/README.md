@@ -38,7 +38,8 @@ API 모드: `uv run uvicorn api.main:app --port 8000` 을 띄운 뒤 `UI_DATA_MO
 
 | 화면 | 파일 | 내용 |
 |---|---|---|
-| 검토 대화 (첫 화면) | `views/review.py` | 질문 → AI 답변(판정 · 검토한 문구 · 문제 표현 · 수정 제안 · 다른 표현 · 출처), 오른쪽 근거 · 원문 문서 · 검토 과정 |
+| 홈 (첫 화면, `/`) | `views/home.py` | 서비스 소개 — 문제 · 검토 방식 · 기능 · 근거 자료. 「시작하기」로 검토 대화에 들어간다. 사이드바 없음 |
+| 검토 대화 (`/review`) | `views/review.py` | 질문 → AI 답변(판정 · 검토한 문구 · 문제 표현 · 수정 제안 · 다른 표현 · 출처), 오른쪽 근거 · 원문 문서 · 검토 과정 |
 | 상세페이지 검토 | `views/bulk.py` | 긴 글을 문장 단위로 검토, 문장별 결과 · 교정본 복사/내려받기 |
 | 규정 · 가이드라인 | `views/library.py` | 조항 검색(하이브리드 검색 결과) · 관리지침 금지 표현 · 식약처 적발 사례 |
 
@@ -52,10 +53,12 @@ API 모드: `uv run uvicorn api.main:app --port 8000` 을 띄운 뒤 `UI_DATA_MO
 ```
 app/
   streamlit_app.py        진입 파일 (경로 처리 · 페이지 설정 · CSS 주입 · 사이드바 · 내비게이션)
-  views/                  화면 3개 (review · bulk · library) — 레이아웃과 위젯만, HTML 은 components 가 만든다
+  views/                  화면 4개 (home · review · bulk · library) — 레이아웃과 위젯만, HTML 은 components 가 만든다
   components/
     styles/base.css       디자인 토큰(:root) + 공통 컴포넌트 CSS — 색·글자·반경은 여기서만 바꾼다
     styles/pages.css      상세페이지 · 라이브러리 전용 CSS
+    styles/home.css       홈 전용 CSS (큰 제목 · 섹션 간격 · 상단 바)
+    landing.py            홈 섹션 (데이터 → HTML 순수 함수). 숫자는 data/ 에서 읽는다
     cards.py              가운데 답변 블록 (데이터 → HTML 순수 함수)
     panels.py             오른쪽 근거 · RAG 패널 (데이터 → HTML 순수 함수)
     suggest.py            최신 답변의 수정 제안 — 후보 고르기(근거 최대 · 균형 · 가장 안전) · 복사 · 이 문구로 다시 검토
@@ -72,7 +75,7 @@ app/
     mock.py               데모용 Mock 판정 엔진 (응답에 mock=True)
     data_sources.py       data/ 원문(법령 XML · 관리지침 · 적발 사례 · 규칙 자산) 읽기
     contract.py           화면이 받는 데이터 모양(TypedDict)과 예시 응답
-  static/                 글꼴(Pretendard · IBM Plex Mono, OFL) · 로고 · 캐릭터(rabbit-*.webp)
+  static/                 글꼴(Pretendard · IBM Plex Mono, OFL) · 로고 · 캐릭터(rabbit-*.webp) · 홈의 검토 화면 캡처(landing/)
 ```
 
 ## 디자인 원칙

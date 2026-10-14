@@ -1,0 +1,245 @@
+/* ==========================================================================
+   [app/components/styles/home.css]
+   홈(소개) 화면 전용 — views/home.py 가 inject_css("home") 로 넣는다.
+   색·반경·글자는 base.css 토큰을 쓰고, 홈에만 필요한 큰 제목 크기(52 · 34px)와 섹션 간격만 여기서 정한다.
+   그림자·넓은 색 면 없음, 반경 12px 이하 — base.css 규칙 그대로.
+   ========================================================================== */
+
+/* 홈일 때만: 가운데 정렬된 본문 폭 (다른 화면의 골격은 base.css 그대로) */
+.stApp:has(.st-key-home_top) [data-testid="stMainBlockContainer"] {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 32px 40px;
+}
+
+/* 다른 화면에서 뒤로 가기로 돌아오면 Streamlit 이 빈 사이드바 틀을 남긴다 — 홈에서는 숨긴다 */
+.stApp:has(.st-key-home_top) [data-testid="stSidebar"],
+.stApp:has(.st-key-home_top) [data-testid="stSidebarCollapsedControl"],
+.stApp:has(.st-key-home_top) [data-testid="stExpandSidebarButton"] { display: none; }
+
+/* ── 상단 바 (스크롤해도 위에 붙는다. 바탕은 화면 끝까지) ─────────────── */
+.stApp .st-key-home_top {
+  min-height: 64px;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  background: var(--bw-bg);
+  box-shadow: 0 0 0 100vmax var(--bw-bg), 0 1px 0 100vmax var(--bw-line);
+  clip-path: inset(0 -100vmax -1px);
+}
+[data-testid="stLayoutWrapper"]:has(> .st-key-home_top),
+.stApp .st-key-home_top {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.bw-home-logo img { display: block; }
+.bw-home-nav { display: flex; gap: 30px; }
+.bw-home-nav a {
+  font-size: var(--fs-small); font-weight: 600; color: var(--bw-ink-2); text-decoration: none;
+}
+.bw-home-nav a:hover { color: var(--bw-accent-text); }
+.stApp .st-key-home_top_r { flex-wrap: nowrap; }
+.st-key-home_start_top button { min-height: 36px; padding: 0 14px; }
+.st-key-home_start_top button p { font-size: var(--fs-small); font-weight: 600; }
+
+/* ── 히어로 ──────────────────────────────────────────────────────────── */
+.bw-home-hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 76px; }
+.bw-home-pill {
+  display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px;
+  border: 1px solid var(--bw-accent-line); border-radius: var(--bw-r);
+  background: var(--bw-accent-wash); color: var(--bw-accent-text);
+  font-size: var(--fs-small); font-weight: 600;
+}
+.bw-home-pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--bw-accent); }
+.bw .bw-home-hero h1 {
+  margin: 22px 0 0; padding: 0;
+  font-size: 52px; line-height: 1.24; font-weight: 700; letter-spacing: -0.035em; color: var(--bw-ink);
+}
+.bw-home-hero h1 em {
+  font-style: normal; color: var(--bw-accent);
+  background: linear-gradient(transparent 70%, var(--bw-accent-soft) 70%);
+  padding: 0 2px;
+}
+.bw .bw-home-hero p {
+  margin: 22px auto 0; max-width: 620px;
+  font-size: var(--fs-em); line-height: 1.75; color: var(--bw-muted);
+}
+
+.stApp .st-key-home_hero_cta { margin-top: 30px; }
+.st-key-home_start_hero button,
+.st-key-home_start_end button { min-height: 48px; padding: 0 22px; }
+.st-key-home_start_hero button p,
+.st-key-home_start_end button p { font-size: 16px; font-weight: 600; }
+.bw-home-ghost {
+  display: inline-flex; align-items: center; height: 48px; padding: 0 22px;
+  border: 1px solid var(--bw-line-strong); border-radius: var(--bw-r);
+  background: var(--bw-surface); color: var(--bw-ink);
+  font-size: 16px; font-weight: 600; text-decoration: none;
+}
+.bw-home-ghost:hover { border-color: var(--bw-accent-line); color: var(--bw-accent-text); }
+
+.bw .bw-home-checks {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px;
+  margin: 24px 0 0; padding: 0; list-style: none;
+  font-size: var(--fs-small); color: var(--bw-ink-2);
+}
+.bw-home-checks li { display: flex; align-items: center; gap: 6px; margin: 0; }
+.bw-home-checks .bw-i { color: var(--bw-accent); }
+
+.bw-home-preview { margin: 52px auto 0; max-width: 1080px; }
+.bw-home-frame {
+  border: 1px solid var(--bw-line-strong); border-radius: var(--bw-r-xl);
+  overflow: hidden; background: var(--bw-surface);
+}
+.bw-home-frame .bar {
+  display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px;
+  border-bottom: 1px solid var(--bw-line); background: var(--bw-surface-2);
+}
+.bw-home-frame .bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--bw-line-strong); }
+.bw-home-frame .url {
+  margin-left: 10px; padding: 3px 10px; border-radius: var(--bw-r-sm);
+  background: var(--bw-bg); font-size: var(--fs-meta); color: var(--bw-muted);
+}
+.bw-home-frame img { display: block; width: 100%; height: auto; }
+.bw-home-preview figcaption { margin-top: 10px; text-align: center; font-size: var(--fs-meta); color: var(--bw-muted); }
+
+/* ── 섹션 공통 ───────────────────────────────────────────────────────── */
+.bw-home-sec { padding-top: 104px; scroll-margin-top: 0; }
+.bw-home-sh { max-width: 760px; }
+.bw-home-eyebrow { font-size: var(--fs-small); font-weight: 700; color: var(--bw-accent-text); }
+.bw .bw-home-sh h2 {
+  margin: 10px 0 0; padding: 0;
+  font-size: 34px; line-height: 1.32; font-weight: 700; letter-spacing: -0.03em; color: var(--bw-ink);
+}
+.bw .bw-home-sh p { margin-top: 12px; font-size: var(--fs-body); line-height: 1.75; color: var(--bw-muted); }
+.bw-home-sec h3 { margin: 0; padding: 0; font-size: var(--fs-em); font-weight: 700; line-height: 1.45; color: var(--bw-ink); }
+
+/* ── 문제 ────────────────────────────────────────────────────────────── */
+.bw-home-problem { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; margin-top: 40px; align-items: start; }
+.bw-home-pains { margin: 0; padding: 0; list-style: none; }
+.bw-home-pains li {
+  display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px;
+  margin: 0; padding: 20px 0; border-top: 1px solid var(--bw-line);
+}
+.bw-home-pains li:first-child { border-top: 0; padding-top: 4px; }
+.bw-home-pains .ic,
+.bw-home-features .ic {
+  display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px;
+  border-radius: var(--bw-r); background: var(--bw-accent-wash); color: var(--bw-accent);
+}
+.bw-home-pains p, .bw-home-features p, .bw-home-steps p {
+  margin: 6px 0 0; font-size: var(--fs-small); line-height: 1.7; color: var(--bw-muted);
+}
+
+.bw-home-cases { border: 1px solid var(--bw-line); border-radius: var(--bw-r-xl); background: var(--bw-surface); overflow: hidden; }
+.bw-home-cases .h, .bw-home-docs .h {
+  display: flex; justify-content: space-between; padding: 14px 20px;
+  font-size: var(--fs-meta); font-weight: 600; color: var(--bw-muted);
+}
+.bw-home-cases ul { margin: 0; padding: 0; list-style: none; }
+.bw-home-cases li {
+  display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 16px; align-items: baseline;
+  margin: 0; padding: 14px 20px; border-top: 1px solid var(--bw-line);
+}
+.bw-home-cases .d { font: 500 var(--fs-meta)/1.4 var(--bw-mono); color: var(--bw-muted); }
+.bw-home-cases .t { font-size: var(--fs-small); line-height: 1.55; color: var(--bw-ink); }
+.bw-home-cases .t a { color: inherit; text-decoration: none; }
+.bw-home-cases .t a:hover { color: var(--bw-accent-text); text-decoration: underline; text-underline-offset: 3px; }
+.bw-home-cases .t .bw-i { margin-left: 4px; color: var(--bw-faint); }
+.bw-home-cases .n { text-align: right; white-space: nowrap; }
+.bw-home-cases .n b { display: block; font: 600 var(--fs-body)/1.3 var(--bw-mono); color: var(--bw-ink); }
+.bw-home-cases .n small { display: block; font-size: var(--fs-meta); color: var(--bw-muted); }
+
+/* ── 검토 방식 ───────────────────────────────────────────────────────── */
+.bw .bw-home-steps {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 40px 0 0; padding: 0; list-style: none;
+  border: 1px solid var(--bw-line); border-radius: var(--bw-r-xl); background: var(--bw-surface); overflow: hidden;
+}
+.bw-home-steps li { margin: 0; padding: 28px 28px 30px; }
+.bw-home-steps li + li { border-left: 1px solid var(--bw-line); }
+.bw-home-steps .no { display: block; margin-bottom: 14px; font: 600 var(--fs-small)/1 var(--bw-mono); color: var(--bw-accent); }
+.bw-home-steps h3 { font-size: var(--fs-title); }
+.bw-home-steps .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+
+/* ── 기능 ────────────────────────────────────────────────────────────── */
+.bw .bw-home-features {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;
+  margin: 40px 0 0; padding: 0; list-style: none;
+}
+.bw-home-features li {
+  display: flex; flex-direction: column;
+  margin: 0; padding: 26px 28px 28px;
+  border: 1px solid var(--bw-line); border-radius: var(--bw-r-xl); background: var(--bw-surface);
+}
+.bw-home-features .ic { margin-bottom: 16px; }
+.bw-home-features h3 { font-size: var(--fs-title); }
+.bw-home-eg {
+  display: flex; align-items: flex-start; gap: 10px; margin-top: 18px; padding: 12px 14px;
+  border: 1px solid var(--bw-line); border-radius: var(--bw-r); background: var(--bw-bg);
+  font-size: var(--fs-small); line-height: 1.7; color: var(--bw-ink);
+}
+.bw-home-eg .bw-tag { margin-top: 1px; }
+.bw-home-eg.is-ladder { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; }
+.bw-home-eg.is-ladder span { color: var(--bw-muted); }
+.bw-home-eg.is-ladder b { font-weight: 600; color: var(--bw-accent-text); }
+
+/* ── 근거 자료 ───────────────────────────────────────────────────────── */
+.bw-home-sources { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 24px; margin-top: 40px; align-items: start; }
+.bw .bw-home-nums {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px;
+  margin: 0; padding: 0; list-style: none;
+  border: 1px solid var(--bw-line); border-radius: var(--bw-r-xl); background: var(--bw-line); overflow: hidden;
+}
+.bw-home-nums li { margin: 0; padding: 24px 22px; background: var(--bw-surface); }
+.bw-home-nums .n { font: 600 34px/1.1 var(--bw-mono); letter-spacing: -0.02em; color: var(--bw-ink); }
+.bw-home-nums .n small { margin-left: 4px; font: 400 var(--fs-body) var(--bw-font); color: var(--bw-muted); }
+.bw-home-nums .l { margin-top: 10px; font-size: var(--fs-small); font-weight: 600; color: var(--bw-ink-2); }
+.bw-home-nums .m { margin-top: 2px; font-size: var(--fs-meta); color: var(--bw-muted); }
+.bw-home-docs { padding: 0 20px 6px; border: 1px solid var(--bw-line); border-radius: var(--bw-r-xl); background: var(--bw-surface); }
+.bw-home-docs .h { padding: 14px 0 10px; }
+
+/* ── 마지막 안내 · 푸터 ──────────────────────────────────────────────── */
+.stApp .st-key-home_cta {
+  margin-top: 104px; padding: 26px 36px;
+  border: 1px solid var(--bw-line); border-radius: var(--bw-r-xl); background: var(--bw-surface);
+}
+.bw-home-cta-in { display: flex; align-items: center; gap: 28px; }
+.bw-home-cta-in .pic img { display: block; }
+.bw .bw-home-cta-in h2 { margin: 0; padding: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.025em; color: var(--bw-ink); }
+.bw .bw-home-cta-in p { margin-top: 8px; font-size: var(--fs-body); color: var(--bw-muted); }
+
+.bw-home-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap;
+  margin-top: 40px; padding: 22px 0 8px; border-top: 1px solid var(--bw-line);
+  font-size: var(--fs-meta); color: var(--bw-muted);
+}
+.bw-home-foot b { margin-right: 10px; font-size: var(--fs-small); color: var(--bw-ink); }
+.bw .bw-home-foot p { margin: 0; font-size: var(--fs-meta); color: var(--bw-muted); }
+
+/* ── 좁은 화면 ───────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .bw .bw-home-hero h1 { font-size: 44px; }
+  .bw-home-problem, .bw-home-sources { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+}
+@media (max-width: 640px) {
+  .stApp:has(.st-key-home_top) [data-testid="stMainBlockContainer"] { padding: 0 16px 28px; }
+  .stApp .st-key-home_top { min-height: 56px; }
+  .bw-home-nav, .st-key-home_top_r .bw-mode { display: none; }
+  .bw-home-hero { padding-top: 44px; }
+  .bw .bw-home-hero h1 { font-size: 32px; line-height: 1.3; }
+  .bw .bw-home-hero p { font-size: var(--fs-body); }
+  .bw-home-preview { margin-top: 36px; }
+  .bw-home-sec { padding-top: 68px; }
+  .bw .bw-home-sh h2 { font-size: 26px; }
+  .bw-home-cases li { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; }
+  .bw-home-cases .d { grid-column: 1 / -1; }
+  .bw-home-steps { grid-template-columns: minmax(0, 1fr); }
+  .bw-home-steps li + li { border-left: 0; border-top: 1px solid var(--bw-line); }
+  .bw-home-features { grid-template-columns: minmax(0, 1fr); }
+  .bw-home-nums li { padding: 18px 16px; }
+  .bw-home-nums .n { font-size: 26px; }
+  .stApp .st-key-home_cta { margin-top: 68px; padding: 22px 18px; }
+  .bw-home-cta-in { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .bw-home-cta-in .pic img { height: 96px !important; }
+}
