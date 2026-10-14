@@ -172,6 +172,15 @@ def form_words(product: dict[str, Any]) -> tuple[str, list[str]]:
     return "", []
 
 
+def market_tags(product: dict[str, Any]) -> list[str]:
+    """같은 제형의 올리브영 랭킹 홍보 태그어 (효능·순위·수치 없는 말만, form_vocab.json market_tags)."""
+    text = f"{product.get('form') or ''} {product.get('name') or ''}"
+    for row in _read(ASSETS / "form_vocab.json", {}).get("forms", []):
+        if re.search(row["match"], text):
+            return list(row.get("market_tags", []))
+    return []
+
+
 @lru_cache(maxsize=1)
 def _bank_rows() -> tuple[dict[str, Any], ...]:
     path = ASSETS.parent / "copy_bank" / "bank.jsonl"
@@ -318,6 +327,9 @@ def build_generation_knowledge(
         lines += ["", f"[MZ 말투 - {bank.get('mz_note', '')}]",
                   "- 써도 됨: " + ", ".join(bank["mz_ok"]),
                   "- 쓰지 않음(효과·최고 보증): " + ", ".join(bank.get("mz_avoid", []))]
+        tags = market_tags(product)
+        if tags:
+            lines.append("- 같은 제형 올리브영 랭킹 태그어(헤드라인 앞 [ ] 태그나 해시태그로 1개까지): " + ", ".join(tags))
     hint = expression_bank().get("channel_hints", {}).get(channel)
     if hint:
         lines += ["", f"[채널 문법 - {channel}] {hint}"]

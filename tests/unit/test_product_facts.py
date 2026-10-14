@@ -84,3 +84,16 @@ def test_build_copy_bank_filters_risky_long_and_duplicate_items():
     ])
     assert [k["text"] for k in kept] == ["자기 전 마지막 한 겹"] and kept[0]["form"] == "크림·밤"
     assert dropped["dup"] == 1 and dropped["words"] == 1 and dropped["risk"] == 1 and dropped["length"] == 1
+
+
+def test_market_tags_only_on_mz_channels_and_carry_no_rank_or_numbers():
+    import re
+
+    from cosmetic_agent.domain.copy_knowledge import market_tags
+
+    sun = {**BASE, "name": "데일리 워터 선크림"}
+    assert "물막선크림" in market_tags(sun)
+    assert "올리브영 랭킹 태그어" in build_generation_knowledge(sun, channel="SNS", rng=random.Random(0))
+    assert "올리브영 랭킹 태그어" not in build_generation_knowledge(sun, channel="상세페이지", rng=random.Random(0))
+    tags = [t for row in json.loads((ASSETS_DIR / "form_vocab.json").read_text(encoding="utf-8"))["forms"] for t in row["market_tags"]]
+    assert not [t for t in tags if re.search(r"1등|1위|연속|\d+\s*(시간|%|배)|진정|미백|장벽|탈모|트러블|여드름|특허", t)]
