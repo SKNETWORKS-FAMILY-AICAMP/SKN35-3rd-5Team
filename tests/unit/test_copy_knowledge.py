@@ -38,8 +38,9 @@ def test_card_separates_notified_ingredient_by_product_type():
 def test_knowledge_block_assigns_different_angles_and_origin():
     product = dict(GENERAL, key_ingredients=["병풀추출물", "판테놀"])
     block = build_generation_knowledge(product, "SNS", random.Random(0))
-    angles = [line for line in block.splitlines() if line.startswith(("- strong:", "- balanced:", "- safe:"))]
-    assert len(angles) == 3 and len({a.split("—")[0].split(":")[1] for a in angles}) == 3
+    angles = [line for line in block.splitlines() if line.startswith("- 후보 ")]
+    assert len(angles) == 6 and len({a.split("—")[0].split(":")[1] for a in angles}) >= 5
+    assert "[끌림 기법" in block
     assert "성분 유래 스토리" in block  # 유래 정보가 있으면 반드시 한 후보에 배정
     assert "[채널 문법 - SNS]" in block
 
@@ -85,3 +86,25 @@ def test_clean_copy_strips_formatting_artifacts():
     assert clean_copy("**제목**\n살리실릭애씨드 함유! [제품을 보여주며 감탄]") == "제목\n살리실릭애씨드 함유!"
     assert clean_copy("### 저녁 루틴\n\n토너로 마무리 #편안한보습") == "저녁 루틴\n토너로 마무리 #편안한보습"
     assert material_claim_notes("자연을 담아낸 촉촉한 케어", GENERAL)
+
+
+def test_verified_candidates_are_ranked_by_appeal_and_capped():
+    from cosmetic_agent.domain.rules import RuleEngine
+    from cosmetic_agent.domain.verifier import CopyVerifier
+    from cosmetic_agent.generation.nodes import verify_candidates_node
+
+    texts = ["가볍게. 촉촉하게. 끝.", "세안하고 돌아서면 당김이 시작된다면", "크림인데 물처럼 가볍게",
+             "세안하고 돌아서면 당김이 시작된다면!", "출근 준비로 바쁜 아침의 마지막 단계", "바르는 순간 산뜻한 마무리"]
+
+    class Ranker:
+        def score(self, texts, **kwargs):
+            return [1, 9, 5, 9, 7, 2]
+
+    product = {"product_id": "P", "name": "워터 크림", "category": "일반", "owned_evidence": []}
+    state = {"product": product, "channel": "SNS", "tone": "",
+             "drafts": [{"text": t, "tier": "safe"} for t in texts]}
+    result = verify_candidates_node(state, CopyVerifier(), RuleEngine(), ranker=Ranker())
+    picked = [c["text"] for c in result["candidates"]]
+    # 9점 두 개는 거의 같은 문구라 하나만, 그다음 7점·5점
+    assert picked == [texts[1], texts[4], texts[2]]
+    assert result["candidates"][0]["appeal_score"] == 9

@@ -27,7 +27,7 @@ class GeneratedDraft(BaseModel):
 
 
 class GenerationOutput(BaseModel):
-    candidates: list[GeneratedDraft] = Field(min_length=3, max_length=3)
+    candidates: list[GeneratedDraft] = Field(min_length=3, max_length=6)
 
 
 class CopyGenerator:
@@ -70,11 +70,13 @@ class CopyGenerator:
         ])
         if isinstance(output, dict):
             output = GenerationOutput.model_validate(output)
-        by_tier = {candidate.tier: candidate for candidate in output.candidates}
         required = ("strong", "balanced", "safe")
-        if set(by_tier) != set(required):
-            raise ValueError("생성 결과에는 strong, balanced, safe 후보가 각각 하나씩 필요합니다.")
-        return [dict(by_tier[tier].model_dump(), text=clean_copy(by_tier[tier].text)) for tier in required]
+        if not set(required) <= {candidate.tier for candidate in output.candidates}:
+            raise ValueError("생성 결과에는 strong, balanced, safe 후보가 각각 하나 이상 필요합니다.")
+        # 후보를 넉넉히(최대 6개) 받아, 검증을 통과한 것 중 끌림 순위로 3개를 고른다 (generation/nodes.py)
+        order = {tier: i for i, tier in enumerate(required)}
+        ranked = sorted(output.candidates, key=lambda c: order[c.tier])
+        return [dict(c.model_dump(), text=clean_copy(c.text)) for c in ranked]
 
 
 def clean_copy(text: str) -> str:

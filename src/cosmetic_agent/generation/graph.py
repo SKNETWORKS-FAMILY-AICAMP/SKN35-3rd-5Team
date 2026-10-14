@@ -28,6 +28,7 @@ def build_generation_graph(
     verifier: CopyVerifier,
     generator: CopyGenerator,
     reviewer=None,
+    ranker=None,
 ):
     builder = StateGraph(AdGenerationState)
 
@@ -62,7 +63,7 @@ def build_generation_graph(
     builder.add_node("retrieve_generation_rules", lambda s: retrieve_generation_rules_node(s, retriever))
     builder.add_node("organize_generation_evidence", organize_generation_evidence_node)
     builder.add_node("generate_candidates", generate)
-    builder.add_node("verify_candidates", lambda s: verify_candidates_node(s, verifier, rule_engine, reviewer))
+    builder.add_node("verify_candidates", lambda s: verify_candidates_node(s, verifier, rule_engine, reviewer, ranker))
     builder.add_node("finalize_generation", finalize_generation_node)
 
     builder.add_edge(START, "parse_generation")

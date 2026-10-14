@@ -204,7 +204,7 @@ def pick_angles(product: dict[str, Any], has_origin: bool, rng: random.Random, n
     # 원료사전 유래 정보가 있으면 성분 유래 각도를 반드시 한 후보에 배정한다 (데이터 연결의 핵심 재료)
     origin = [a for a in rest if a["id"] == "origin_story"]
     rest = origin + [a for a in rest if a["id"] != "origin_story"]
-    ordered = (strong_pool[:1] + rest) if strong_pool else rest
+    ordered = (strong_pool[:2] + rest) if strong_pool else rest
     return ordered[:n]
 
 
@@ -242,11 +242,17 @@ def build_generation_knowledge(
     ingredients = list(dict.fromkeys(product.get("key_ingredients") or []))
     cards = [ingredient_card(name, product) + _role_suffix(name, profiles) for name in ingredients[:8]]
     has_origin = any("유래:" in c for c in cards)
-    angles = pick_angles(product, has_origin, rng)
-    tiers = ["strong", "balanced", "safe"]
+    slots = ["strong", "strong", "balanced", "balanced", "safe", "safe"]
+    angles = pick_angles(product, has_origin, rng, n=len(slots))
+    angles += angles[: len(slots) - len(angles)]  # 쓸 수 있는 각도가 6개보다 적으면 앞에서부터 다시 쓴다
     lines = ["[성분 카드 - 식약처 원료사전·기능성 고시 성분표 기준]", *(cards or ["- 입력된 성분 없음 (성분 이야기는 하지 말 것)"])]
-    lines += ["", "[이번 후보별 표현 각도 - 세 후보가 서로 다른 각도로 쓴다]"]
-    lines += [f"- {tier}: {a['name']} — {a['how']} (예: {a['example']})" for tier, a in zip(tiers, angles)]
+    lines += ["", "[이번 후보별 표현 각도 - 후보 6개가 서로 다른 각도로 쓴다]"]
+    lines += [f"- 후보 {i} ({tier}): {a['name']} — {a['how']} (예: {a['example']})"
+              for i, (tier, a) in enumerate(zip(slots, angles), 1)]
+    hooks = expression_bank().get("hooks", [])
+    if hooks:
+        lines += ["", "[끌림 기법 - 모든 후보의 첫 구절에 하나 이상 쓴다. 기법을 썼다고 효능 주장이 허용되지는 않는다]"]
+        lines += [f"- {h['name']}: {h['how']} (예: {h['example']})" for h in rng.sample(hooks, min(6, len(hooks)))]
     hint = expression_bank().get("channel_hints", {}).get(channel)
     if hint:
         lines += ["", f"[채널 문법 - {channel}] {hint}"]

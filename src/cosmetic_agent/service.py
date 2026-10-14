@@ -16,6 +16,7 @@ from .domain.rules import RuleEngine
 from .domain.verifier import CopyVerifier
 from .models.judge_factory import JudgeFactory
 from .models.copy_generator import CopyGenerator
+from .models.appeal_ranker import AppealRanker
 from .rag.vector_store import VectorStoreRetriever
 from .rag.sparse_bm25 import SparseBM25Retriever
 from .rag.hybrid import HybridRetriever
@@ -85,6 +86,7 @@ class ReviewService:
             verifier=self.verifier,
             generator=self.copy_generator,
             reviewer=self.review_single,
+            ranker=AppealRanker(),
         )
         logger.info("ReviewService 초기화 완료 (그래프 재사용 준비 완료)")
 

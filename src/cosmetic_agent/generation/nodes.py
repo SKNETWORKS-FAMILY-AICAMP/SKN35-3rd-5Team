@@ -107,15 +107,34 @@ def generate_candidates_node(
         }
 
 
+SHOWN_CANDIDATES = 3
+
+
+def _pick_diverse(order: list[int], texts: list[str], limit: int) -> list[int]:
+    """끌림 순서대로 고르되, 이미 고른 후보와 너무 비슷하면(문자 유사도 0.6 초과) 건너뛴다."""
+    from difflib import SequenceMatcher
+
+    chosen: list[int] = []
+    for i in order:
+        if all(SequenceMatcher(None, texts[i], texts[j]).ratio() <= 0.6 for j in chosen):
+            chosen.append(i)
+    chosen += [i for i in order if i not in chosen]  # 모자라면 비슷한 것도 뒤에 둔다
+    return chosen[:limit] if limit else chosen
+
+
 def verify_candidates_node(
     state: AdGenerationState,
     verifier: CopyVerifier,
     rule_engine: RuleEngine,
     reviewer=None,
+    ranker=None,
 ) -> dict[str, Any]:
+    """1) 값싼 검사(참고 ID·미확인 성분·사실 날조·재료 점검·검증기)를 모든 후보에
+    2) 통과한 후보를 끌림 점수로 정렬(ranker)하고 서로 다른 것 위주로
+    3) 앞에서부터 판정 엔진 검토(reviewer)를 거쳐 최대 3개를 보여준다."""
     product = state["product"]
-    candidates: list[dict[str, Any]] = []
     rejected: list[str] = list(state.get("rejected_notes") or []) if not state.get("drafts") else []
+    passed_drafts: list[tuple[dict[str, Any], str]] = []
     for draft in state.get("drafts", []):
         text = draft.get("text", "")
         allowed_ids = {r["reference_id"] for r in state.get("market_references", [])}
@@ -147,25 +166,43 @@ def verify_candidates_node(
             functional_type=product.get("functional_type"),
         )
         if passed:
-            candidate = {**draft, "verified": True, "verify_note": note, "status": "검토통과"}
-            if reviewer is not None:
-                try:
-                    review = reviewer(text, ProductCard.model_validate(product))
-                    candidate["review"] = review.model_dump()
-                    candidate["notes"] = [v for v in (review.result.review_notes, review.result.next_test) if v]
-                    if review.result.status != "판정" or review.result.level != 0:
-                        candidate.update(status="확인필요", verified=False, verify_note="후속 규정 검토에서 확인이 필요합니다.")
-                    if review.result.level == 2:
-                        rejected.append(review.result.review_notes or "후속 검토에서 위반으로 판정되어 재작성합니다.")
-                        continue
-                except Exception:  # noqa: BLE001 - 검토 실패를 통과로 표시하지 않는다
-                    candidate.update(status="확인필요", verified=False, verify_note="후속 검토에 실패했습니다.", notes=["모델·검색 연결을 확인하고 다시 검토해주세요."])
-            if candidate["status"] != "검토통과":
-                rejected.extend(candidate.get("notes") or [candidate["verify_note"]])
-            candidates.append(candidate)
+            passed_drafts.append((draft, note))
         else:
             rejected.append(f"{draft.get('tier', 'candidate')}: {note}")
-    return {"candidates": candidates, "rejected_notes": rejected}
+
+    texts = [draft.get("text", "") for draft, _ in passed_drafts]
+    scores = ranker.score(texts, channel=state.get("channel", ""), tone=state.get("tone", ""),
+                          product_name=product.get("name", "")) if ranker is not None else [0.0] * len(texts)
+    order = sorted(range(len(texts)), key=lambda i: -scores[i])  # 점수가 같으면 원래 순서(등급 순)
+    order = _pick_diverse(order, texts, 0)
+
+    candidates: list[dict[str, Any]] = []
+    for i in order:
+        if sum(c["status"] == "검토통과" for c in candidates) >= SHOWN_CANDIDATES:
+            break
+        draft, note = passed_drafts[i]
+        text = draft.get("text", "")
+        candidate = {**draft, "verified": True, "verify_note": note, "status": "검토통과"}
+        if ranker is not None:
+            candidate["appeal_score"] = scores[i]
+        if reviewer is not None:
+            try:
+                review = reviewer(text, ProductCard.model_validate(product))
+                candidate["review"] = review.model_dump()
+                candidate["notes"] = [v for v in (review.result.review_notes, review.result.next_test) if v]
+                if review.result.status != "판정" or review.result.level != 0:
+                    candidate.update(status="확인필요", verified=False, verify_note="후속 규정 검토에서 확인이 필요합니다.")
+                if review.result.level == 2:
+                    rejected.append(review.result.review_notes or "후속 검토에서 위반으로 판정되어 재작성합니다.")
+                    continue
+            except Exception:  # noqa: BLE001 - 검토 실패를 통과로 표시하지 않는다
+                candidate.update(status="확인필요", verified=False, verify_note="후속 검토에 실패했습니다.", notes=["모델·검색 연결을 확인하고 다시 검토해주세요."])
+        if candidate["status"] != "검토통과":
+            rejected.extend(candidate.get("notes") or [candidate["verify_note"]])
+        candidates.append(candidate)
+    # 검토통과를 앞에, 그다음 확인필요. 화면에는 최대 3개
+    candidates.sort(key=lambda c: c["status"] != "검토통과")
+    return {"candidates": candidates[:SHOWN_CANDIDATES], "rejected_notes": rejected}
 
 
 def finalize_generation_node(state: AdGenerationState) -> dict[str, Any]:
