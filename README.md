@@ -70,7 +70,7 @@
 
 ### 📊 4. 평가 파트
 * [ ] [`data/golden_set/dev.jsonl`](data/golden_set/dev.jsonl): 실험용 30건 이상 문구와 정답 라벨(level, violation_type, 근거ID) 구축
-* [ ] [`data/golden_set/holdout.jsonl`](data/golden_set/holdout.jsonl): 최종 검증용 20건 이상 블라인드 벤치마크 데이터 구축
+* [x] [`data/golden_set/holdout.jsonl`](data/golden_set/holdout.jsonl): 최종 검증용 20건 이상 블라인드 벤치마크 데이터 구축
 * [ ] [`eval/metrics/eval_metrics.py`](eval/metrics/eval_metrics.py): Macro-F1 및 검색 Hit@4 함수 구현
 * [ ] [`eval/run_eval.py`](eval/run_eval.py): 골든셋 순회 후 R0(규칙) vs R1(GPT) vs R4(최종) 비교표 출력
 
@@ -128,15 +128,35 @@ uv sync --extra dev
 
 ```bash
 uv run python indexing/03_chunk_articles.py
+uv run python indexing/04_enrich_metadata.py
 uv run python indexing/05_build_indexes.py
 ```
 
+04 단계는 골든셋 문구를 사용하지 않고 원문을 기준으로 주장 유형, 실증 요건,
+법적 효력, 검색 키워드를 추가합니다. Dense와 BM25는 이 검색 설명을 함께
+색인하며, 사용자에게 제시하는 인용문은 기존 규정 원문을 그대로 사용합니다.
+
 > `data/02_processed/bm25_index.pkl`은 실행 환경에 필요한 검색 인덱스입니다. 배포 시 파일을 함께 제공하거나 배포 빌드 과정에서 다시 생성해야 합니다.
 
-인덱싱 결과 검증:
+인덱싱 결과와 dev 검색 품질 검증:
 
 ```bash
-uv run python scripts/validate_rag.py
+uv run python scripts/validate_rag.py --split dev
+```
+
+실행 결과는 `eval/reports/rag_retrieval_dev_YYYY-MM-DD.json`과
+`eval/reports/rag_retrieval_dev_YYYY-MM-DD.md`에 저장됩니다. 보고서에는
+Dense·BM25·Hybrid의 Hit@1/2/4와 MRR, 실패 문항 및 실패 유형이 포함됩니다.
+
+Hybrid 검색은 RRF 후보 중 최종 Top 4 내부를 경량 reranker로 재정렬합니다.
+reranker는 외부 LLM을 호출하지 않고 기존 RRF 점수, Dense 순위 및 검색용
+메타데이터 일치도를 사용하며 최종 근거 집합 자체는 변경하지 않습니다.
+
+현재 holdout은 사용자 결정에 따라 반복 회귀 테스트에 사용합니다. 따라서 이 결과는
+블라인드 최종 성능이 아니라 같은 문항에 대한 회귀 지표로 해석해야 합니다.
+
+```bash
+uv run python scripts/validate_rag.py --split holdout --confirm-holdout
 ```
 
 ### 5) 서버 및 대시보드 실행

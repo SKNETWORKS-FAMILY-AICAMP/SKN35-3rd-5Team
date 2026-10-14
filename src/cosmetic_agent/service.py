@@ -16,6 +16,7 @@ from .domain.rules import RuleEngine
 from .domain.verifier import CopyVerifier
 from .models.judge_factory import JudgeFactory
 from .models.copy_generator import CopyGenerator
+from .models.appeal_ranker import AppealRanker
 from .rag.vector_store import VectorStoreRetriever
 from .rag.sparse_bm25 import SparseBM25Retriever
 from .rag.hybrid import HybridRetriever
@@ -34,8 +35,13 @@ def _ensure_bm25_index() -> None:
     if settings.BM25_INDEX_PATH.exists():
         return
     import importlib.util
+    import sys
 
-    builder_path = PROJECT_ROOT / "indexing" / "05_build_indexes.py"
+    indexing_dir = PROJECT_ROOT / "indexing"
+    # 색인 스크립트가 같은 폴더의 metadata_enrichment 를 불러오므로 경로에 넣는다
+    if str(indexing_dir) not in sys.path:
+        sys.path.insert(0, str(indexing_dir))
+    builder_path = indexing_dir / "05_build_indexes.py"
     spec = importlib.util.spec_from_file_location("build_indexes", builder_path)
     builder = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(builder)
@@ -85,6 +91,7 @@ class ReviewService:
             verifier=self.verifier,
             generator=self.copy_generator,
             reviewer=self.review_single,
+            ranker=AppealRanker(),
         )
         logger.info("ReviewService 초기화 완료 (그래프 재사용 준비 완료)")
 
@@ -193,5 +200,7 @@ class ReviewService:
             candidates=final_state.get("candidates", []),
             citations=citations,
             warnings=final_state.get("warnings", []),
+            market_references=final_state.get("market_references", []),
+            ingredient_profiles=final_state.get("ingredient_profiles", []),
             timing=ExecutionTiming(total_ms=(time.perf_counter() - start_t) * 1000),
         )

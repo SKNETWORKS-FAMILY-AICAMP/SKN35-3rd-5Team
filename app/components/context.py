@@ -14,7 +14,7 @@ import streamlit as st
 
 from app.components.layout import esc, html
 from app.services import backend
-from app.services.peer_market import FORMS
+from app.services.peer_market import FORMS, form_of
 
 _PID = "bw_pid"          # 선택한 제품 id (화면을 옮겨도 유지)
 _EV = "bw_ev_state"      # {product_id: [체크 여부, ...]}
@@ -162,7 +162,9 @@ def _register_dialog(key: str) -> None:
     ingredients = c4.text_input("주요 성분 (쉼표로 구분)", placeholder="예: 나이아신아마이드, 판테놀")
     # 예상 매출 시나리오에서 비슷한 시장 제품을 찾고 가격을 비교하는 데 쓴다
     c5, c6 = st.columns([2, 3])
-    form = c5.selectbox("제형", FORMS, help="세럼·앰플·에센스·부스터는 같은 묶음으로 비교합니다")
+    form_choice = c5.selectbox("제형", ["제품명에서 자동 확인", *FORMS], help="제품명에 토너·크림 등이 있으면 자동으로 확인합니다. 모호한 제품은 직접 선택하세요.")
+    form = form_of(name) if form_choice == "제품명에서 자동 확인" else form_choice
+    c5.caption(f"비교 제형: {form or '제품명으로 확인할 수 없어 직접 선택이 필요합니다.'}")
     price = c6.number_input("판매가 (원, 선택)", min_value=0, value=None, step=1000, placeholder="예: 32000")
     st.markdown("**보유 실증 자료** · 표 아래 ＋ 로 행을 추가해 여러 개 입력 (항목이 빈 행은 무시)")
     rows = st.data_editor(
@@ -181,6 +183,9 @@ def _register_dialog(key: str) -> None:
         return
     if not name.strip():
         st.error("제품명을 입력해 주세요")
+        return
+    if not form:
+        st.error("제품명으로 제형을 확인할 수 없습니다. 제형을 직접 선택해 주세요.")
         return
     evidence = [
         {"test_type": r["시험 종류"], "item": (r.get("항목") or "").strip(),

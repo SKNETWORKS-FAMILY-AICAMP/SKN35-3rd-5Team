@@ -162,3 +162,35 @@ def test_functional_product_cannot_promise_removal(verifier):
     assert not codes(verifier, "피부의 미백에 도움을 주는 앰플", **kwargs)
     assert "금지표현" in codes(verifier, "깊은 주름이 사라지는 세럼",
                               product_category="기능성", functional_type="주름 개선")
+
+
+@pytest.mark.parametrize("name", [
+    "비스-피이지/피피지-18/6다이메티콘",  # PEG/PPG 한글 표기의 '피지'
+    "리놀레아미도프로필피지-다이모늄클로라이드포스페이트",
+    "카복시메틸람노사이드",  # 화학명 속 '카복시'
+    "하이드롤라이즈드콜라겐",  # 콜라겐 함유 사실
+    "폴리글리세릴-3세틸에터",  # '3세'는 나이가 아님
+    "인체중간엽줄기세포배양액",  # '인체중간엽'의 '체중'
+])
+def test_ingredient_names_do_not_trigger_claim_rules(verifier, name):
+    # 식약처 원료사전 성분명 2,000개 대량 점검에서 찾은 오탐. 인체 유래 오인 판단은 따로 본다.
+    issues = verifier.inspect(f"{name} 함유", [])
+    if name.startswith("인체"):  # 진짜 인체 유래 성분은 보수적으로 거는 것이 맞다
+        issues = [i for i in issues if "인체유래" not in i.basis_id]
+    assert not issues, issues
+
+
+def test_claims_still_caught_after_ingredient_exceptions(verifier):
+    assert "실증필요" in codes(verifier, "피지 조절 효과로 보송한 피부")
+    assert "실증필요" in codes(verifier, "콜라겐 생성을 촉진하는 크림")
+    assert "금지표현" in codes(verifier, "카복시 테라피 효과를 집에서")
+    assert "금지표현" in codes(verifier, "체중 감량을 돕는 바디 크림")
+    assert "금지표현" in codes(verifier, "인체 줄기세포 엑소좀 앰플")
+    assert not codes(verifier, "연어정소엑소좀 함유")  # 인체 외 유래를 밝힘
+
+
+@pytest.mark.parametrize("text", ["나이 들지 않는 피부의 비밀, 아데노신", "젊음을 유지하세요", "시간을 되돌리는 세럼"])
+def test_reversing_aging_is_out_of_scope_even_for_wrinkle_products(verifier, text):
+    kwargs = {"product_category": "기능성", "functional_type": "주름 개선"}
+    assert "금지표현" in codes(verifier, text, **kwargs)
+    assert not codes(verifier, "피부의 주름 개선에 도움을 주는 세럼", **kwargs)

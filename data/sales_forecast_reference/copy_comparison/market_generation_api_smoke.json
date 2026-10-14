@@ -1,0 +1,154 @@
+{
+  "record_kind": "실제 API 연결 검증; 판매 효과 평가 아님",
+  "input": {
+    "instruction": "주요 성분 사실과 촉촉하게 가꾸는 표현을 중심으로 한 줄 광고문을 만들어줘. 시장 사례는 표현 방식만 참고해줘.",
+    "product": {
+      "product_id": "CUSTOM_MARKET_SMOKE",
+      "name": "수분 진정 수딩 토너",
+      "form": "토너",
+      "category": "일반",
+      "key_ingredients": [
+        "히알루론산",
+        "판테놀"
+      ],
+      "owned_evidence": []
+    },
+    "channel": "상세페이지",
+    "tone": "간결한",
+    "length": "한 줄",
+    "keywords": [
+      "히알루론산",
+      "판테놀"
+    ]
+  },
+  "response": {
+    "request_id": "GEN_1921375189",
+    "status": "생성완료",
+    "product_id": "CUSTOM_MARKET_SMOKE",
+    "candidates": [
+      {
+        "text": "히알루론산과 판테놀로 촉촉하게 가꾸는 수분 진정 토너!",
+        "tier": "strong",
+        "rationale": "주요 성분인 히알루론산과 판테놀을 강조하여 제품의 특징을 부각시키면서 촉촉한 피부를 연상시키는 표현으로 구성하였습니다.",
+        "used_evidence": [],
+        "cited_ids": [
+          "L1",
+          "L3"
+        ],
+        "verified": true,
+        "verify_note": "검증 통과",
+        "market_reference_ids": [
+          "M1"
+        ],
+        "market_application": "주요 성분을 강조하는 방식으로, 소비자에게 제품의 특성을 간결하게 전달하는 표현을 사용했습니다."
+      },
+      {
+        "text": "히알루론산과 판테놀로 피부를 촉촉하게 가꿔주는 수분 진정 토너입니다.",
+        "tier": "balanced",
+        "rationale": "주요 성분을 간결하게 언급하면서 제품의 특성을 부각시킨 표현입니다.",
+        "used_evidence": [],
+        "cited_ids": [
+          "L1",
+          "L3"
+        ],
+        "verified": true,
+        "verify_note": "검증 통과",
+        "market_reference_ids": [
+          "M1"
+        ],
+        "market_application": "소비자에게 제품의 주요 성분과 효과를 간결하게 전달하는 표현 방식을 참고하였습니다."
+      },
+      {
+        "text": "촉촉한 사용감으로 피부를 부드럽게 가꿔주는 수분 진정 토너입니다.",
+        "tier": "safe",
+        "rationale": "특별한 효능 근거 없이도 사용할 수 있는 관리·사용감 표현으로, 소비자에게 긍정적인 인상을 줄 수 있는 문구입니다.",
+        "used_evidence": [],
+        "cited_ids": [
+          "L1",
+          "L3"
+        ],
+        "verified": true,
+        "verify_note": "검증 통과",
+        "market_reference_ids": [],
+        "market_application": "사용감과 관리 효과를 강조하여 소비자에게 긍정적인 이미지를 전달하는 표현입니다."
+      }
+    ],
+    "citations": [
+      {
+        "chunk_id": "LAW_시행규칙_별표5-2사",
+        "source": "화장품법 시행규칙",
+        "article": "별표5-2사",
+        "authority": 1,
+        "content_snippet": "[화장품법 시행규칙 별표5-2사 화장품 표시ㆍ광고의 범위 및 준수사항(제22조 관련)]\n사. 사실과 다르거나 부분적으로 사실이라고 하더라도 전체적으로 보아 소비자\n\n가 잘못 인식할 우려가 있는 표시ㆍ광고 또는 소비자를 속이거나 소비자가\n\n속을 우려가 있는 표시ㆍ광고를 하지 말 것"
+      },
+      {
+        "chunk_id": "LAW_시행규칙_별표5-2자",
+        "source": "화장품법 시행규칙",
+        "article": "별표5-2자",
+        "authority": 1,
+        "content_snippet": "[화장품법 시행규칙 별표5-2자 화장품 표시ㆍ광고의 범위 및 준수사항(제22조 관련)]\n자. 저속하거나 혐오감을 주는 표현ㆍ도안ㆍ사진 등을 이용하는 표시ㆍ광고를\n\n하지 말 것"
+      },
+      {
+        "chunk_id": "GUIDE_관리지침_II_적용_범위_및_기준",
+        "source": "화장품 표시·광고 관리 지침",
+        "article": "II. 적용 범위 및 기준",
+        "authority": 3,
+        "content_snippet": "[화장품 표시·광고 관리 지침 > II. 적용 범위 및 기준]\n1. 적용 범위\n①이 지침은 화장품제조업자·화장품책임판매업자·맞춤형화장품판매업자 및 판매자\n(이하 ‘책임판매업자등’이라 한다)가 화장품의 용기·포장 또는 첨부문서에\n표시(이하 ‘표시’라 한다) 또는 광고에 사용하는 모든 표현에 적용한다.\n②이 지침은 화장품 관련 법규의 범위 내에서 적용한다.\n2. 표시·광고 표현범위\n책임판매업자등이 화장품 표시 또는 광고를 할 때 금지표현 등 세부사항의예시는\n별표 1과 같다.\n3. 표시·광고 실증의 주요 대상\n사실과 다르게 소비자를 속이"
+      },
+      {
+        "chunk_id": "GUIDE_관리지침_I_목적",
+        "source": "화장품 표시·광고 관리 지침",
+        "article": "I. 목적",
+        "authority": 3,
+        "content_snippet": "[화장품 표시·광고 관리 지침 > I. 목적]\n이 지침은 화장품법 제10조, 제13조, 제14조 및 같은 법 시행규칙 제19조, 제22조,\n제23조, 별표 5와 관련하여, 화장품의 용기·포장 또는 첨부문서의 표시 또는 광고에\n사용되는 금지표현의 예시와 화장품 표시·광고 실증자료 요청에 관한 주요 대상을\n정함으로써 소비자를 허위·과장 광고로부터 보호하고 화장품제조업자·화장품책임\n판매업자·맞춤형화장품판매업자 및 판매자가 화장품의 표시·광고를 적정하게 할 수\n있도록 유도함을 목적으로 한다."
+      },
+      {
+        "chunk_id": "GUIDE_관리지침_III_주의사항",
+        "source": "화장품 표시·광고 관리 지침",
+        "article": "III. 주의사항",
+        "authority": 3,
+        "content_snippet": "[화장품 표시·광고 관리 지침 > III. 주의사항]\n1. 화장품책임판매업자 및 화장품책임판매업자의 위탁을 받은 제조업자는 수입화장품의\n외국어로 표현된 표시 또는 광고에 대하여 이 지침에 적합하도록 하기 위하여\n수정, 삭제, 오버레이블링(over-labelling) 등의 적절한 방법을 사용할 수 있다. 이\n경우 유통과정에서 스티커 등이 훼손되거나 떨어지지 않도록 하여야 한다.\n2. 이 지침은 화장품 표시·광고의 금지표현과 실증자료 요청 대상에 대한 이해를\n돕기 위해 제공되는 예시규정이며,\n이 지침에서 규정하지 아니한 사항에\n대해서는"
+      },
+      {
+        "chunk_id": "NOTICE_실증규정_별표",
+        "source": "화장품 표시·광고 실증에 관한 규정",
+        "article": "별표",
+        "authority": 2,
+        "content_snippet": "[화장품 표시·광고 실증에 관한 규정 별표 표시·광고에 따른 실증자료(제3조제1항 단서 관련)]\n[별표]\n\n표시·광고에 따른 실증자료(제3조제1항 단서 관련)\n\n표시·광고 표현\n\n실증자료\n\n○ 여드름성 피부에 사용에 적합\n\n&#9656; 인체 적용시험 자료 제출\n\n○ 항균(인체세정용 제품에 한함)\n\n&#9656; 인체 적용시험 자료 제출\n\n○ 피부노화 완화\n\n&#9656; 인체 적용시험 자료 또는 인체 외 시험 자료 제출\n\n○ 일시적 셀룰라이트 감소\n\n&#9656; 인체 적용시험 자료 제출\n\n○ 붓기, 다크서클 완화\n\n&#9656;"
+      }
+    ],
+    "warnings": [],
+    "timing": {
+      "retrieval_ms": 0.0,
+      "llm_ms": 0.0,
+      "total_ms": 11251.109500182793
+    },
+    "mock": false,
+    "market_references": [
+      {
+        "reference_id": "M1",
+        "product_id": "MKT_ANUA_HEARTLEAF_HA_TONER_250_RENEWAL",
+        "brand": "아누아",
+        "product_name": "어성초 77 히알루론산 수분 진정 토너",
+        "form": "토너",
+        "shared_ingredients": [
+          "판테놀",
+          "히알루론산"
+        ],
+        "ingredient_basis": "공개 주요 성분 키워드",
+        "copy_id": "ANUA_HA_TONER_NAME_20261014",
+        "copy_text": "[NEW/리뉴얼] 어성초 77 히알루론산 수분 진정 토너 250ml",
+        "copy_types": [
+          "성분 소구형",
+          "효능 서술형"
+        ],
+        "placement": "상품명",
+        "conditions": "상품명 원문. 77의 의미·시험 조건은 이 필드에서 추정하지 않음.",
+        "source_url": "https://anua.kr/product/detail.html?cate_no=108&display_group=1&product_no=496",
+        "observed_on": "2026-10-14",
+        "market": "KR",
+        "allowed_as_owned_evidence": false
+      }
+    ]
+  }
+}
