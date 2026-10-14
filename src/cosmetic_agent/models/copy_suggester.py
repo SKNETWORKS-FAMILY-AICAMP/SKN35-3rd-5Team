@@ -14,10 +14,16 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 from ..common.config import settings
+from ..domain.verifier import _number_tokens
 from .prompts import PROMPT_VERSION, SUGGEST_SYSTEM_PROMPT, build_claim_menu, build_suggest_user_prompt
 
 # 실증규정 제3조·제4조: 광고 주장과 직접 관련된 시험결과(인체 적용시험 또는 인체 외 시험)가 실증자료다.
 DEFAULT_NEXT_TEST = "광고 주장과 직접 관련된 인체 적용시험 또는 인체 외 시험 결과보고서 (화장품 표시·광고 실증에 관한 규정 제3조·제4조)"
+
+
+class CandidateNote(BaseModel):
+    changes: list[str] = Field(default_factory=list, description="원문 표현 → 바꾼 표현 (이유)")
+    hypothesis: str = Field(default="", description="A/B 테스트 가설 (대조군 = 가장 안전 후보)")
 
 
 class SuggestionOutput(BaseModel):
@@ -27,6 +33,8 @@ class SuggestionOutput(BaseModel):
     used_evidence: list[str] = Field(default_factory=list, description="후보에 사용한 보유 근거 항목")
     cited_ids: list[str] = Field(default_factory=list, description="참고한 관련 규정 번호 (L1 등)")
     rationale: str = Field(default="", description="무엇을 왜 바꿨는지")
+    candidate_notes: list[CandidateNote] = Field(default_factory=list, description="후보별 변경점·실험 가설")
+    primary_metric: str = Field(default="", description="후보를 비교할 A/B 지표 하나")
 
 
 def _load_json(path) -> list[dict[str, Any]]:
@@ -98,22 +106,73 @@ class CopySuggester:
                 return text
         return None
 
-    def _pick(self, options: list[str], product: dict[str, Any], copy_text: str, level: int | None):
-        """검증을 통과하는 후보 중 가장 앞(가장 강한) 것을 고른다. 없으면 첫 후보."""
-        notes = []
-        for text in options:
-            passed, note = self.verifier.verify_suggestion(
-                text,
-                product.get("owned_evidence", []),
-                self.rule_engine,
-                product_category=product.get("category", "일반"),
-                functional_type=product.get("functional_type"),
-                original=copy_text if (level or 0) >= 1 else None,
-            )
-            if passed:
-                return text, notes
-            notes.append(note)
-        return options[0], notes
+    def _verify(self, text: str, product: dict[str, Any], copy_text: str, level: int | None) -> tuple[bool, str]:
+        return self.verifier.verify_suggestion(
+            text,
+            product.get("owned_evidence", []),
+            self.rule_engine,
+            product_category=product.get("category", "일반"),
+            functional_type=product.get("functional_type"),
+            original=copy_text if (level or 0) >= 1 else None,
+        )
+
+    def _risky_phrases(self, copy_text: str, product: dict[str, Any]) -> list[str]:
+        """원문에서 검증기·규칙 엔진이 문제 삼는 표현 (후보에서 빠졌는지 비교하려고 모은다)."""
+        issues = self.verifier.inspect(
+            copy_text,
+            product.get("owned_evidence", []),
+            self.rule_engine,
+            product_category=product.get("category", "일반"),
+            functional_type=product.get("functional_type"),
+        )
+        phrases = [issue.matched for issue in issues if issue.matched]
+        try:
+            _, hits = self.rule_engine.check_banned_terms(
+                copy_text, product.get("category", "일반"), product.get("functional_type"))
+            phrases += [str(h.get("matched") or "") for h in hits if h.get("matched")]
+        except Exception:  # noqa: BLE001 - 규칙 엔진이 없거나 형식이 달라도 제안은 계속한다
+            pass
+        return list(dict.fromkeys(p for p in phrases if p))
+
+    def _details(self, options, statuses, chosen_at, notes, copy_text, product) -> list[dict[str, Any]]:
+        """후보 비교표: 검증 결과·원문에서 뺀 위험 표현·쓴 근거 수치는 코드가, 변경점·가설은 LLM 이 채운다."""
+        tiers = ["strong", "balanced", "safe"] if len(options) >= 3 else ["strong", "safe"]
+        risky = self._risky_phrases(copy_text, product)
+        evidence_tokens = set()
+        for e in product.get("owned_evidence", []):
+            evidence_tokens |= _number_tokens(" ".join(str(e.get(k) or "") for k in ("item", "value")))
+        details = []
+        for i, text in enumerate(options):
+            passed, verify_note = statuses[i]
+            note = notes[i] if i < len(notes) else CandidateNote()
+            details.append({
+                "text": text,
+                "tier": tiers[min(i, len(tiers) - 1)],
+                "chosen": i == chosen_at,
+                "verified": passed,
+                "verify_note": None if passed else verify_note,
+                "removed_risky": [p for p in risky if p not in text],
+                "kept_risky": [p for p in risky if p in text],
+                "evidence_numbers": sorted(_number_tokens(text) & evidence_tokens),
+                "changes": note.changes,
+                "hypothesis": note.hypothesis,
+            })
+        return details
+
+    @staticmethod
+    def _experiment(details: list[dict[str, Any]], metric: str) -> dict[str, Any]:
+        """A/B 실험 초안. 원문은 위반이라 제외하고, 검증을 통과한 후보만 넣는다. 대조군 = 가장 안전 후보."""
+        passed = [d for d in details if d["verified"]]
+        if len(passed) < 2:
+            return {}
+        control, arms = passed[-1], passed[:-1]
+        return {
+            "primary_metric": metric or "클릭률",
+            "control": {"tier": control["tier"], "text": control["text"]},
+            "variants": [{"tier": d["tier"], "text": d["text"], "hypothesis": d["hypothesis"]} for d in arms],
+            "excluded": [{"tier": d["tier"], "reason": "검증 탈락"} for d in details if not d["verified"]],
+            "note": "원문은 법 위반 소지가 있어 실험에 쓰지 않는다. 효과 크기는 실험 전이라 제시하지 않는다.",
+        }
 
     def suggest(
         self,
@@ -157,7 +216,12 @@ class CopySuggester:
         if isinstance(output, dict):
             output = SuggestionOutput(**output)
         options = [c.strip() for c in output.candidates if c and c.strip()] or [output.suggestion.strip()]
-        chosen, rejected = self._pick(options, product, copy_text, level)
+        # 후보를 모두 검증하고, 통과한 것 중 가장 강한(앞쪽) 후보를 고른다.
+        statuses = [self._verify(text, product, copy_text, level) for text in options]
+        chosen_at = next((i for i, (passed, _) in enumerate(statuses) if passed), 0)
+        chosen = options[chosen_at]
+        # 화면 호환: 선택된 후보보다 앞에서 탈락한 후보들의 사유 (후보 순서)
+        rejected = [note for passed, note in statuses[:chosen_at]]
 
         next_test = (output.next_test or "").strip()
         if next_test.lower() in {"", "null", "none", "없음", "-"}:
@@ -170,6 +234,9 @@ class CopySuggester:
             "next_test": next_test,
             "candidates": options,
             "rejected_notes": rejected,
+            "candidate_details": (details := self._details(
+                options, statuses, chosen_at, output.candidate_notes, copy_text, product)),
+            "experiment": self._experiment(details, output.primary_metric),
             "used_evidence": output.used_evidence,
             "cited_ids": output.cited_ids,
             "suggest_rationale": output.rationale,

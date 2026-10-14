@@ -1,0 +1,43 @@
+# Render 무료 배포 설정 (Blueprint). Render 대시보드 → New → Blueprint 에서 이 저장소를 고르면
+# FastAPI(beaurette-api)와 Streamlit(beaurette-app) 두 서비스가 만들어진다.
+# sync: false 항목(API 키 등)은 생성 화면에서 직접 입력한다 (저장소에 값을 쓰지 않는다).
+services:
+  - type: web
+    name: beaurette-api
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: PYTHONPATH
+        value: src
+      - key: QDRANT_COLLECTION_NAME
+        value: cosmetic_ad_rules_v2
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+
+  - type: web
+    name: beaurette-app
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m streamlit run app/streamlit_app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: PYTHONPATH
+        value: src
+      - key: UI_DATA_MODE
+        value: api
+      # beaurette-api 가 만들어진 뒤 그 주소(https://beaurette-api-xxxx.onrender.com)를 넣는다
+      - key: API_BASE_URL
+        sync: false
