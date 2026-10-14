@@ -48,7 +48,7 @@ st.caption(
     f"{context['category_label']} · 선택 실증 {context['evidence_on']}/{context['evidence_total']} · 샘플 제품 데이터"
 )
 st.caption(
-    f"프로젝트 {len(backend.list_products())}제품 · 현재 연결된 시장 참고 {len(references)}제품 · 공개 제목 비교 {len(pairs)}건"
+    f"예시 {len(backend.list_products())}제품 · 현재 연결된 시장 참고 {len(references)}제품 · 공개 제목 비교 {len(pairs)}건"
 )
 
 market_tab, performance_tab, experiment_tab = st.tabs(
@@ -62,7 +62,7 @@ with market_tab:
             st.dataframe(
                 product["owned_evidence"],
                 hide_index=True,
-                alt="선택한 프로젝트 샘플 제품의 보유 실증 자료",
+                alt="선택한 제품의 보유 실증 자료",
             )
     else:
         st.caption(

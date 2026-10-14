@@ -2,7 +2,7 @@
 [app/views/review.py]
 문구 검토 — 규정 문서 기반 RAG 챗봇 화면.
 가운데: 대화(질문 → AI 답변) · 검토 기준 줄 · 입력 / 오른쪽: 근거(RAG) · 원문 문서 · 검토 과정.
-검토 기준(제품·실증 자료)은 왼쪽 사이드바 「프로젝트」가 정한다 — 여기서는 읽기만 한다.
+검토 기준(제품·실증 자료)은 왼쪽 사이드바 「내 제품」이 정한다 — 여기서는 읽기만 한다.
 
 - 진행 표시는 backend.review_events() 가 실제로 낸 이벤트만 그린다 (components/progress.py).
 - 최신 답변: 수정 제안 후보 고르기(components/suggest.py) · 위험 표현 ↔ 근거 연동(components/interact.py) ·
@@ -18,7 +18,7 @@ from datetime import datetime
 
 import streamlit as st
 
-from app.components import blocks, progress, suggest, threads
+from app.components import blocks, live_check, progress, suggest, threads
 from app.components.cards import assistant_live, assistant_message, error_message, user_message, welcome
 from app.components.context import current
 from app.components.icons import icon
@@ -52,7 +52,9 @@ def _bubble_label(ctx: dict) -> str:
 
 
 def _run(thread: dict, message: dict, slot) -> None:
-    """대기 중인 질문에 답한다. 검토는 별도 스레드에서 돌리고, 받은 이벤트만 진행 카드에 그린다."""
+    """대기 중인 질문에 답한다. 검토는 별도 스레드에서 돌리고, 받은 이벤트만 진행 카드에 그린다.
+    카드는 처음 한 번과 이벤트가 올 때만 다시 보낸다 — 경과 시간은 브라우저가 세므로 기다리는 동안 서버는 쉰다
+    (0.15초마다 카드를 다시 보내면 CPU 가 작은 배포 서버에서 갱신이 몰렸다 끊겨 숫자가 멈춰 보였다)."""
     events: queue.Queue = queue.Queue()
 
     def work() -> None:
@@ -68,21 +70,25 @@ def _run(thread: dict, message: dict, slot) -> None:
     demo = backend.data_mode() == "mock"
     pace = 0.08 * MOCK_DELAY if demo else 0.0
     state, t0 = progress.Progress(), time.perf_counter()
+
+    def draw() -> None:
+        slot.html(f'<div class="bw">{progress.card(state, elapsed=None if demo else time.perf_counter() - t0, demo=pace > 0)}</div>')
+
+    draw()
     while True:
         try:
             event = events.get(timeout=0.15)
         except queue.Empty:
-            event = None
-        if event and event["type"] == "result":
+            continue
+        if event["type"] == "result":
             threads.answer(thread, {"role": "assistant", "resp": event["resp"], "at": datetime.now(), "ctx": message["ctx"]})
             return
-        if event and event["type"] == "error":
+        if event["type"] == "error":
             threads.answer(thread, {"role": "error", "message": event["message"], "at": datetime.now()})
             return
-        if event:
-            state.apply(event)
-        slot.html(f'<div class="bw">{progress.card(state, elapsed=None if demo else time.perf_counter() - t0, demo=pace > 0)}</div>')
-        if event and pace and event["type"] == "stage":
+        state.apply(event)
+        draw()
+        if pace and event["type"] == "stage":
             time.sleep(pace)
 
 
@@ -169,7 +175,8 @@ with center, st.container(key="center"):
 
     with st.container(key="composer", gap=None):
         html(f'<div class="bw-composer-ctx">{icon("science", 15)}<span>검토 기준</span><b>{esc(_ctx_line(ctx))}</b>'
-             '<span class="hint">왼쪽 「프로젝트」에서 바꿉니다</span></div>')
+             '<span class="hint">왼쪽 「내 제품」에서 바꿉니다</span></div>')
+        html(live_check.slot("bw_chat"))   # 입력하는 동안 바로 밑줄 — 요약 한 줄
         prompt = st.chat_input("검토할 광고 문구를 입력하거나 붙여 넣으세요", key="bw_chat", max_chars=5000)
         if prompt and prompt.strip():
             threads.ask(prompt.strip(), ctx, product)
@@ -180,6 +187,7 @@ with center, st.container(key="center"):
             st.page_link(pages["library"], label="근거 원문 찾아보기", icon=":material/menu_book:")
 
     html(LINK_SCRIPT, js=True)   # 위험 표현 ↔ 오른쪽 근거 연동 (한 번만 붙는다)
+    html(live_check.script(product, ["bw_chat"]), js=True)   # 입력창 글자 아래 밑줄 (브라우저에서 바로 검사)
 
 with right, st.container(key="aside"):
     if last:

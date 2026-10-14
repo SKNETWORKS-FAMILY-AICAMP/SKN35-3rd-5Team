@@ -19,9 +19,9 @@ with st.container(key="chat_shell_full"):
                       help="대화 기록을 비우고 처음부터 시작합니다. 다른 주제로 넘어갈 때는 누르지 않아도 됩니다.")
     with st.container(key="chat_settings_full"), st.expander("제품 및 검토 기준"):
         st.session_state["bw_chat_project_widget"] = st.session_state.get("bw_chat_project", False)
-        st.checkbox("왼쪽 프로젝트의 제품·실증 자료 사용", key="bw_chat_project_widget", on_change=remember_project)
+        st.checkbox("왼쪽 「내 제품」의 제품·실증 자료 사용", key="bw_chat_project_widget", on_change=remember_project)
         if st.session_state.get("bw_chat_project"):
-            st.caption("프로젝트 자료는 실제 동일 제품의 근거일 때만 사용하세요.")
+            st.caption("내 제품 자료는 실제 동일 제품의 근거일 때만 사용하세요.")
         else:
             st.caption("제품 설명이나 원하는 광고 방향을 자유롭게 말해주세요. 같은 대화에서 새 주제로 넘어갈 수 있습니다.")
     render_chat()

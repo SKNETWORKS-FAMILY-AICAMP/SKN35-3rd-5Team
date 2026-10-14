@@ -48,8 +48,8 @@ def test_market_page_follows_shared_sidebar_product_and_evidence(monkeypatch):
     assert not app.exception
     app.switch_page("views/market.py").run()
     assert not app.exception
-    # 기본 제품은 시연용 자사 샘플(PROD_001). 공개 분석 샘플을 고르면 시장 페이지가 따라간다.
-    assert app.selectbox(key="proj_product").value == "PROD_001"
+    # 처음에는 제품 정보 없이 일반 화장품 기준(GENERAL_DEFAULT). 공개 분석 샘플을 고르면 시장 페이지가 따라간다.
+    assert app.selectbox(key="proj_product").value == "GENERAL_DEFAULT"
     app.selectbox(key="proj_product").select("PUBLIC_KIEHLS_UFC").run()
     assert not app.exception
     assert any("키엘" in h.value for h in app.subheader)

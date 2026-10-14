@@ -3,13 +3,16 @@ import re
 
 import streamlit as st
 
-from app.components.context import current
+from app.components.context import current, register_product
 from app.components.generation import render_generation
-from app.services import backend
+from app.components.ingredient_roles import render_ingredient_roles
+from app.services import backend, generation_results
+from cosmetic_agent.generation.creative import creative_catalog
+from cosmetic_agent.market_reference import form_of
 
 st.title("광고문 생성")
 st.caption("원하는 제품과 광고 방향을 말해주세요. 성분을 몰라도 초안부터 만들고, 규정과 확인된 제품 근거로 검토합니다.")
-use_project = st.checkbox("왼쪽 프로젝트의 제품·실증 자료 사용", value=False)
+use_project = st.checkbox("왼쪽 「내 제품」의 제품·실증 자료 사용", value=False)
 if use_project:
     product, ctx = current()
     st.caption(f"{ctx['product_name']} · 실증 {ctx['evidence_on']}건. 실제 동일 제품의 자료일 때만 사용하세요.")
@@ -35,6 +38,13 @@ with st.form("generate_form"):
 payload = {"instruction": instruction.strip(), "product": product, "channel": channel,
            "tone": tone.strip() or "요청에 맞게", "length": length,
            "ingredients": list(dict.fromkeys(v.strip() for v in re.split(r"[,，\n;]+", raw) if v.strip()))}
+# 등록 성분과 연결된 성분 역할 카드(연구 범위·출처)를 생성 전에 보여준다
+render_ingredient_roles(dict(product, key_ingredients=[*(product.get("key_ingredients") or []), *payload["ingredients"]]))
+with st.expander("창작 레퍼런스 · 어떤 방식으로 다르게 쓰나요?"):
+    st.caption("제공된 광고 이미지의 표현 구조만 참고합니다. 해당 브랜드의 수치·기술·효능을 복사하지 않습니다.")
+    for style in creative_catalog()["styles"]:
+        st.markdown(f"**{style['name']}** — {style['pattern']}")
+    st.caption("출력: 헤드라인 + 설명 문구 + 사용한 실증의 시험 조건. 자료가 없으면 시험 조건을 만들지 않습니다.")
 if submitted:
     st.session_state.pop("bw_generation", None)
     if not payload["instruction"]:
@@ -44,10 +54,36 @@ if submitted:
             with st.spinner("요청에 맞는 광고 초안을 만들고 검토하고 있습니다…"):
                 response = backend.generate_copy(payload)
             st.session_state["bw_generation"] = {"payload": payload, "response": response}
+            if use_project:  # 예상 매출 화면이 같은 생성 결과를 이어 쓴다
+                generation_results.save(product, response, {k: payload[k] for k in ("instruction", "channel", "tone", "length")})
         except backend.BackendError as error:
             st.error(error.message)
 saved = st.session_state.get("bw_generation")
+
+
+def use_in_forecast(index: int) -> None:
+    """선택한 후보를 예상 매출 시나리오 3번에 연결한다.
+    내 제품이면 그 제품 기록에, 초안이면 입력한 제품 정보로 내 제품을 만들어 연결한다."""
+    target = product
+    if not use_project:
+        drafts = st.session_state.setdefault("bw_generation_drafts", {})
+        key = (product.get("name"), product.get("category"), product.get("functional_type"), tuple(payload["ingredients"]))
+        existing = next((p for p in st.session_state.get("bw_custom_products", []) if p["product_id"] == drafts.get(key)), None)
+        target = existing or register_product({
+            "name": product.get("name") or "나의 화장품", "category": product.get("category", "일반"),
+            "functional_type": product.get("functional_type"), "key_ingredients": payload["ingredients"],
+            "form": form_of(product.get("name") or ""), "owned_evidence": [],
+        })
+        drafts[key] = target["product_id"]
+        st.session_state["bw_pid"] = target["product_id"]
+    generation_results.save(target, saved["response"], saved["payload"])
+    generation_results.choose(target, index)
+    st.switch_page(st.session_state["bw_pages"]["forecast"])
+
+
 if saved and saved["payload"] == payload:
-    render_generation(saved["response"])
+    render_generation(saved["response"], on_select=use_in_forecast)
+    if not use_project and saved["response"].get("candidates"):
+        st.caption("선택하면 입력한 제품명·구분·성분으로 왼쪽 「내 제품」에 제품이 만들어지고, 예상 매출 시나리오에서 비슷한 시장 제품과 비교합니다.")
 elif saved:
     st.info("입력 또는 검토 기준이 바뀌었습니다. 다시 생성하면 현재 기준으로 검토합니다.")

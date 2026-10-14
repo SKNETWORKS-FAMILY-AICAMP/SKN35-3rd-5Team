@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
 from ..common.config import settings
+from ..domain.copy_knowledge import build_generation_knowledge
 from .copy_suggester import find_functional_ceiling, load_claim_assets
 from .generation_prompts import GENERATION_SYSTEM_PROMPT, build_generation_prompt
 from .prompts import build_claim_menu
@@ -18,16 +20,25 @@ class GeneratedDraft(BaseModel):
     rationale: str = ""
     used_evidence: list[str] = Field(default_factory=list)
     cited_ids: list[str] = Field(default_factory=list)
+    market_reference_ids: list[str] = Field(default_factory=list)
+    market_application: str = ""
+    ingredient_reference_ids: list[str] = Field(default_factory=list)
+    ingredient_application: str = ""
+    headline: str = ""
+    supporting_copy: str = ""
+    creative_reference_ids: list[str] = Field(default_factory=list)
+    creative_application: str = ""
+    evidence_reference_ids: list[str] = Field(default_factory=list)
 
 
 class GenerationOutput(BaseModel):
-    candidates: list[GeneratedDraft] = Field(min_length=3, max_length=3)
+    candidates: list[GeneratedDraft] = Field(min_length=3, max_length=6)
 
 
 class CopyGenerator:
     def __init__(self, llm: Any = None, model_name: str | None = None):
         self._llm = llm
-        self.model_name = model_name or settings.OPENAI_MODEL_NAME
+        self.model_name = model_name or settings.GENERATION_MODEL_NAME or settings.OPENAI_MODEL_NAME
         self.functional_ceilings, self.claim_ladder = load_claim_assets()
 
     @property
@@ -37,7 +48,8 @@ class CopyGenerator:
 
             self._llm = ChatOpenAI(
                 model=self.model_name,
-                temperature=0.4,
+                # 다양성은 재료·각도로 확보하고, 안전성은 생성 뒤 검증기·판정이 막는다
+                temperature=0.8,
                 api_key=settings.OPENAI_API_KEY or None,
                 base_url=settings.OPENAI_BASE_URL,
             ).with_structured_output(GenerationOutput)
@@ -54,6 +66,8 @@ class CopyGenerator:
                 claim_ladder=self.claim_ladder,
                 functional_ceiling=find_functional_ceiling(product.get("functional_type"), self.functional_ceilings),
             )
+        if "knowledge" not in kwargs:
+            kwargs["knowledge"] = build_generation_knowledge(product, kwargs.get("channel", ""))
         prompt = build_generation_prompt(**kwargs)
         output = self.llm.invoke([
             ("system", GENERATION_SYSTEM_PROMPT),
@@ -61,8 +75,19 @@ class CopyGenerator:
         ])
         if isinstance(output, dict):
             output = GenerationOutput.model_validate(output)
-        by_tier = {candidate.tier: candidate for candidate in output.candidates}
         required = ("strong", "balanced", "safe")
-        if set(by_tier) != set(required):
-            raise ValueError("생성 결과에는 strong, balanced, safe 후보가 각각 하나씩 필요합니다.")
-        return [by_tier[tier].model_dump() for tier in required]
+        if not set(required) <= {candidate.tier for candidate in output.candidates}:
+            raise ValueError("생성 결과에는 strong, balanced, safe 후보가 각각 하나 이상 필요합니다.")
+        # 후보를 넉넉히(최대 6개) 받아, 검증을 통과한 것 중 끌림 순위로 3개를 고른다 (generation/nodes.py)
+        order = {tier: i for i, tier in enumerate(required)}
+        ranked = sorted(output.candidates, key=lambda c: order[c.tier])
+        return [dict(c.model_dump(), text=clean_copy(c.text)) for c in ranked]
+
+
+def clean_copy(text: str) -> str:
+    """광고 문구에 섞여 나오는 마크다운 강조·무대 지시([제품을 보여주며])·이스케이프 줄바꿈을 지운다."""
+    text = text.replace("\\n", "\n").replace("**", "")
+    text = re.sub(r"\[[^\]\n]{1,30}\]", "", text)
+    text = re.sub(r"(?m)^#{1,6}\s+", "", text)  # 마크다운 제목. 해시태그(#보습)는 공백이 없어 남는다
+    text = re.sub(r"\n{2,}", "\n", text)
+    return re.sub(r"[ \t]{2,}", " ", text).strip()

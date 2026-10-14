@@ -13,6 +13,7 @@ from datetime import datetime
 
 import streamlit as st
 
+from app.components import live_check
 from app.components.cards import COPY_SCRIPT, highlighted, status_tag, thinking
 from app.components.context import current
 from app.components.icons import icon
@@ -118,12 +119,14 @@ center, right = st.columns([1.72, 1], gap="large")
 
 with center, st.container(key="center"):
     page_header("상세페이지 검토", "상세페이지 글 전체를 문장 단위로 검토하고, 고쳐야 할 문장과 교정본을 정리합니다.", health=health)
-    product, ctx = current()   # 검토 기준은 왼쪽 「프로젝트」가 정한다
+    product, ctx = current()   # 검토 기준은 왼쪽 「내 제품」이 정한다
 
     with st.container(key="pagebody"):
         with st.container(key="bulkin"):
             st.text_area("상세페이지 글", key="bw_bulk_text", height=170, label_visibility="collapsed",
                          placeholder="상세페이지 글을 그대로 붙여 넣으세요. 줄바꿈과 문장부호로 나눠 최대 100문장까지 검토합니다.")
+            # 입력하는 동안 바로 밑줄 — 글자 아래 밑줄 + 요약 한 줄 (브라우저에서 바로 검사)
+            html(live_check.slot("bw_bulk_text") + live_check.script(product, ["bw_bulk_text"]), js=True)
         with st.container(horizontal=True, key="bulkbtn"):
             st.button("예시 상세페이지 넣기", type="tertiary", icon=":material/description:", on_click=_fill_sample)
             run = st.button("문장별 검토 시작", type="primary", icon=":material/fact_check:")
@@ -193,5 +196,5 @@ with right:
                  '<li><div><b>문장별 판정</b> — 문장마다 근거 조항을 찾아 사용 가능 · 실증 필요 · 수정 필요로 나눕니다.</div></li>'
                  '<li><div><b>교정본</b> — 고쳐야 할 문장만 보유 실증 범위의 표현으로 바꿔 한 번에 복사하거나 내려받습니다.</div></li>'
                  '</ol></div>'
-                 '<div class="bw-card"><p class="bw-card-note">검토 기준 제품과 실증 자료는 왼쪽 「프로젝트」에서 바꿀 수 있습니다. '
+                 '<div class="bw-card"><p class="bw-card-note">검토 기준 제품과 실증 자료는 왼쪽 「내 제품」에서 바꿀 수 있습니다. '
                  '모든 문장에 같은 기준이 적용됩니다.</p></div>')

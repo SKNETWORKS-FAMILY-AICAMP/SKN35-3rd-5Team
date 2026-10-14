@@ -259,6 +259,8 @@ class RuleEngine:
                 return True
             tokens = _number_tokens(text)
             return bool(tokens) and any(tokens <= _number_tokens(_evidence_text(e)) for e in valid)
+        if rule_id == "S007":  # 지속시간: 시간·기간을 측정한 시험이 있어야 함
+            return any(re.search(r"\d+(?:시간|일|주)", body) for body in bodies)
         if rule_id == "S004":  # 무(無) 표현: 시험 분석 자료
             return any("분석" in body for body in bodies)
         if rule.get("type") == "비교광고":

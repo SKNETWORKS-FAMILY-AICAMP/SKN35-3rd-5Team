@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-PROMPT_VERSION = "suggest-v8"
+PROMPT_VERSION = "suggest-v9"
 
 SUGGEST_SYSTEM_PROMPT = """\
 너는 화장품 회사의 표시·광고 심의(RA) 담당자다.
@@ -104,7 +104,11 @@ def build_suggest_user_prompt(
         f"- 구분: {category}",
     ]
     if product.get("key_ingredients"):
-        lines.append(f"- 주요 성분 (함유 사실만 표현 가능, 원료 효능을 완제품 효능처럼 쓰지 않음): {', '.join(product['key_ingredients'])}")
+        from ..domain.copy_knowledge import ingredient_card
+
+        # 식약처 원료사전·기능성 고시 성분표와 연결한 성분 카드 (유래·영문명은 사실이라 대안 문구 재료로 쓸 수 있음)
+        lines.append("- 주요 성분 (원료 효능을 완제품 효능처럼 쓰지 않음):")
+        lines += [f"  {ingredient_card(name, product)}" for name in product["key_ingredients"][:8]]
     if category == "기능성":
         lines.append(f"- 심사(보고) 기능성: {product.get('functional_type') or '미기재'}")
         if functional_ceiling:

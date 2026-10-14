@@ -3,8 +3,19 @@ hybrid:
   dense_top_k: 10
   sparse_top_k: 10
   final_top_k: 4
-  rrf_k: 60              # RRF 상한 상수 (rank + 60)
-  min_statute_count: 1   # 저관련 법령의 강제 삽입을 막고 직접 근거 1개만 보장
+  rrf_k: 10              # 작은 순위 차이를 더 강하게 반영
+  dense_weight: 0.1      # dev 재현 평가에서 Dense 과대 반영을 완화
+  sparse_weight: 1.0     # 법령 용어·조항 ID에 강한 BM25 중심
+  metadata_match_weight: 0.02  # 청크 분류명과 질의가 직접 일치할 때만 소폭 가산
+  dense_rescue_rank: 2   # Dense 상위 2개 의미 후보가 RRF에서 완전히 탈락하지 않게 보호
+  max_per_source: 2      # 한 문서의 인접 청크가 최종 근거를 독점하지 않게 제한
+  reranker:
+    enabled: true
+    candidate_limit: 4   # 최종 근거 집합은 유지하고 Top 4 내부 순위만 조정
+    base_weight: 0.98
+    dense_weight: 0.01
+    metadata_weight: 0.01
+  min_statute_count: 1   # 상위 결과에 없을 때 마지막 청크만 법령·고시로 교체
 
 gates:
   evidence_similarity_threshold: 0.65  # 근거 충분성 1차 유사도 컷오프

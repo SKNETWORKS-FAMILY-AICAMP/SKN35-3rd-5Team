@@ -60,8 +60,11 @@ def mock_products() -> list[dict]:
     original = _load_json("MOCK_PRODUCTS_PATH", "data/assets/mock_products.json")
     public_path = REPO_ROOT / "data" / "assets" / "public_analysis_products.json"
     public = json.loads(public_path.read_text(encoding="utf-8")) if public_path.exists() else []
-    # 기본 선택(첫 제품)은 시연 시나리오의 자사 샘플(하이드라 워터 크림)로 두고, 공개 분석 샘플은 뒤에 붙인다
-    return original + public
+    # 제형·기능성 유형별 예시 제품(골든셋 v2 개발용 제품 카드, holdout2 제품은 넣지 않음)
+    sample_path = REPO_ROOT / "data" / "assets" / "sample_products.json"
+    samples = json.loads(sample_path.read_text(encoding="utf-8")) if sample_path.exists() else []
+    # 기본 선택(첫 제품)은 시연 시나리오의 자사 샘플(하이드라 워터 크림)로 두고, 예시·공개 분석 샘플은 뒤에 붙인다
+    return original + samples + public
 
 
 def banned_terms() -> list[dict]:

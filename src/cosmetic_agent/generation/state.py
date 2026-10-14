@@ -24,3 +24,5 @@ class AdGenerationState(TypedDict):
     generation_error: NotRequired[str]
     status: NotRequired[str]
     warnings: NotRequired[list[str]]
+    market_references: NotRequired[list[dict[str, Any]]]
+    ingredient_profiles: NotRequired[list[dict[str, Any]]]

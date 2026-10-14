@@ -203,6 +203,10 @@ substantiation = [
      "pattern": r"항균",
      "basis_id": "NOTICE_실증규정_별표", "law_id": LAW_BY_TYPE["실증필요"],
      "needs": "항균 인체적용시험 자료 (인체세정용 제품에 한함)"},
+    {"id": "S007", "term": "지속시간 표현", "level": 1, "type": "실증필요",
+     "pattern": rf"하루{S}종일|온종일|밤새|밤사이|오래도록|오랫동안|롱래스팅|\d+{S}시간{S}(?:동안|내내|지속)|지속(?:력|되는|돼|됩니다)",
+     "basis_id": G + "별표2_효능표현", "law_id": LAW_BY_TYPE["실증필요"],
+     "needs": "해당 지속시간을 측정한 인체적용시험 자료 (측정 시점 그대로 표기)"},
 ]
 comparison = [
     {"id": "C001", "term": "비교 표현", "level": 1, "type": "비교광고",

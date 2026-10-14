@@ -15,6 +15,8 @@ from openai import OpenAI
 from qdrant_client import QdrantClient, models
 from rank_bm25 import BM25Okapi
 
+from metadata_enrichment import build_search_text, enrich_chunks
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CHUNKS_PATH = PROJECT_ROOT / "data" / "02_processed" / "chunks.jsonl"
@@ -47,7 +49,7 @@ def load_chunks(path: Path = DEFAULT_CHUNKS_PATH) -> list[dict[str, Any]]:
         chunks = [json.loads(line) for line in stream if line.strip()]
     if not chunks:
         raise ValueError(f"청크 파일이 비어 있습니다: {path}")
-    return chunks
+    return enrich_chunks(chunks)
 
 
 def build_qdrant_index(
@@ -73,7 +75,7 @@ def build_qdrant_index(
     for number, batch in enumerate(_batched(chunks, EMBEDDING_BATCH_SIZE), start=1):
         response = openai_client.embeddings.create(
             model=embedding_model,
-            input=[chunk["content"] for chunk in batch],
+            input=[build_search_text(chunk) for chunk in batch],
             encoding_format="float",
         )
         vectors.extend(item.embedding for item in response.data)
@@ -121,10 +123,10 @@ def build_qdrant_index(
 def build_bm25_index(chunks: list[dict[str, Any]], output_path: Path) -> None:
     """BM25 인덱스와 원본 청크를 하나의 pickle 파일로 저장한다."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    tokenized_corpus = [tokenize(chunk["content"]) for chunk in chunks]
+    tokenized_corpus = [tokenize(build_search_text(chunk)) for chunk in chunks]
     payload = {
-        "version": 1,
-        "tokenizer": "ko-char-ngram-v2",
+        "version": 2,
+        "tokenizer": "ko-char-ngram-v2+metadata-v1",
         "chunks": chunks,
         "tokenized_corpus": tokenized_corpus,
         "index": BM25Okapi(tokenized_corpus),

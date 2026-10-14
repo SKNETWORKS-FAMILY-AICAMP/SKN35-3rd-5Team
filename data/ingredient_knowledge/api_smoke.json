@@ -1,0 +1,242 @@
+{
+  "record_kind": "실제 API 연결 확인; 효능·매출 검증 아님",
+  "input": {
+    "instruction": "히알루론산과 판테놀의 역할을 참고해 성분명 중심, 데일리 보습 루틴 중심, 제품 특징 중심으로 한 줄씩 작성해줘. 임상 효과를 보장하지 말아줘.",
+    "product": {
+      "product_id": "CUSTOM_ROLE_SMOKE",
+      "name": "수분 진정 수딩 토너",
+      "form": "토너",
+      "category": "일반",
+      "key_ingredients": [
+        "히알루론산",
+        "판테놀"
+      ],
+      "owned_evidence": []
+    },
+    "channel": "상세페이지",
+    "tone": "간결한",
+    "length": "한 줄",
+    "keywords": []
+  },
+  "response": {
+    "request_id": "GEN_1922506100",
+    "status": "생성완료",
+    "product_id": "CUSTOM_ROLE_SMOKE",
+    "candidates": [
+      {
+        "text": "히알루론산이 수분을 결합하여 피부를 촉촉하게 가꿔줍니다.",
+        "tier": "strong",
+        "rationale": "히알루론산의 수분 결합 역할을 강조하여 제품의 보습 효과를 부각시킵니다.",
+        "used_evidence": [],
+        "cited_ids": [
+          "L1"
+        ],
+        "verified": true,
+        "verify_note": "검증 통과",
+        "market_reference_ids": [],
+        "market_application": "",
+        "ingredient_reference_ids": [
+          "I1"
+        ],
+        "ingredient_application": "히알루론산의 수분 결합 특성을 강조하여 제품의 보습 효과를 표현."
+      },
+      {
+        "text": "편안한 데일리 보습 루틴으로 피부를 촉촉하게 유지하세요.",
+        "tier": "balanced",
+        "rationale": "일상적인 보습 루틴을 강조하며 제품 사용을 유도하는 표현입니다.",
+        "used_evidence": [],
+        "cited_ids": [
+          "L1"
+        ],
+        "verified": true,
+        "verify_note": "검증 통과",
+        "market_reference_ids": [],
+        "market_application": "",
+        "ingredient_reference_ids": [
+          "I2"
+        ],
+        "ingredient_application": "판테놀의 보습 역할을 반영하여 데일리 사용을 강조하는 표현."
+      },
+      {
+        "text": "부드럽고 촉촉한 사용감으로 피부를 가꿔주는 수딩 토너입니다.",
+        "tier": "safe",
+        "rationale": "제품의 사용감과 특징을 간결하게 전달하며 소비자에게 긍정적인 인상을 줍니다.",
+        "used_evidence": [],
+        "cited_ids": [
+          "L1"
+        ],
+        "verified": true,
+        "verify_note": "검증 통과",
+        "market_reference_ids": [],
+        "market_application": "",
+        "ingredient_reference_ids": [],
+        "ingredient_application": ""
+      }
+    ],
+    "citations": [
+      {
+        "chunk_id": "NOTICE_실증규정_제3조",
+        "source": "화장품 표시·광고 실증에 관한 규정",
+        "article": "제3조",
+        "authority": 2,
+        "content_snippet": "[화장품 표시·광고 실증에 관한 규정 제3조 실증자료]\n제3조(실증자료) ① 「화장품법 시행규칙」 제23조제2항에 따라 합리적인 근거로 인정될 수 있는 실증자료는 다음 중 어느 하나에 해당하여야 한다. 다만, 별표에서 정하는 표시·광고의 경우에는 별표의 실증자료를 합리적인 근거로 인정한다.\n1. 시험결과: 인체 적용시험 자료, 인체 외 시험 자료, 같은 수준이상의 조사 자료\n(예시) 같은 수준이상의 조사자료: 해당 표시·광고와 관련된 시험결과 등이 포함된 논문, 학술문헌 등\n2. 조사결과\n(예시) 표본설정, 질문사항, 질문방법이 그"
+      },
+      {
+        "chunk_id": "NOTICE_실증규정_별표",
+        "source": "화장품 표시·광고 실증에 관한 규정",
+        "article": "별표",
+        "authority": 2,
+        "content_snippet": "[화장품 표시·광고 실증에 관한 규정 별표 표시·광고에 따른 실증자료(제3조제1항 단서 관련)]\n[별표]\n\n표시·광고에 따른 실증자료(제3조제1항 단서 관련)\n\n표시·광고 표현\n\n실증자료\n\n○ 여드름성 피부에 사용에 적합\n\n&#9656; 인체 적용시험 자료 제출\n\n○ 항균(인체세정용 제품에 한함)\n\n&#9656; 인체 적용시험 자료 제출\n\n○ 피부노화 완화\n\n&#9656; 인체 적용시험 자료 또는 인체 외 시험 자료 제출\n\n○ 일시적 셀룰라이트 감소\n\n&#9656; 인체 적용시험 자료 제출\n\n○ 붓기, 다크서클 완화\n\n&#9656;"
+      },
+      {
+        "chunk_id": "GUIDE_관리지침_별표2_실증대상",
+        "source": "화장품 표시·광고 관리 지침",
+        "article": "별표2_실증대상",
+        "authority": 3,
+        "content_snippet": "[화장품 표시·광고 관리 지침 > 별표2_실증대상]\n화장품 표시․광고 주요 실증대상\n구 분\n실증 대상\n비 고\n1. 「화장품\n표시·광고\n실증에 관한\n규정」(식약처\n고시) 별표 등에\n따른 표현\n· 여드름성 피부에 사용에 적합\n· 항균(인체세정용 제품에 한함)\n· 일시적 셀룰라이트 감소\n· 붓기 완화\n· 다크서클 완화\n· 피부 혈행 개선\n· 피부장벽 손상의 개선에 도움\n· 피부 피지분비 조절\n· 미세먼지 차단, 미세먼지 흡착 방지\n․인체 적용시험 자료로 입증\n· 모발의 손상을 개선한다.\n· 인체 적용시험 자료, 인체 외\n시험 자료로 입증"
+      },
+      {
+        "chunk_id": "GUIDE_관리지침_III_주의사항_part2",
+        "source": "화장품 표시·광고 관리 지침",
+        "article": "III. 주의사항",
+        "authority": 3,
+        "content_snippet": "[화장품 표시·광고 관리 지침 > III. 주의사항]\n단이 곤란한 경우에는 일반적인 소비자가\n받아들이는 전체적인 광고의 인상을 고려하여 금지표현의 범주로 판단할 수 있다.\n7. 온라인 부당광고 해당 여부 검토시,\n광고의 제목명에 기재되어 있는 문구도\n고려하여 판단한다.\n\n8. 이 지침 [별표 2] 3.에 따라 ISO 천연·유기농 지수를 표시·광고할 때에는 소비자\n오인을 줄이기 위한 다음 표시·기재 방식을 참고하여야 한다.\n①제품의 전면부에 기재·표시하는 경우\n\"식약처 기준에 따른 천연화장품(유기농화장품) 아님\"을 함께 표시\n* 전면"
+      },
+      {
+        "chunk_id": "CASE_2025-08-06_피부재생염증완화",
+        "source": "식품의약품안전처 부당광고 적발 사례",
+        "article": "“피부재생”, “염증완화” 등 화장품",
+        "authority": 4,
+        "content_snippet": "[행정처분·부당광고 사례 > “피부재생”, “염증완화” 등 화장품]\n보도자료\n보도시점\n배포 즉시\n배포\n2025. 8. 6.(수)\n“피부재생”, “염증완화” 등 화장품\n부당광고 적발\n- 의학적 효능·효과, 마이크로니들 내세운 광고 등 온라인 부당광고 총 83건 적발\n- 판매사이트 차단 및 책임판매업체 35개소는 현장점검 및 행정처분 진행 예정\n식품의약품안전처(처장 오유경)는 의학적 효능·효과 등을 내세우는 화장품\n부당광고를 주제로 온라인상의 화장품 판매게시물을 점검한 결과, ｢화장품법｣을\n위반*한 83건을 적발하여 방송통신심의위원회 "
+      },
+      {
+        "chunk_id": "GUIDE_관리지침_별표1_기능성",
+        "source": "화장품 표시·광고 관리 지침",
+        "article": "별표1_기능성",
+        "authority": 3,
+        "content_snippet": "[화장품 표시·광고 관리 지침 > 별표1_기능성]\n기능성 관련\n표현\n· 기능성 화장품 심사(보고)하지\n아니한 제품에 미백,\n화이트닝\n(whitening), 주름(링클, wrinkle)\n개선, 자외선(UV)차단 등 기능성\n관련 표현\n· 기능성화장품 심사(보고) 결과와\n다른 내용의 표시·광고 또는 기능성\n화장품 안전성·유효성에 관한 심사를\n받은 범위를 벗어나는 표시·광고\n원료 관련 표현· 기능성화장품으로 심사(보고)하지\n아니한 제품에 ‘식약처 미백 고시\n성분 OO 함유’ 등의 표현\n· 기능성 효능·효과 성분이 아닌\n다른 성분으로 기능성"
+      }
+    ],
+    "warnings": [],
+    "timing": {
+      "retrieval_ms": 0.0,
+      "llm_ms": 0.0,
+      "total_ms": 11364.688199944794
+    },
+    "mock": false,
+    "market_references": [
+      {
+        "reference_id": "M1",
+        "product_id": "MKT_ANUA_HEARTLEAF_HA_TONER_250_RENEWAL",
+        "brand": "아누아",
+        "product_name": "어성초 77 히알루론산 수분 진정 토너",
+        "form": "토너",
+        "shared_ingredients": [
+          "판테놀",
+          "히알루론산"
+        ],
+        "ingredient_basis": "공개 주요 성분 키워드",
+        "copy_id": "ANUA_HA_TONER_NAME_20261014",
+        "copy_text": "[NEW/리뉴얼] 어성초 77 히알루론산 수분 진정 토너 250ml",
+        "copy_types": [
+          "성분 소구형",
+          "효능 서술형"
+        ],
+        "placement": "상품명",
+        "conditions": "상품명 원문. 77의 의미·시험 조건은 이 필드에서 추정하지 않음.",
+        "source_url": "https://anua.kr/product/detail.html?cate_no=108&display_group=1&product_no=496",
+        "observed_on": "2026-10-14",
+        "market": "KR",
+        "allowed_as_owned_evidence": false
+      }
+    ],
+    "ingredient_profiles": [
+      {
+        "ingredient_id": "hyaluronic_acid",
+        "name": "히알루론산",
+        "aliases": [
+          "히알루론산",
+          "하이알루로닉애씨드",
+          "소듐하이알루로네이트",
+          "소듐히알루로네이트",
+          "하이드롤라이즈드하이알루로닉애씨드",
+          "하이드롤라이즈드소듐하이알루로네이트",
+          "소듐아세틸레이티드하이알루로네이트",
+          "포타슘하이알루로네이트",
+          "Hyaluronic Acid",
+          "Sodium Hyaluronate"
+        ],
+        "roles": [
+          "수분 결합",
+          "보습 설계"
+        ],
+        "research_summary": "수분을 결합하는 성질과 특정 히알루론산 제형의 피부 수분 관련 연구가 있다.",
+        "evidence_kind": "사람 대상 특정 제형 연구",
+        "study_conditions": "76명 여성의 눈가에 서로 다른 분자량의 0.1% 제형을 60일 적용한 연구. 분자량·농도·제형이 다른 제품으로 결과를 전용하지 않는다.",
+        "copy_angles": [
+          "수분을 담은 데일리 케어",
+          "촉촉하게 가꾸는 루틴"
+        ],
+        "avoid_claims": [
+          "진피 침투",
+          "주름 제거",
+          "지속시간·개선율 확정"
+        ],
+        "source_url": "https://pubmed.ncbi.nlm.nih.gov/22052267/",
+        "source_title": "Efficacy of cream-based novel formulations of hyaluronic acid of different molecular weights in anti-wrinkle treatment",
+        "accessed_on": "2026-10-14",
+        "allowed_as_owned_evidence": false,
+        "allowed_as_regulatory_evidence": false,
+        "requires_product_evidence": [
+          "수치·기간·비교우위",
+          "장벽·붉은기 등 구체적 개선 주장"
+        ],
+        "functional_gate": null,
+        "matched_ingredients": [
+          "히알루론산"
+        ],
+        "reference_id": "I1"
+      },
+      {
+        "ingredient_id": "panthenol",
+        "name": "판테놀",
+        "aliases": [
+          "판테놀",
+          "Panthenol",
+          "Dexpanthenol",
+          "덱스판테놀"
+        ],
+        "roles": [
+          "보습",
+          "피부 컨디셔닝 연구"
+        ],
+        "research_summary": "덱스판테놀을 포함한 특정 제형에서 각질층 수분과 수분 손실 지표를 평가한 연구가 있다.",
+        "evidence_kind": "사람 대상 특정 제형 연구",
+        "study_conditions": "무작위 이중맹검 기제 대조 연구의 7일 도포 조건. 덱스판테놀 연구를 모든 판테놀 배합·농도에 동일 적용하지 않는다.",
+        "copy_angles": [
+          "편안한 데일리 보습 루틴",
+          "촉촉하게 가꾸는 케어"
+        ],
+        "avoid_claims": [
+          "상처 치료",
+          "피부 재생",
+          "붉은기·장벽 개선 확정"
+        ],
+        "source_url": "https://pubmed.ncbi.nlm.nih.gov/10965426/",
+        "source_title": "Effect of topically applied dexpanthenol on epidermal barrier function and stratum corneum hydration",
+        "accessed_on": "2026-10-14",
+        "allowed_as_owned_evidence": false,
+        "allowed_as_regulatory_evidence": false,
+        "requires_product_evidence": [
+          "수치·기간·비교우위",
+          "장벽·붉은기 등 구체적 개선 주장"
+        ],
+        "functional_gate": null,
+        "matched_ingredients": [
+          "판테놀"
+        ],
+        "reference_id": "I2"
+      }
+    ]
+  }
+}
