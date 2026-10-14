@@ -3,7 +3,7 @@ import re
 
 import streamlit as st
 
-from app.components.context import current, register_product
+from app.components.context import FUNCTIONAL_TYPES, current, register_product
 from app.components.generation import render_generation
 from app.components.ingredient_roles import render_ingredient_roles
 from app.services import backend, generation_results
@@ -30,7 +30,7 @@ with st.form("generate_form"):
         if not use_project:
             name = st.text_input("제품명 (선택)", max_chars=100)
             category = st.selectbox("제품 구분", ["일반", "기능성"])
-            functional_type = st.text_input("실제 심사·보고받은 기능성 유형", max_chars=100) if category == "기능성" else None
+            functional_type = ", ".join(st.multiselect("실제 심사·보고받은 기능성 유형", FUNCTIONAL_TYPES)) if category == "기능성" else None
             product = dict(product, name=name.strip() or "나의 화장품", category=category, functional_type=functional_type)
         raw = st.text_area("실제 함유 성분 (선택)", placeholder="판테놀, 히알루론산", max_chars=10000, height=80)
     submitted = st.form_submit_button("광고문 만들기", type="primary", icon=":material/auto_awesome:")

@@ -1,0 +1,24 @@
+# Render 무료 서버는 15분 동안 요청이 없으면 잠들고, 다음 접속 때 깨어나는 데 1분 가까이 걸린다.
+# 발표·시연 기간에는 5분마다 두 서버를 불러 깨워 둔다.
+#
+# 주의: Render 무료 요금제는 계정당 월 750 인스턴스 시간이다. 두 서비스를 24시간 깨워 두면
+# 약 15일이면 소진되므로, 발표가 끝나면 이 워크플로를 끄거나(Actions → Disable workflow) 파일을 지운다.
+# GitHub 예약 실행은 정시보다 몇 분 늦게 돌 수 있다. 발표 직전에는 브라우저로 /health 를 한 번 더 연다.
+name: keep-render-awake
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping API and app
+        run: |
+          for url in https://beaurette-api.onrender.com/health https://beaurette-app.onrender.com/; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 90 "$url" || true)
+            echo "$url -> $code"
+          done

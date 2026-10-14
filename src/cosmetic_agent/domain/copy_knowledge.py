@@ -49,6 +49,26 @@ def ingredient_index() -> dict[str, dict[str, Any]]:
     return index
 
 
+@lru_cache(maxsize=1)
+def ingredient_names() -> list[str]:
+    """제품 등록 화면의 성분 검색용 이름 목록 (식약처 원료사전 국문명).
+
+    자주 쓰는 성분(기능성 고시 성분·성분 역할 카드·예시 제품 성분)을 앞에 두고 나머지는 가나다순.
+    """
+    raw = _read(DATA / "01_raw" / "api" / "cosmetic_ingredients.json", {})
+    names = sorted({(x.get("kor_name") or "").strip() for x in raw.get("items", []) if (x.get("kor_name") or "").strip()})
+    common: list[str] = []
+    for group in _classes().get("functional_notified", {}).values():
+        common += group
+    cards = _read(DATA / "ingredient_knowledge" / "ingredient_cards.json", {}).get("cards", [])
+    common += [a for card in cards for a in card.get("aliases", []) if re.fullmatch(r"[가-힣0-9\-]+", a)]
+    for path in (ASSETS / "mock_products.json", ASSETS / "sample_products.json"):
+        common += [i for prod in _read(path, []) for i in prod.get("key_ingredients") or []]
+    known = set(names)
+    head = [n for n in dict.fromkeys(common) if n in known]
+    return head + [n for n in names if n not in set(head)]
+
+
 def origin_phrase(definition: str | None, name: str = "") -> str | None:
     """'이 원료는 병풀 (Centella asiatica)의 전초에서 추출한 것이다.' → '병풀 전초에서 추출한 원료'.
 
