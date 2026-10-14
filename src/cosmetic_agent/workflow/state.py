@@ -17,6 +17,8 @@ class AdReviewState(TypedDict):
     model_level: NotRequired[int]         # 0: 가능, 1: 조건부, 2: 불가 (판정 모델)
     level: NotRequired[int]               # = max(rule_level, model_level) 하한 보장
     rule_hits: NotRequired[list[dict[str, Any]]]
+    rule_basis_ids: NotRequired[list[str]]
+    rule_next_test: NotRequired[str | None]
     violation_type: NotRequired[str]
     claim_type: NotRequired[str]
 

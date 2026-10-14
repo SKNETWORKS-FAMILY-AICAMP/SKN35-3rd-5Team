@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 import re
 
 from langchain_core.documents import Document
@@ -71,7 +73,11 @@ class HybridRetriever:
         selection_k = min(final_k or top_k, top_k)
         if selection_k <= 0:
             return []
-        dense = self.dense.search_dense(query, self.candidate_k, product_scope)
+        try:
+            dense = self.dense.search_dense(query, self.candidate_k, product_scope)
+        except Exception as error:  # noqa: BLE001 - Qdrant·임베딩 장애에도 BM25 근거로 검토는 계속한다
+            logging.getLogger(__name__).warning("Dense 검색 실패, BM25 만 사용: %s", type(error).__name__)
+            dense = []
         sparse = self.sparse.search_sparse(query, self.candidate_k, product_scope)
 
         documents: dict[str, Document] = {}
