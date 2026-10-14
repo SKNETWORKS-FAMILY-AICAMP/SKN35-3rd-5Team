@@ -1,0 +1,8 @@
+[
+  {"company_id":"CO_AMOREPACIFIC","name":"아모레퍼시픽","role":"brand_business","source_ids":["SRC_AP_BRAND_2026","SRC_KURLY_AP_MOU"],"summary":"에스트라 등 브랜드 사업과 플랫폼 공동 상품·마케팅 맥락을 연결한다.","caution":"그룹·법인·브랜드·SKU 실적을 구분. 회사의 연구·판매 역량이 자사 제품 효능의 근거가 되지는 않음."},
+  {"company_id":"CO_APR","name":"에이피알","role":"brand_and_beauty_device_business","source_ids":["SRC_APR_ABOUT","SRC_APR_IR_2024"],"summary":"메디큐브·에이프릴스킨 브랜드 및 화장품/뷰티디바이스 사업 구분.","caution":"에이지알 기기 실적·효과를 PDRN 화장품의 매출·효능으로 이전하지 않음."},
+  {"company_id":"CO_DALBA_GLOBAL","name":"달바글로벌","role":"brand_business","source_ids":["SRC_DALBA_GLOBAL"],"summary":"달바의 제형·복합 용도 소구와 플랫폼 행사 판매 이력을 함께 참고한다.","caution":"개별 제품 제조사 관계는 미확인. 같은 회사의 로션과 미스트 실적을 섞지 않음."},
+  {"company_id":"CO_PHARMARESEARCH","name":"파마리서치","role":"cosmetics_and_medical_business","source_ids":["SRC_PHARMA_COSMETIC"],"summary":"리쥬란코스메틱의 화장품 특화 성분·클리닉/힐러 라인 설명.","caution":"주사형 리쥬란·의약품·의료기기와 도포형 화장품의 효능·승인·매출을 분리."},
+  {"company_id":"CO_KOLMAR","name":"한국콜마","role":"odm_oem_development_manufacturing","source_ids":["SRC_KOLMAR_ODM"],"summary":"상품 기획·연구개발·생산·출하에 걸친 ODM/OEM 역할을 산업 맥락으로 제공한다.","caution":"특정 SKU의 제조업자 기재나 계약 증거가 없으면 제조 관계를 연결하지 않음. 자체 소비자 브랜드 매출과 동일 취급하지 않음."},
+  {"company_id":"CO_FOUNDERS","name":"더파운더즈","role":"multiple_brand_business","source_ids":["SRC_FOUNDERS"],"summary":"ANUA 브랜드와 다중 브랜드 회사 실적의 집계 범위를 연결한다.","caution":"회사 연매출을 ANUA 또는 PDRN 세럼 매출로 배분하지 않음."}
+]

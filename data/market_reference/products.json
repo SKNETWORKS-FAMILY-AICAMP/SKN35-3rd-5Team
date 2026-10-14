@@ -1,0 +1,7 @@
+[
+  {"product_id":"MKT_ANUA_PDRN_SERUM","brand":"ANUA","name":"PDRN 히알루론산 캡슐 100 세럼","category":"serum","ingredient_tags":["PDRN","히알루론산"],"ingredient_annotation":"상품명에서 확인한 마케팅 성분 태그; 개인별 효능 추정 아님","source_id":"SRC_ANUA_SERUM"},
+  {"product_id":"MKT_ANUA_PDRN_CREAM","brand":"ANUA","name":"PDRN 히알루론산 100 수분 크림","category":"cream","ingredient_tags":["PDRN","히알루론산"],"ingredient_annotation":"상품명 기반","source_id":"SRC_ANUA_CREAM"},
+  {"product_id":"MKT_KIEHLS_UFC","brand":"KIEHLS","name":"울트라 훼이셜 크림","category":"cream","ingredient_tags":["스쿠알란"],"ingredient_annotation":"공식몰 주요성분 기재 기반; 임상 효과의 원인 성분을 단정하지 않음","source_id":"SRC_KIEHLS_UFC"},
+  {"product_id":"MKT_KIEHLS_BARRIER","brand":"KIEHLS","name":"울트라 훼이셜 어드밴스드 리페어 베리어 크림","category":"cream","ingredient_tags":[],"ingredient_annotation":"이번 수집에서 성분 강조 소재를 확정하지 않음","source_id":"SRC_KIEHLS_BARRIER"},
+  {"product_id":"MKT_AESTURA_365","brand":"AESTURA","name":"아토베리어365 크림","category":"cream","ingredient_tags":[],"ingredient_annotation":"제품명만으로 성분을 추정하지 않음","source_id":"SRC_OY_AESTURA"}
+]
