@@ -13,6 +13,7 @@ from datetime import datetime
 
 import streamlit as st
 
+from app.components import live_check
 from app.components.cards import COPY_SCRIPT, highlighted, status_tag, thinking
 from app.components.context import current
 from app.components.icons import icon
@@ -124,6 +125,8 @@ with center, st.container(key="center"):
         with st.container(key="bulkin"):
             st.text_area("상세페이지 글", key="bw_bulk_text", height=170, label_visibility="collapsed",
                          placeholder="상세페이지 글을 그대로 붙여 넣으세요. 줄바꿈과 문장부호로 나눠 최대 100문장까지 검토합니다.")
+            # 입력하는 동안 바로 밑줄 — 글자 아래 밑줄 + 요약 한 줄 (브라우저에서 바로 검사)
+            html(live_check.slot("bw_bulk_text") + live_check.script(product, ["bw_bulk_text"]), js=True)
         with st.container(horizontal=True, key="bulkbtn"):
             st.button("예시 상세페이지 넣기", type="tertiary", icon=":material/description:", on_click=_fill_sample)
             run = st.button("문장별 검토 시작", type="primary", icon=":material/fact_check:")

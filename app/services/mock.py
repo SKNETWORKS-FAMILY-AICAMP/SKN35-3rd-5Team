@@ -232,6 +232,50 @@ def _candidates(text: str, product: dict) -> list[Hit]:
     return out
 
 
+# ── 입력 중 검사용 규칙표 (components/live_check.py 가 브라우저에서 같은 규칙으로 바로 밑줄을 긋는다) ──
+def rule_table(product: dict) -> dict:
+    """_candidates() 와 같은 순서 · 같은 제품 조건의 규칙을 정규식 문자열로 내보낸다.
+    브라우저 결과가 detect() 와 같아야 한다 — _candidates() 를 바꾸면 여기도 같이 바꾸고 live_check 대조 시험을 돌린다."""
+    own_claim = ds.claim_of_product(product)
+    rules: list[dict] = []
+
+    def rule(pattern: str, label: str, violation: str, level: int, *, acne: bool = False) -> None:
+        rules.append({"re": pattern, "label": label, "violation": violation, "level": level, **({"acne": True} if acne else {})})
+
+    for pat, _guide, _case, _reason in _MEDICAL:
+        rule(pat, _LABEL["medical"], "의약품오인", 2, acne=own_claim == "여드름")
+    for entry in ds.functional_claims():
+        for phrase in entry["banned"]:
+            for part in re.split(r"[/]", re.sub(r"\(.*?\)", "", phrase)):
+                part = part.strip()
+                if len(part) >= 2:
+                    rule(re.escape(part).replace(r"\ ", r"\s*"), _LABEL["medical"], "의약품오인", 2)
+    for key, meaning in ds.term_map().items():
+        medical = "의약품" in meaning
+        rule(re.escape(key).replace(r"\ ", r"\s*"), _LABEL["medical" if medical else "functional"],
+             "의약품오인" if medical else "기능성오인", 2)
+    own_type = product.get("functional_type") if product.get("category") == "기능성" else None
+    for term in ds.banned_terms():
+        if own_type and own_type in term.get("exempt_functional", []):
+            continue
+        if term.get("scope") == "기능성" and not own_type:
+            continue
+        vtype = term.get("type", "의약품오인")
+        rule(term["pattern"], _TYPE_LABEL.get(vtype, _LABEL["medical"]), vtype, int(term.get("level", 2)))
+    for pat, _guide, _reason in _SCOPE:
+        rule(pat, _LABEL["scope"], "범위이탈", 2)
+    for claim, pat in _FUNCTIONAL:
+        if claim != own_claim:
+            rule(pat, _LABEL["functional"], "기능성오인", 2)
+    rule(_DOCTOR, _LABEL["doctor"], "의약품오인", 2)
+    rule(_SUPERLATIVE, _LABEL["superlative"], "소비자오인", 2)
+    rule(_EXAGGERATION, _LABEL["exaggeration"], "소비자오인", 1)
+    rule(_COMPARE, _LABEL["compare"], "비교광고", 1)
+    evidence = [{"flat": _flat(ev.get("value") or ""), "survey": ds.evidence_kind(ev) == "survey"}
+                for ev in product.get("owned_evidence") or []]
+    return {"rules": rules, "duration": _DURATION, "number": _NUMBER, "evidence": evidence, "proof": _LABEL["proof"]}
+
+
 def detect(text: str, product: dict) -> list[Hit]:
     """겹치는 후보를 정리한 최종 표현 목록 (원문 순서). 높은 단계·긴 표현이 우선한다."""
     cands = _candidates(text, product)
