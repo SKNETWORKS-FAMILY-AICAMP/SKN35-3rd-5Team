@@ -20,6 +20,7 @@ import streamlit as st  # noqa: E402
 from app.components.sidebar import render_sidebar  # noqa: E402
 from app.components.theme import inject_base_css  # noqa: E402
 from app.services import backend  # noqa: E402
+from app.components.chatbot import render_launcher  # noqa: E402
 
 APP_DIR = Path(__file__).resolve().parent
 
@@ -32,19 +33,22 @@ st.set_page_config(
 
 
 @st.cache_data(ttl=20, show_spinner=False)
-def _health() -> dict:
+def _health(mode: str) -> dict:
     return backend.health()
 
 
 PAGES = {
+    "chat": st.Page(str(APP_DIR / "views" / "chat.py"), title="통합 챗봇", icon=":material/chat_bubble:"),
+    "generate": st.Page(str(APP_DIR / "views" / "generate.py"), title="성분으로 문구 만들기", icon=":material/auto_awesome:"),
     "review": st.Page(str(APP_DIR / "views" / "review.py"), title="검토 대화", icon=":material/forum:", default=True),
     "bulk": st.Page(str(APP_DIR / "views" / "bulk.py"), title="상세페이지 검토", icon=":material/article:"),
     "library": st.Page(str(APP_DIR / "views" / "library.py"), title="규정 · 가이드라인", icon=":material/menu_book:"),
 }
 st.session_state["bw_pages"] = PAGES
-st.session_state["bw_health"] = _health()
+st.session_state["bw_health"] = _health(backend.data_mode())
 
 page = st.navigation(list(PAGES.values()), position="hidden")
 inject_base_css()
 render_sidebar(PAGES, st.session_state["bw_health"])
 page.run()
+render_launcher(PAGES)

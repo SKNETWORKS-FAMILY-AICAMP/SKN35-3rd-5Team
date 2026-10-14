@@ -2,13 +2,17 @@
 [api/main.py]
 FastAPI 애플리케이션 진입점 및 수명주기(Lifespan) 관리.
 """
-from contextlib import asynccontextmanager
 from collections.abc import Callable
+from contextlib import asynccontextmanager
 from typing import Any
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from api.routes import chat, generate, health, review, search
 from cosmetic_agent.common.logger import get_logger
-from api.routes import health, review, search
+from cosmetic_agent.models.copy_generator import CopyGenerationService
+from cosmetic_agent.models.chatbot import ChatService
 
 logger = get_logger("API")
 
@@ -19,11 +23,13 @@ def build_review_service():
     return ReviewService()
 
 
-def create_app(service_factory: Callable[[], Any] = build_review_service) -> FastAPI:
+def create_app(service_factory: Callable[[], Any] = build_review_service, generation_factory=CopyGenerationService, chat_factory=ChatService) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         logger.info("FastAPI 기동: 검토 서비스 로드 중...")
         app.state.review_service = service_factory()
+        app.state.generation_service = generation_factory(app.state.review_service)
+        app.state.chat_service = chat_factory(app.state.review_service, app.state.generation_service)
         logger.info("FastAPI 준비 완료")
         yield
         logger.info("FastAPI 종료 중...")
@@ -46,6 +52,8 @@ def create_app(service_factory: Callable[[], Any] = build_review_service) -> Fas
     app.include_router(health.router)
     app.include_router(review.router)
     app.include_router(search.router)
+    app.include_router(generate.router)
+    app.include_router(chat.router)
 
     return app
 

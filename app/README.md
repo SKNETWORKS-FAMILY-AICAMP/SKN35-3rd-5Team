@@ -15,10 +15,12 @@ uv run streamlit run app/streamlit_app.py      # 저장소 루트에서 실행 (
 | `UI_DATA_MODE` | `mock`(기본) / `api` | Mock 응답으로 동작할지, FastAPI 서버(`API_BASE_URL`)에 붙을지 |
 | `UI_MOCK_DELAY` | `1`(기본) / `0` | Mock 검토 단계 연출 속도. `0` 이면 기다리지 않음(리허설·점검용) |
 
-API 모드: `uv run uvicorn api.main:app --port 8000` 을 띄운 뒤 `UI_DATA_MODE=api` 로 실행합니다.
+API 모드: `uv run uvicorn api.main:app --port 8000` 을 띄운 뒤 `.env`에 `UI_DATA_MODE=api`를 설정하고 화면을 새로고침합니다. 실행 환경변수에 지정한 값이 `.env`보다 우선하므로, 실행 환경에서 `mock`을 지정했다면 `api`로 바꾸고 Streamlit을 다시 실행합니다.
 연결 상태는 화면 오른쪽 위와 사이드바 아래에 표시됩니다. API 가 실패하면 Mock 으로 바꿔치기하지 않고 오류를 보여 줍니다.
 
 ## 화면 구조
+
+**통합 챗봇** 메뉴(`views/chat.py`)와 왼쪽 하단의 동그란 버튼(`components/chatbot.py`)이 추가되어 있습니다. 버튼을 누르면 작은 채팅 팝업이 열리고, 팝업의 전체 화면 링크로 챗봇 페이지에 들어갈 수 있습니다. 두 화면은 같은 대화와 성분·채널·어조·이전 후보를 공유합니다. `backend.chat()`은 `POST /chat`으로 자연어 요청을 보내며, API 모드에서만 실제 결과를 반환합니다. 기존 검토 대화·성분 생성·상세페이지 검토·규정 메뉴는 유지됩니다.
 
 ```
 ┌ 왼쪽 (탐색) ────────┬ 가운데 (대화) ─────────────────────────┬ 오른쪽 (근거 · RAG) ─────┐
