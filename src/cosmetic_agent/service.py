@@ -5,6 +5,8 @@ FastAPI 및 Streamlit이 호출하는 단일 비즈니스 로직 진입점(Facad
 import time
 from typing import Any
 from .domain.schemas import (
+    GenerateRequest,
+    GenerateResponse,
     ProductCard,
     ReviewResult,
     ReviewResponse,
@@ -13,11 +15,13 @@ from .domain.schemas import (
 from .domain.rules import RuleEngine
 from .domain.verifier import CopyVerifier
 from .models.judge_factory import JudgeFactory
+from .models.copy_generator import CopyGenerator
 from .rag.vector_store import VectorStoreRetriever
 from .rag.sparse_bm25 import SparseBM25Retriever
 from .rag.hybrid import HybridRetriever
 from .rag.query_rewriter import QueryRewriter
 from .workflow.graph import build_ad_review_graph
+from .generation.graph import build_generation_graph
 from .common.config import settings
 from .common.logger import get_logger
 
@@ -47,6 +51,8 @@ class ReviewService:
             sparse_retriever=self.sparse_retriever,
         )
 
+        self.copy_generator = CopyGenerator()
+
         # LangGraph 컴파일
         self.graph = build_ad_review_graph(
             rule_engine=self.rule_engine,
@@ -54,6 +60,13 @@ class ReviewService:
             rewriter=self.rewriter,
             retriever=self.hybrid_retriever,
             verifier=self.verifier,
+        )
+        self.generation_graph = build_generation_graph(
+            rule_engine=self.rule_engine,
+            rewriter=self.rewriter,
+            retriever=self.hybrid_retriever,
+            verifier=self.verifier,
+            generator=self.copy_generator,
         )
         logger.info("ReviewService 초기화 완료 (그래프 재사용 준비 완료)")
 
@@ -121,3 +134,37 @@ class ReviewService:
         # 2. self.graph.batch() 또는 반복문 호출
         sentences = [s.strip() for s in full_text.split("\n") if s.strip()]
         return [self.review_single(s, product) for s in sentences]
+
+    def generate_copy(self, request: GenerateRequest) -> GenerateResponse:
+        """선택된 제품·실증자료와 규정 근거 안에서 신규 광고 문구를 생성한다."""
+        start_t = time.perf_counter()
+        final_state = self.generation_graph.invoke({
+            "instruction": request.instruction,
+            "product": request.product.model_dump(),
+            "channel": request.channel,
+            "tone": request.tone,
+            "length": request.length,
+            "keywords": request.keywords,
+        })
+
+        citations = []
+        for document in final_state.get("documents", []):
+            metadata = document.metadata
+            authority = int(metadata.get("authority", 4))
+            citations.append({
+                "chunk_id": metadata.get("chunk_id") or metadata.get("id", ""),
+                "source": metadata.get("source", ""),
+                "article": metadata.get("article", ""),
+                "authority": authority if authority in (1, 2, 3, 4) else 4,
+                "content_snippet": document.page_content[:300],
+            })
+
+        return GenerateResponse(
+            request_id=f"GEN_{int(start_t * 1000)}",
+            status=final_state.get("status", "생성보류"),
+            product_id=request.product.product_id,
+            candidates=final_state.get("candidates", []),
+            citations=citations,
+            warnings=final_state.get("warnings", []),
+            timing=ExecutionTiming(total_ms=(time.perf_counter() - start_t) * 1000),
+        )

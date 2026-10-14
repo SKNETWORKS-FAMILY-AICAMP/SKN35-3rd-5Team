@@ -26,7 +26,7 @@ def _delete(tid: str, title: str) -> None:
 
 
 def render_sidebar(pages: dict[str, st.Page], health: dict) -> None:
-    """pages: {"review": Page, "bulk": Page, "library": Page}."""
+    """pages: {"review": Page, "generate": Page, "bulk": Page, "library": Page}."""
     with st.sidebar:
         html(f'<div class="bw-brand">{lockup_img(36)}</div>')
 

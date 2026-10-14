@@ -24,7 +24,7 @@
 │   ├── models/         # Rule / GPT Few-shot / QLoRA 판정 모델 인터페이스
 │   ├── workflow/       # LangGraph 9단계 StateGraph 노드/엣지
 │   └── service.py      # 싱글톤 파사드 서비스
-├── api/                # FastAPI 서빙 레이어 (/health, /review, /search)
+├── api/                # FastAPI 서빙 레이어 (/health, /review, /generate, /search)
 ├── app/                # Streamlit 사용자 대시보드
 └── tests/              # 단위 테스트 및 계약 검증 테스트
 ```
