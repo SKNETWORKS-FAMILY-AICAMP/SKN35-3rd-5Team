@@ -39,6 +39,7 @@ API 모드: `uv run uvicorn api.main:app --port 8000` 을 띄운 뒤 `UI_DATA_MO
 | 화면 | 파일 | 내용 |
 |---|---|---|
 | 검토 대화 (첫 화면) | `views/review.py` | 질문 → AI 답변(판정 · 검토한 문구 · 문제 표현 · 수정 제안 · 다른 표현 · 출처), 오른쪽 근거 · 원문 문서 · 검토 과정 |
+| 광고문 생성 | `views/generate.py` | 현재 검토 기준으로 신규 문구 3개 생성 · 역검증 · 근거 확인 · 다시 검토 |
 | 상세페이지 검토 | `views/bulk.py` | 긴 글을 문장 단위로 검토, 문장별 결과 · 교정본 복사/내려받기 |
 | 규정 · 가이드라인 | `views/library.py` | 조항 검색(하이브리드 검색 결과) · 관리지침 금지 표현 · 식약처 적발 사례 |
 
@@ -101,6 +102,7 @@ COOA 의 도메인 구조(위험도 · 권장 문구 · RA 검토 권고), 팀 �
 |---|---|---|
 | `review_events(copy_text, product)` | `POST /review/stream` (있으면) → 없으면 `POST /review` | 검토 진행 이벤트 + 결과. 아래 「진행 이벤트」 |
 | `review_copy(copy_text, product)` | `POST /review` | `ReviewResponse` 그대로 |
+| `generate_copy(instruction, product, ...)` | `POST /generate` | 검토 기준 기반 신규 문구 생성 및 역검증 |
 | `review_page(full_text, product)` | `POST /review/bulk` | 문장 분할은 `api/text.py` 와 같은 규칙 |
 | `search_rules(query, scope)` | `GET /search` | `[{content, metadata}]` |
 | `health()` | `GET /health` | 연결 상태 표시 |
