@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     OPENAI_BASE_URL: str | None = None
     OPENAI_MODEL_NAME: str = "gpt-4o-mini"
+    # 광고문 생성만 따로. 성분 카드·표현 각도 같은 긴 재료 규칙을 지키려면 큰 모델이 낫다. 비우면 OPENAI_MODEL_NAME 사용
+    GENERATION_MODEL_NAME: str = "gpt-4o"
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
 
     # Qdrant

@@ -4,6 +4,7 @@ import re
 from types import SimpleNamespace
 from typing import Any
 
+from ..domain.copy_knowledge import material_claim_notes
 from ..domain.rules import RuleEngine
 from ..domain.schemas import ProductCard
 from ..domain.verifier import CopyVerifier
@@ -111,6 +112,7 @@ def verify_candidates_node(
         unsupported = grounding_notes(text, SimpleNamespace(
             product=ProductCard.model_validate(product), ingredients=product.get("key_ingredients", [])))
         unsupported += concept_claim_notes(text, state)
+        unsupported += material_claim_notes(text, product)
         if unsupported:
             rejected.extend(unsupported)
             continue
