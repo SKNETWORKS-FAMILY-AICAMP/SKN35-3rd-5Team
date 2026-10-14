@@ -110,6 +110,8 @@ class ReviewService:
             candidates=final_state.get("candidates", []),
             rejected_notes=final_state.get("rejected_notes", []),
             used_evidence=final_state.get("used_evidence", []),
+            candidate_details=final_state.get("candidate_details", []),
+            experiment=final_state.get("experiment", {}),
         )
 
     def review_bulk(self, full_text: str, product: ProductCard) -> list[ReviewResponse]:

@@ -96,3 +96,29 @@ def test_review_response_feeds_streamlit_variants():
     assert [v["tier"] for v in variants] == ["strong", "balanced", "safe"]
     assert [v["chosen"] for v in variants] == [False, True, False]
     assert variants[0]["verified"] is False and "숫자날조" in variants[0]["note"]
+
+
+def test_candidate_details_compare_against_original():
+    from cosmetic_agent.models.copy_suggester import CandidateNote
+
+    llm = FakeLLM(SuggestionOutput(
+        candidates=["8주 사용 후 수분량 35% 증가 (인체적용시험)", "세포 재생 보습 크림", "산뜻한 크림"],
+        candidate_notes=[CandidateNote(changes=["세포 재생 → 수분량 35% 증가 (근거 사용)"],
+                                       hypothesis="대조군 대비 수치를 보여줘 클릭률이 높을 것이다")],
+        primary_metric="클릭률",
+    ))
+    result = CopySuggester(llm=llm).suggest(copy_text="피부 세포 재생 크림", product=PRODUCT, level=2)
+    strong, risky, safe = result["candidate_details"]
+
+    assert strong["chosen"] and strong["verified"]
+    assert "35%" in strong["evidence_numbers"] and "8주" in strong["evidence_numbers"]
+    assert any("재생" in p for p in strong["removed_risky"])
+    assert strong["hypothesis"]
+    # 실험: 검증 통과 후보만, 대조군은 가장 안전 후보, 탈락 후보는 제외
+    exp = result["experiment"]
+    assert exp["primary_metric"] == "클릭률"
+    assert exp["control"]["tier"] == "safe" and [v["tier"] for v in exp["variants"]] == ["strong"]
+    assert exp["excluded"] == [{"tier": "balanced", "reason": "검증 탈락"}]
+    # 위험 표현을 남긴 후보는 검증 탈락으로 표시된다
+    assert risky["verified"] is False and risky["kept_risky"]
+    assert safe["tier"] == "safe" and safe["changes"] == []

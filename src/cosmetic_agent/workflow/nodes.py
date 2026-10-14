@@ -113,6 +113,8 @@ def suggest_copy_node(state: AdReviewState, suggester: CopySuggester | None = No
         "candidates": result.get("candidates", []),
         "rejected_notes": result.get("rejected_notes", []),
         "used_evidence": result.get("used_evidence", []),
+        "candidate_details": result.get("candidate_details", []),
+        "experiment": result.get("experiment", {}),
     }
 
 

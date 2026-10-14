@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-PROMPT_VERSION = "suggest-v6"
+PROMPT_VERSION = "suggest-v8"
 
 SUGGEST_SYSTEM_PROMPT = """\
 너는 화장품 회사의 표시·광고 심의(RA) 담당자다.
@@ -52,6 +52,13 @@ SUGGEST_SYSTEM_PROMPT = """\
 - used_evidence: 후보에 사용한 보유 근거 항목 (없으면 빈 목록)
 - cited_ids: 참고한 [관련 규정] 번호 (예: L1)
 - rationale: 무엇을 왜 바꿨는지 한두 문장
+- candidate_notes: candidates 와 같은 순서로, 후보마다
+  - changes: 원문 대비 바꾼 점을 '구절 단위'로 최대 3개. 각 항목은 "원문 구절 → 바꾼 구절 (이유)" 또는 "원문 구절 → 삭제 (이유)"
+  - hypothesis: A/B 테스트 가설 한 문장. 원문은 위반이라 비교군이 될 수 없으므로 마지막 후보(가장 안전)를 대조군으로 둔다.
+    첫째·둘째 후보: "대조군 대비 [이 후보의 차별점] 때문에 [primary_metric]이 높을 것이다"
+    마지막 후보: "대조군"
+    효과 크기(몇 % 상승 등)는 근거가 없으므로 쓰지 않는다.
+- primary_metric: 세 후보를 비교할 지표 하나 (클릭률 / 전환율 / 장바구니 담기율 중). 원문의 목적(관심 끌기·구매 설득)에 맞게 고른다.
 """
 
 
