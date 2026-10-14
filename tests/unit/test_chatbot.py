@@ -3,8 +3,13 @@ from unittest.mock import Mock
 import pytest
 
 from cosmetic_agent.domain.chat import ChatContext, ChatRequest
-from cosmetic_agent.domain.generation import GeneratedCandidate, GenerateResponse
-from cosmetic_agent.domain.schemas import ExecutionTiming, ReviewResponse, ReviewResult
+from cosmetic_agent.domain.schemas import (
+    ExecutionTiming,
+    GeneratedCandidate,
+    GenerateResponse,
+    ReviewResponse,
+    ReviewResult,
+)
 from cosmetic_agent.models.chatbot import ChatPlan, ChatService
 from cosmetic_agent.models.copy_generator import GenerationUnavailable
 
@@ -36,8 +41,8 @@ def test_review_uses_extracted_copy_and_preserves_trusted_evidence(sample_produc
 def test_generate_uses_resolved_context_and_no_implicit_evidence():
     svc = service(ChatPlan(intent="generate", context=ChatContext(
         ingredients=["판테놀"], product_name="테스트 크림", tone="발랄한", channel="배너", brief="두 번째 문구처럼 짧게"), reference_index=2))
-    svc.generator.generate.return_value = GenerateResponse(candidates=[
-        GeneratedCandidate(text="판테놀 함유 크림", status="확인필요")])
+    svc.generator.generate.return_value = GenerateResponse(request_id="test", status="생성완료", product_id="P1", timing=ExecutionTiming(), candidates=[
+        GeneratedCandidate(text="판테놀 함유 크림", tier="safe", status="확인필요")])
     previous = ChatContext(ingredients=["판테놀"], product_name="테스트 크림", last_copies=["후보 하나", "후보 둘"])
     response = svc.chat(ChatRequest(message="2번 더 짧고 발랄하게", context=previous))
     request = svc.generator.generate.call_args.args[0]
@@ -45,18 +50,17 @@ def test_generate_uses_resolved_context_and_no_implicit_evidence():
     assert request.tone == "발랄한" and request.channel == "배너"
     assert request.product.name == "테스트 크림"
     assert request.product.owned_evidence == []
-    assert "두 번째" in request.brief
+    assert "두 번째" in request.instruction
     assert request.reference_copy == "후보 둘"
     assert response.context.last_copies == ["판테놀 함유 크림"]
     assert "후보 둘" in svc._llm.invoke.call_args.args[0][1][1]
     svc.reviewer.review_single.assert_not_called()
 
 
-@pytest.mark.parametrize("intent, question", [("generate", "성분"), ("review", "광고 문구")])
-def test_missing_inputs_ask_question_without_running_tools(intent, question):
-    svc = service(ChatPlan(intent=intent, context=ChatContext()))
+def test_review_without_text_asks_for_required_input():
+    svc = service(ChatPlan(intent="review", context=ChatContext()))
     response = svc.chat(ChatRequest(message="해주세요"))
-    assert response.intent == "clarify" and question in response.message
+    assert response.intent == "clarify" and "광고 문구" in response.message
     svc.reviewer.review_single.assert_not_called()
     svc.generator.generate.assert_not_called()
 
@@ -94,3 +98,36 @@ def test_candidate_review_uses_actual_previous_text():
     svc.reviewer.review_single.return_value = reviewed()
     svc.chat(ChatRequest(message="1번 검토", context=ChatContext(last_copies=["실제 후보"])))
     assert svc.reviewer.review_single.call_args.args[0] == "실제 후보"
+
+
+@pytest.mark.parametrize("intent, question", [("generate", ""), ("clarify", "성분이 무엇인가요?")])
+def test_sunscreen_request_generates_without_asking_for_ingredients(intent, question):
+    svc = service(ChatPlan(intent=intent, question=question, context=ChatContext(
+        product_name="선크림", product_description="자외선 차단 선크림 광고")))
+    svc.generator.generate.return_value = GenerateResponse(
+        request_id="sunscreen", status="생성완료", product_id="chat_draft", timing=ExecutionTiming(),
+        candidates=[GeneratedCandidate(text="햇살 있는 하루, 외출 준비의 선케어 루틴.", tier="safe")])
+    response = svc.chat(ChatRequest(message="자외선 차단하는 선크림 관련해서 만들어줘봐"))
+    assert response.intent == "generate"
+    sent = svc.generator.generate.call_args.args[0]
+    assert sent.ingredients == [] and sent.product.owned_evidence == []
+    assert sent.product.category == "일반" and sent.product.functional_type is None
+    assert "선크림" in sent.instruction
+    assert response.generation.candidates
+
+
+def test_short_followup_defaults_to_first_candidate_without_clarification():
+    svc = service(ChatPlan(intent="generate", context=ChatContext(tone="유머러스한", length="한 줄")))
+    svc.generator.generate.return_value = GenerateResponse(
+        request_id="followup", status="생성완료", product_id="chat_draft", timing=ExecutionTiming())
+    svc.chat(ChatRequest(message="더 짧고 웃기게", context=ChatContext(last_copies=["이전 후보", "다른 후보"])))
+    sent = svc.generator.generate.call_args.args[0]
+    assert sent.reference_copy == "이전 후보" and sent.tone == "유머러스한" and sent.length == "한 줄"
+
+
+def test_capability_conversation_does_not_treat_it_as_ad_review():
+    svc = service(ChatPlan(intent="answer", context=ChatContext(), question="성분을 몰라도 제품 설명만으로 광고 초안을 만들 수 있어요."))
+    response = svc.chat(ChatRequest(message="성분 몰라도 되지?"))
+    assert response.intent == "answer"
+    svc.generator.generate.assert_not_called()
+    svc.reviewer.review_single.assert_not_called()

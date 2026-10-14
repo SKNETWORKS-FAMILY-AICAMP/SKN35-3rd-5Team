@@ -13,8 +13,8 @@ from qdrant_client.http.exceptions import ResponseHandlingException
 
 from api.routes import chat, generate, health, review, search
 from cosmetic_agent.common.logger import get_logger
+from cosmetic_agent.generation.service import UnifiedGenerationService
 from cosmetic_agent.models.chatbot import ChatService
-from cosmetic_agent.models.copy_generator import CopyGenerationService
 
 logger = get_logger("API")
 
@@ -25,7 +25,7 @@ def build_review_service():
     return ReviewService()
 
 
-def create_app(service_factory: Callable[[], Any] = build_review_service, generation_factory=CopyGenerationService, chat_factory=ChatService) -> FastAPI:
+def create_app(service_factory: Callable[[], Any] = build_review_service, generation_factory=UnifiedGenerationService, chat_factory=ChatService) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         logger.info("FastAPI 기동: 검토 서비스 로드 중...")

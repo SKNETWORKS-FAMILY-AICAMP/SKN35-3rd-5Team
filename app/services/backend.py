@@ -50,7 +50,7 @@ def data_mode() -> str:
 
 
 def generate_copy(payload: dict) -> dict:
-    """성분 기반 실제 AI 생성. 데모에서는 생성 결과를 지어내지 않는다."""
+    """자유 작성 요청·선택적 성분 입력을 동일한 생성 그래프로 처리한다."""
     if data_mode() not in ("api", "local"):
         raise BackendError("현재 화면이 데모 모드입니다. .env에 UI_DATA_MODE=api를 설정하고 화면을 새로고침하세요. 실행 환경에 mock이 지정되어 있으면 api로 바꾼 뒤 Streamlit을 다시 실행하세요.")
     return _post("/generate", payload, timeout=180.0)
@@ -314,9 +314,7 @@ def generate_project_copy(
         "length": length,
         "keywords": keywords or [],
     }
-    if data_mode() == "mock":
-        return mock.generate_copy(**payload)
-    return _post("/generate", payload, timeout=180.0)
+    return generate_copy(payload)
 
 
 def split_sentences(full_text: str) -> list[str]:

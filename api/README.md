@@ -20,7 +20,8 @@ uv run uvicorn api.main:app --reload --port 8000
 - `GET /health`: 서버 생존 확인 (모델/검색기 가용성 검사는 아님).
 - `POST /review`: 단일 문구. `copy_text` 최대 5,000자, 기존 화면과 응답 호환.
 - `POST /review/bulk`: 문장별 검토. `full_text` 최대 50,000자, 100문장.
-- `POST /generate`: 제품·선택한 실증자료·채널·톤을 기준으로 검증된 신규 광고 문구 생성.
+- `POST /generate`: 자유로운 `instruction`과 선택적 `ingredients`·제품 정보를 동일한 LangGraph로 처리합니다. 성분은 필수가 아닙니다. 응답 후보에 검토 상태와 후보별 검토 근거를 포함합니다.
+- `POST /chat`: 자연어 의도 파악 → 대화 맥락 반영 → 통합 생성/검토/근거 기반 규정 질문 답변. 성분 누락은 추가 질문 사유가 아닙니다.
 - `GET /search`: Qdrant Cloud + BM25 규정 검색.
 
 `/review/bulk` 요청 예시:
