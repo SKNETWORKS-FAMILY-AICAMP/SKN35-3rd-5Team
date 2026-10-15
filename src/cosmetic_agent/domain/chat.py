@@ -13,6 +13,34 @@ from .schemas import (
 )
 
 
+def assistant_history_text(response: dict) -> str:
+    """Keep conversational content and copy references without serializing tool metadata."""
+    parts = [str(response.get("message") or "")[:2000]]
+    review = response.get("review") or {}
+    if review:
+        result = review.get("result") or {}
+        parts.append("검토한 문구: " + str(review.get("input_text") or "")[:1000])
+        for label, key in (("검토 사유", "review_notes"), ("수정 제안", "suggestion"), ("필요한 확인", "next_test")):
+            if result.get(key):
+                parts.append(label + ": " + str(result[key])[:700])
+    generation = response.get("generation") or {}
+    citations = [*(response.get("citations") or []),
+                 *((review.get("result") or {}).get("citations") or []),
+                 *(generation.get("citations") or [])]
+    for index, candidate in enumerate(generation.get("candidates", [])[:3], 1):
+        parts.append(f"광고 후보 {index} ({candidate.get('status', '확인필요')}): " + str(candidate.get("text") or "")[:1000])
+        candidate_review = (candidate.get("review") or {}).get("result") or {}
+        notes = [*(candidate.get("notes") or []), candidate_review.get("review_notes"), candidate_review.get("next_test")]
+        notes = list(dict.fromkeys(str(note) for note in notes if note))
+        if notes:
+            parts.append("검토 사유: " + " / ".join(notes)[:300])
+        citations.extend(candidate_review.get("citations") or [])
+    for citation in citations[:3]:
+        parts.append(f"참고 규정 {citation.get('source', '')} {citation.get('article', '')}: "
+                     + str(citation.get("content_snippet") or "")[:300])
+    return "\n".join(part for part in parts if part)[:6000]
+
+
 class ChatContext(BaseModel):
     ingredients: list[IngredientName] = Field(default_factory=list, max_length=100)
     channel: Literal["SNS", "상세페이지", "배너", "검색광고", "라이브커머스"] = "SNS"

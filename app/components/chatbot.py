@@ -11,6 +11,7 @@ from app.components.generation import render_generation
 from app.components.layout import clock, esc
 from app.components.theme import inject_css
 from app.services import backend
+from cosmetic_agent.domain.chat import assistant_history_text
 
 KST = timezone(timedelta(hours=9))
 LAUNCHER_SCRIPT = Path(__file__).with_name("chat_launcher.js")
@@ -20,7 +21,7 @@ def chat_header(*, compact: bool = False) -> None:
     """메신저 상단의 대화 상대 프로필."""
     st.html(f'<div class="bw-chat-profile"><span class="bw-chat-profile-avatar">'
             f'{avatar_img(44, alt="뷰렛 토끼")}</span><div><strong>뷰렛</strong>'
-            f'<span>{"광고 문구 도우미" if compact else "광고 문구를 함께 다듬는 AI 도우미"}</span></div></div>')
+            f'<span>{"화장품·성분 도우미" if compact else "화장품과 성분을 함께 이야기하는 AI 도우미"}</span></div></div>')
 
 
 def state() -> dict:
@@ -114,8 +115,7 @@ def _send(message: str, product: dict, messages, *, scope: str) -> None:
         if turn["role"] == "user":
             history.append({"role": "user", "content": turn["text"]})
         else:
-            # 실행 결과와 상태도 전달해 후속 후보 참조를 지원한다.
-            history.append({"role": "assistant", "content": json.dumps(turn["response"], ensure_ascii=False)[:6000]})
+            history.append({"role": "assistant", "content": assistant_history_text(turn["response"])})
     with messages:
         pending = st.empty()
     with pending.container():
@@ -153,9 +153,10 @@ def render_chat(*, compact: bool = False) -> None:
             st.html(f'<div class="bw-chat-welcome"><span class="bw-chat-welcome-avatar">'
                     f'{avatar_img(38, alt="뷰렛 토끼")}</span><div><div class="bw-chat-sender">뷰렛</div>'
                     '<div class="bw-chat-welcome-bubble">안녕하세요, 뷰렛이에요 👋<br>'
-                    '어떤 광고를 만들고 싶은지 말해주세요.<br>성분을 몰라도 초안부터 만들어드릴게요.</div>'
+                    '화장품과 성분에 대해 편하게 물어보세요.<br>설명부터 광고 문구 생성·검토까지 도와드릴게요.</div>'
                     '<div class="bw-chat-examples"><span>이렇게 말해보세요</span>'
-                    '<p>“이 광고 문구, 검토하고 고쳐줘”</p>'
+                    '<p>“판테놀과 히알루론산은 뭐가 달라?”</p>'
+                    '<p>“그럼 민감성 피부에는 어떤 점을 살펴봐야 해?”</p>'
                     '<p>“선크림 광고를 짧고 발랄하게 만들어줘”</p></div></div></div>')
         for index, turn in enumerate(chat["messages"]):
             _render_turn(turn, scope=scope, index=index)
@@ -163,14 +164,14 @@ def render_chat(*, compact: bool = False) -> None:
         with st.form("chat_mini_form", clear_on_submit=True):
             entry, send = st.columns([5, 1], gap="small", vertical_alignment="center")
             with entry:
-                message = st.text_input("챗봇 요청", placeholder="뷰렛에게 메시지 보내기", max_chars=5000, label_visibility="collapsed")
+                message = st.text_input("챗봇 요청", placeholder="화장품·성분에 대해 물어보세요", max_chars=5000, label_visibility="collapsed")
             with send:
                 submitted = st.form_submit_button("보내기", icon=":material/arrow_upward:", width="stretch")
         if submitted:
             _send(message, product, messages, scope=scope)
     else:
         with st.container(key="chat_composer_full"):
-            message = st.chat_input("뷰렛에게 메시지 보내기", max_chars=5000, key="chat_full_input")
+            message = st.chat_input("화장품·성분에 대해 물어보세요", max_chars=5000, key="chat_full_input")
             if message:
                 _send(message, product, messages, scope=scope)
             st.html('<div class="bw-chat-composer-note">Enter로 전송 · Shift + Enter로 줄바꿈</div>')
