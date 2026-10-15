@@ -74,8 +74,8 @@ saved = st.session_state.get("bw_generation")
 
 
 def use_in_forecast(index: int) -> None:
-    """선택한 후보를 예상 매출 시나리오 3번에 연결한다.
-    내 제품이면 그 제품 기록에, 초안이면 입력한 제품 정보로 내 제품을 만들어 연결한다."""
+    """선택한 후보를 예상 매출 변화 폭 화면에 연결한다.
+    프로젝트 제품이면 그 제품 기록에, 초안이면 입력한 제품 정보로 프로젝트 제품을 만들어 연결한다."""
     target = product
     if not use_project:
         drafts = st.session_state.setdefault("bw_generation_drafts", {})
