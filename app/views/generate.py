@@ -88,8 +88,11 @@ def use_in_forecast(index: int) -> None:
         })
         drafts[key] = target["product_id"]
         st.session_state["bw_pid"] = target["product_id"]
-    generation_results.save(target, saved["response"], saved["payload"])
-    generation_results.choose(target, index)
+    try:
+        generation_results.send_to_forecast(target, saved["response"], saved["payload"], index)
+    except Exception as error:  # noqa: BLE001 - 연결 실패 사유를 화면에 보여준다
+        st.error(f"매출 시나리오 연결에 실패했습니다: {error}")
+        return
     st.switch_page(st.session_state["bw_pages"]["forecast"])
 
 
