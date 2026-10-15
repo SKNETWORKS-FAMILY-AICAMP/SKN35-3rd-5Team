@@ -55,15 +55,15 @@
 
 SK Networks Family AI Camp 35기 · 3차 프로젝트 · 5팀
 
-[서비스 화면](https://beaurette-app.onrender.com) · [API 문서](https://beaurette-api.onrender.com/docs) · [API 가이드](api/README.md) · [UI 가이드](app/README.md)
+[서비스 화면](https://cosmetic-ad-agent.onrender.com) · [API 문서](https://beaurette-api.onrender.com/docs) · [API 가이드](api/README.md) · [UI 가이드](app/README.md)
 
 배포 환경의 기동 상태에 따라 첫 응답이 지연될 수 있습니다.
 
 ### 서비스 화면
 
-2026-10-15 배포 서비스에서 직접 캡처한 화면입니다. 최신 홈 디자인과 내 제품 등록, 통합 챗봇, 광고문 생성, 시장 비교·매출 시나리오를 반영했습니다. 이미지를 누르면 원본 크기로 볼 수 있습니다.
+2026-10-15 배포 서비스에서 직접 캡처한 화면입니다. 최신 홈 디자인과 내 제품 등록, 통합 챗봇, 광고문 생성, 시장 비교·매출 시나리오를 반영했습니다. 아래 대표 이미지를 누르면 서비스로 이동하고, 기능별 이미지를 누르면 원본 크기로 볼 수 있습니다.
 
-![Beaurette 최신 홈 화면](docs/screenshots/home-2026-10-15.jpg)
+[![Beaurette 최신 홈 화면 · 서비스 바로가기](docs/screenshots/home-2026-10-15.jpg)](https://cosmetic-ad-agent.onrender.com)
 
 | 문구 검토 · 규정 근거 | 수정 후보 · 역검증 |
 | :---: | :---: |
