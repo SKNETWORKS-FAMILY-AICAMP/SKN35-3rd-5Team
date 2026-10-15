@@ -37,14 +37,44 @@ def record(product: dict) -> tuple[dict | None, bool]:
 
 def selected(product: dict) -> dict | None:
     result, stale = record(product)
-    if not result or stale or result["response"].get("status") != "생성완료":
+    if not result or stale or not result["response"].get("candidates"):
         return None
     candidates = result["response"].get("candidates", [])
-    return candidates[result["selected"]] if candidates else None
+    index = result.get("selected", 0)
+    return candidates[index] if 0 <= index < len(candidates) and usable(candidates[index]) else None
+
+
+def usable(candidate: dict) -> bool:
+    return candidate.get("verified", True) and candidate.get("status", "검토통과") == "검토통과"
 
 
 def choose(product: dict, index: int) -> None:
     result, stale = record(product)
     if not result or stale or not 0 <= index < len(result["response"].get("candidates", [])):
         raise ValueError("현재 제품 기준으로 생성한 후보를 선택해 주세요.")
+    if not usable(result["response"]["candidates"][index]):
+        raise ValueError("검토를 통과한 후보만 매출 시나리오에 사용할 수 있습니다.")
     result["selected"] = index
+
+
+def send_to_forecast(product: dict, response: dict, conditions: dict, index: int) -> None:
+    """Persist one product-bound selection; navigation must not reconstruct its evidence."""
+    candidates = response.get("candidates", [])
+    if not 0 <= index < len(candidates) or not usable(candidates[index]):
+        raise ValueError("검토를 통과한 후보를 선택해 주세요.")
+    save(product, response, conditions)
+    choose(product, index)
+    st.session_state["bw_pid"] = product["product_id"]
+    st.session_state["bw_forecast_handoff"] = {"product_id": product["product_id"]}
+
+
+def receive_forecast() -> bool:
+    """Activate a saved selection before the forecast reads the current product."""
+    handoff = st.session_state.pop("bw_forecast_handoff", None)
+    if not handoff:
+        return False
+    pid = handoff.get("product_id")
+    if pid not in st.session_state.get("bw_generation_records", {}):
+        return False
+    st.session_state["bw_pid"] = pid
+    return True
