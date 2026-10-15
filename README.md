@@ -16,7 +16,28 @@
   </tbody>
 </table>
 
-## 팀원별 역할 및 기여
+## 팀원 소개
+
+<table align="center">
+  <tbody>
+    <tr>
+      <td align="center" valign="middle" width="160"><img src="docs/team/kim-gyeongmin-portrait.jpg" alt="김경민 소개 이미지" width="160" height="213"></td>
+      <td align="center" valign="middle" width="160"><img src="docs/team/kwon-junho-portrait.jpg" alt="권준호 소개 이미지" width="160" height="213"></td>
+      <td align="center" valign="middle" width="160"><img src="docs/team/yu-jiho-portrait.jpg" alt="유지호 소개 이미지" width="160" height="213"></td>
+      <td align="center" valign="middle" width="160"><img src="docs/team/lee-hyeongmin-portrait.jpg" alt="이형민 소개 이미지" width="160" height="213"></td>
+      <td align="center" valign="middle" width="160"><!-- 이세희 소개 이미지 추가 예정 --></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>김경민</strong></td>
+      <td align="center"><strong>권준호</strong></td>
+      <td align="center"><strong>유지호</strong></td>
+      <td align="center"><strong>이형민</strong></td>
+      <td align="center"><strong>이세희</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+### 팀원별 역할 및 기여
 
 | 팀원 | 작업 브랜치 | 주요 역할 | 구현 및 기여 | 대표 커밋 |
 | --- | --- | --- | --- | --- |
