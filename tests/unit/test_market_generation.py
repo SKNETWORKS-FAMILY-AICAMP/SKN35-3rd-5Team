@@ -83,7 +83,7 @@ def test_selected_generated_copy_is_shared_with_forecast(monkeypatch):
     expected = record["response"]["candidates"][1]["text"]
     app.button(key="select_generated_1").click().run()
     assert not app.exception
-    assert next(t.value for t in app.text_area if t.label == "선택한 생성 문구") == expected
+    assert any(t.value == expected for t in app.code)
     app.switch_page("views/generate.py").run()
     assert not app.exception
     # 기존 수치 근거를 해제하면 다른 화면에서 이전 결과를 재사용하지 않는다.
@@ -91,4 +91,4 @@ def test_selected_generated_copy_is_shared_with_forecast(monkeypatch):
     app.switch_page("views/forecast.py").run()
     assert not app.exception
     assert any("다시 생성" in w.value for w in app.warning)
-    assert next(t.value for t in app.text_area if t.label == "선택한 생성 문구") == ""
+    assert not any(t.value == expected for t in app.code)
