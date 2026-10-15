@@ -1,11 +1,17 @@
 from pathlib import Path
 
+import pytest
 from streamlit.testing.v1 import AppTest
 
 from app.services import backend
 
 PAGE = Path(__file__).resolve().parents[2] / "app" / "views" / "chat.py"
 APP = PAGE.parents[1] / "streamlit_app.py"
+
+
+@pytest.fixture(autouse=True)
+def offline_chat_ui(monkeypatch):
+    monkeypatch.setattr(backend, "data_mode", lambda: "mock")
 
 
 def test_chat_page_followup_and_reset(monkeypatch):
@@ -97,4 +103,24 @@ def test_product_setting_change_preserves_transcript_and_starts_fresh_context(mo
     page.chat_input[0].set_value("선택한 제품 광고를 써줘").run()
     assert calls[1]["context"] == {}
     assert calls[1]["history"] == []
+    assert len(page.chat_message) == 4
+
+
+def test_cosmetics_followup_sends_natural_assistant_history(monkeypatch):
+    calls = []
+
+    def chat(payload):
+        calls.append(payload)
+        return {"intent": "answer", "message": "판테놀의 일반 역할을 설명한 답변", "context": {},
+                "request_id": "internal-metadata"}
+
+    monkeypatch.setattr(backend, "chat", chat)
+    page = AppTest.from_file(str(PAGE)).run()
+    page.chat_input[0].set_value("판테놀이 뭐야?").run()
+    page.chat_input[0].set_value("그럼 더 쉽게 설명해줘").run()
+    assert not page.exception
+    assert calls[1]["history"] == [
+        {"role": "user", "content": "판테놀이 뭐야?"},
+        {"role": "assistant", "content": "판테놀의 일반 역할을 설명한 답변"},
+    ]
     assert len(page.chat_message) == 4

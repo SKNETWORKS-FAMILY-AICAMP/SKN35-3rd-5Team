@@ -23,5 +23,5 @@ with st.container(key="chat_shell_full"):
         if st.session_state.get("bw_chat_project"):
             st.caption("내 제품 자료는 실제 동일 제품의 근거일 때만 사용하세요.")
         else:
-            st.caption("제품 설명이나 원하는 광고 방향을 자유롭게 말해주세요. 같은 대화에서 새 주제로 넘어갈 수 있습니다.")
+            st.caption("화장품 성분·사용법·제품 차이를 물어보거나 광고 문구를 요청해보세요. 같은 대화에서 주제를 바꿔도 됩니다.")
     render_chat()
