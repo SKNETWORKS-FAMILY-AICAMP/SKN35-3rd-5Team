@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="850" viewBox="0 0 1200 850" role="img" aria-labelledby="title description">
+<title id="title">Beaurette · 검토 워크플로</title>
+<desc id="description">주 처리 흐름은 초록색 · 재시도는 보라색 · 보류 경로는 황색 연결선의 빛이 화살표 방향으로 이동합니다.</desc>
+<defs>
+  <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#dbe5e4" stroke-width="0.6" opacity="0.5"/></pattern>
+
+<marker id="arrow-green" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L12 6L0 12Z" fill="#198368"/></marker>
+<marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L12 6L0 12Z" fill="#44789a"/></marker>
+<marker id="arrow-purple" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L12 6L0 12Z" fill="#8560b4"/></marker>
+<marker id="arrow-amber" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L12 6L0 12Z" fill="#b78030"/></marker>
+</defs>
+<style>
+  text { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+  .flow { stroke-dasharray: 16 56; animation: travel 2.6s linear infinite; }
+  @keyframes travel { from { stroke-dashoffset: 72; } to { stroke-dashoffset: 0; } }
+  @media (prefers-reduced-motion: reduce) { .flow { animation: none; opacity: 0; } }
+</style>
+
+<rect x="1" y="1" width="1198" height="848" rx="18" fill="#f7faf9" stroke="#dfe8e4"/>
+<rect x="1" y="1" width="1198" height="848" rx="18" fill="url(#grid)"/>
+<text x="36" y="44" font-size="22" font-weight="700" fill="#203c34">Beaurette · 검토 워크플로</text>
+<text x="36" y="70" font-size="13" fill="#6d7e77">주 처리 흐름은 초록색 · 재시도는 보라색 · 보류 경로는 황색</text>
+<rect x="24" y="98" width="270" height="685" rx="12" fill="#ffffff" fill-opacity="0.48" stroke="#d6e1dc" stroke-dasharray="5 6"/>
+<text x="159.0" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#82948a">01 / 입력 · 사전 판정</text>
+<rect x="320" y="98" width="410" height="685" rx="12" fill="#ffffff" fill-opacity="0.48" stroke="#d6e1dc" stroke-dasharray="5 6"/>
+<text x="525.0" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#82948a">02 / 검색 · 근거 확인</text>
+<rect x="756" y="98" width="418" height="685" rx="12" fill="#ffffff" fill-opacity="0.48" stroke="#d6e1dc" stroke-dasharray="5 6"/>
+<text x="965.0" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#82948a">03 / 교정 · 검증 · 결과</text>
+<path d="M159 232V286" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M159 232V286" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0s"/>
+<path class="flow" d="M159 232V286" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0s"/>
+<path d="M159 358V412" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M159 358V412" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.6s"/>
+<path class="flow" d="M159 358V412" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.6s"/>
+<path d="M260 448H305V196H350" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M260 448H305V196H350" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.2s"/>
+<path class="flow" d="M260 448H305V196H350" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.2s"/>
+<path d="M455 232V286" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M455 232V286" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.8s"/>
+<path class="flow" d="M455 232V286" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.8s"/>
+<path d="M455 358V412" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M455 358V412" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.4s"/>
+<path class="flow" d="M455 358V412" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.4s"/>
+<path d="M560 448H598V196H560" fill="none" stroke="#8560b4" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-purple)"/>
+<path class="flow" d="M560 448H598V196H560" fill="none" stroke="#8560b4" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.6s"/>
+<path class="flow" d="M560 448H598V196H560" fill="none" stroke="#8560b4" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.6s"/>
+<rect x="584.0" y="246" width="52" height="22" rx="5" fill="#f7faf9"/>
+<text x="610" y="260" text-anchor="middle" font-size="12" fill="#8560b4">재검색</text>
+<path d="M560 448H610V688H910" fill="none" stroke="#b78030" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-amber)"/>
+<path class="flow" d="M560 448H610V688H910" fill="none" stroke="#b78030" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.4s"/>
+<path class="flow" d="M560 448H610V688H910" fill="none" stroke="#b78030" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.4s"/>
+<rect x="629.0" y="660" width="172" height="22" rx="5" fill="#f7faf9"/>
+<text x="715" y="674" text-anchor="middle" font-size="12" fill="#b78030">재시도 소진 · 판단보류</text>
+<path d="M455 484V566" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M455 484V566" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.8s"/>
+<path class="flow" d="M455 484V566" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.8s"/>
+<rect x="417.0" y="519" width="76" height="22" rx="5" fill="#f7faf9"/>
+<text x="455" y="533" text-anchor="middle" font-size="12" fill="#198368">근거 충분</text>
+<path d="M560 602H674V216H800" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M560 602H674V216H800" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.4s"/>
+<path class="flow" d="M560 602H674V216H800" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.4s"/>
+<rect x="666.0" y="396" width="76" height="22" rx="5" fill="#f7faf9"/>
+<text x="704" y="410" text-anchor="middle" font-size="12" fill="#198368">교정 필요</text>
+<path d="M560 602H660V716H910" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M560 602H660V716H910" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.0s"/>
+<path class="flow" d="M560 602H660V716H910" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.0s"/>
+<rect x="708.0" y="690" width="88" height="22" rx="5" fill="#f7faf9"/>
+<text x="752" y="704" text-anchor="middle" font-size="12" fill="#198368">교정 불필요</text>
+<path d="M935 252V336" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M935 252V336" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.0s"/>
+<path class="flow" d="M935 252V336" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.0s"/>
+<path d="M1070 372H1126V216H1070" fill="none" stroke="#8560b4" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-purple)"/>
+<path class="flow" d="M1070 372H1126V216H1070" fill="none" stroke="#8560b4" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.1s"/>
+<path class="flow" d="M1070 372H1126V216H1070" fill="none" stroke="#8560b4" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.1s"/>
+<rect x="1094.0" y="280" width="52" height="22" rx="5" fill="#f7faf9"/>
+<text x="1120" y="294" text-anchor="middle" font-size="12" fill="#8560b4">재제안</text>
+<path d="M935 408V652" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M935 408V652" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.6s"/>
+<path class="flow" d="M935 408V652" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.6s"/>
+<rect x="946.0" y="525" width="112" height="22" rx="5" fill="#f7faf9"/>
+<text x="1002" y="539" text-anchor="middle" font-size="12" fill="#198368">검증 결과 확정</text>
+<rect x="58" y="160" width="202" height="72" rx="10" fill="#eaf5ef" stroke="#198368" stroke-width="1.4"/>
+<text x="159.0" y="190" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">입력 정규화</text>
+<text x="159.0" y="212" text-anchor="middle" font-size="11" fill="#6a7d74">문구 · 제품 · 보유 실증</text>
+<rect x="58" y="286" width="202" height="72" rx="10" fill="#eaf5ef" stroke="#198368" stroke-width="1.4"/>
+<text x="159.0" y="316" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">규칙 검사</text>
+<text x="159.0" y="338" text-anchor="middle" font-size="11" fill="#6a7d74">금지 표현 · 기능성 범위</text>
+<rect x="58" y="412" width="202" height="72" rx="10" fill="#eaf5ef" stroke="#198368" stroke-width="1.4"/>
+<text x="159.0" y="442" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">사전 판정</text>
+<text x="159.0" y="464" text-anchor="middle" font-size="11" fill="#6a7d74">Rule / GPT · 규칙 하한</text>
+<rect x="350" y="160" width="210" height="72" rx="10" fill="#ecf3f8" stroke="#44789a" stroke-width="1.4"/>
+<text x="455.0" y="190" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">검색 질의 작성</text>
+<text x="455.0" y="212" text-anchor="middle" font-size="11" fill="#6a7d74">질의 재작성 · 재시도 제한</text>
+<rect x="350" y="286" width="210" height="72" rx="10" fill="#ecf3f8" stroke="#44789a" stroke-width="1.4"/>
+<text x="455.0" y="316" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">하이브리드 검색</text>
+<text x="455.0" y="338" text-anchor="middle" font-size="11" fill="#6a7d74">Dense + BM25 · RRF</text>
+<rect x="350" y="412" width="210" height="72" rx="10" fill="#ecf3f8" stroke="#44789a" stroke-width="1.4"/>
+<text x="455.0" y="442" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">근거 충분성 확인</text>
+<text x="455.0" y="464" text-anchor="middle" font-size="11" fill="#6a7d74">재검색 / 진행 / 판단보류</text>
+<rect x="350" y="566" width="210" height="72" rx="10" fill="#ecf3f8" stroke="#44789a" stroke-width="1.4"/>
+<text x="455.0" y="596" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">근거 정리 · 판정 분기</text>
+<text x="455.0" y="618" text-anchor="middle" font-size="11" fill="#6a7d74">조항 연결 · 교정 필요 여부</text>
+<rect x="800" y="180" width="270" height="72" rx="10" fill="#eaf5ef" stroke="#198368" stroke-width="1.4"/>
+<text x="935.0" y="210" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">실증 범위 내 후보 제안</text>
+<text x="935.0" y="232" text-anchor="middle" font-size="11" fill="#6a7d74">보유 근거로 표현 상한 계산</text>
+<rect x="800" y="336" width="270" height="72" rx="10" fill="#f1edf9" stroke="#8560b4" stroke-width="1.4"/>
+<text x="935.0" y="366" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">제안 문구 역검증</text>
+<text x="935.0" y="388" text-anchor="middle" font-size="11" fill="#6a7d74">금지 표현 · 기능성 · 실증 수치</text>
+<rect x="910" y="652" width="244" height="72" rx="10" fill="#fbf3e5" stroke="#b78030" stroke-width="1.4"/>
+<text x="1032.0" y="682" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">최종 결과</text>
+<text x="1032.0" y="704" text-anchor="middle" font-size="11" fill="#6a7d74">판정 · 근거 · 제안 / 판단보류</text>
+<path d="M38 815H82" stroke="#198368" stroke-width="3.5" marker-end="url(#arrow-green)"/><text x="94" y="819" font-size="11" fill="#6d7e77">화살표 방향으로 이동하는 강조선 · 데이터 / 처리 흐름</text>
+</svg>

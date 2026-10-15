@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="790" viewBox="0 0 1200 790" role="img" aria-labelledby="title description">
+<title id="title">Beaurette · 시스템 아키텍처</title>
+<desc id="description">사용자 요청 → 대화·검토·생성 → 근거 검색·모델 호출·역검증 연결선의 빛이 화살표 방향으로 이동합니다.</desc>
+<defs>
+  <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#dbe5e4" stroke-width="0.6" opacity="0.5"/></pattern>
+
+<marker id="arrow-green" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L12 6L0 12Z" fill="#198368"/></marker>
+<marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L12 6L0 12Z" fill="#44789a"/></marker>
+<marker id="arrow-purple" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L12 6L0 12Z" fill="#8560b4"/></marker>
+<marker id="arrow-amber" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L12 6L0 12Z" fill="#b78030"/></marker>
+</defs>
+<style>
+  text { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+  .flow { stroke-dasharray: 16 56; animation: travel 2.6s linear infinite; }
+  @keyframes travel { from { stroke-dashoffset: 72; } to { stroke-dashoffset: 0; } }
+  @media (prefers-reduced-motion: reduce) { .flow { animation: none; opacity: 0; } }
+</style>
+
+<rect x="1" y="1" width="1198" height="788" rx="18" fill="#f7faf9" stroke="#dfe8e4"/>
+<rect x="1" y="1" width="1198" height="788" rx="18" fill="url(#grid)"/>
+<text x="36" y="44" font-size="22" font-weight="700" fill="#203c34">Beaurette · 시스템 아키텍처</text>
+<text x="36" y="70" font-size="13" fill="#6d7e77">사용자 요청 → 대화·검토·생성 → 근거 검색·모델 호출·역검증</text>
+<rect x="24" y="98" width="154" height="625" rx="12" fill="#ffffff" fill-opacity="0.48" stroke="#d6e1dc" stroke-dasharray="5 6"/>
+<text x="101.0" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#82948a">01 / 사용자</text>
+<rect x="198" y="98" width="166" height="625" rx="12" fill="#ffffff" fill-opacity="0.48" stroke="#d6e1dc" stroke-dasharray="5 6"/>
+<text x="281.0" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#82948a">02 / 서비스</text>
+<rect x="390" y="98" width="236" height="625" rx="12" fill="#ffffff" fill-opacity="0.48" stroke="#d6e1dc" stroke-dasharray="5 6"/>
+<text x="508.0" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#82948a">03 / LangGraph</text>
+<rect x="654" y="98" width="520" height="625" rx="12" fill="#ffffff" fill-opacity="0.48" stroke="#d6e1dc" stroke-dasharray="5 6"/>
+<text x="914.0" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#82948a">04 / 검색 · 모델 · 검증</text>
+<path d="M101 242V300" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M101 242V300" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.1s"/>
+<path class="flow" d="M101 242V300" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.1s"/>
+<path d="M162 336H210" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M162 336H210" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.5s"/>
+<path class="flow" d="M162 336H210" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.5s"/>
+<path d="M352 336H378V196H410" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M352 336H378V196H410" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.9s"/>
+<path class="flow" d="M352 336H378V196H410" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.9s"/>
+<path d="M352 336H410" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M352 336H410" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.3s"/>
+<path class="flow" d="M352 336H410" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.3s"/>
+<path d="M352 336H378V476H410" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M352 336H378V476H410" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.7s"/>
+<path class="flow" d="M352 336H378V476H410" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.7s"/>
+<path d="M507 232V300" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M507 232V300" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.4s"/>
+<path class="flow" d="M507 232V300" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.4s"/>
+<path d="M507 232H634V476H604" fill="none" stroke="#198368" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="flow" d="M507 232H634V476H604" fill="none" stroke="#198368" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.2s"/>
+<path class="flow" d="M507 232H634V476H604" fill="none" stroke="#198368" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.2s"/>
+<path d="M604 196H636V190H680" fill="none" stroke="#44789a" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path class="flow" d="M604 196H636V190H680" fill="none" stroke="#44789a" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.3s"/>
+<path class="flow" d="M604 196H636V190H680" fill="none" stroke="#44789a" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.3s"/>
+<path d="M604 336H642V204H680" fill="none" stroke="#44789a" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path class="flow" d="M604 336H642V204H680" fill="none" stroke="#44789a" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.1s"/>
+<path class="flow" d="M604 336H642V204H680" fill="none" stroke="#44789a" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.1s"/>
+<path d="M604 476H648V218H680" fill="none" stroke="#44789a" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path class="flow" d="M604 476H648V218H680" fill="none" stroke="#44789a" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.9s"/>
+<path class="flow" d="M604 476H648V218H680" fill="none" stroke="#44789a" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.9s"/>
+<path d="M604 196H630V342H680" fill="none" stroke="#8560b4" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-purple)"/>
+<path class="flow" d="M604 196H630V342H680" fill="none" stroke="#8560b4" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.6s"/>
+<path class="flow" d="M604 196H630V342H680" fill="none" stroke="#8560b4" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.6s"/>
+<path d="M604 336H680" fill="none" stroke="#8560b4" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-purple)"/>
+<path class="flow" d="M604 336H680" fill="none" stroke="#8560b4" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.4s"/>
+<path class="flow" d="M604 336H680" fill="none" stroke="#8560b4" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.4s"/>
+<path d="M604 476H630V356H680" fill="none" stroke="#8560b4" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-purple)"/>
+<path class="flow" d="M604 476H630V356H680" fill="none" stroke="#8560b4" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.2s"/>
+<path class="flow" d="M604 476H630V356H680" fill="none" stroke="#8560b4" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.2s"/>
+<path d="M604 336H622V488H680" fill="none" stroke="#b78030" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-amber)"/>
+<path class="flow" d="M604 336H622V488H680" fill="none" stroke="#b78030" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.0s"/>
+<path class="flow" d="M604 336H622V488H680" fill="none" stroke="#b78030" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.0s"/>
+<path d="M604 476H622V508H680" fill="none" stroke="#b78030" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-amber)"/>
+<path class="flow" d="M604 476H622V508H680" fill="none" stroke="#b78030" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.8s"/>
+<path class="flow" d="M604 476H622V508H680" fill="none" stroke="#b78030" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.8s"/>
+<path d="M878 196H954V175H976" fill="none" stroke="#44789a" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path class="flow" d="M878 196H954V175H976" fill="none" stroke="#44789a" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.7s"/>
+<path class="flow" d="M878 196H954V175H976" fill="none" stroke="#44789a" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.7s"/>
+<path d="M878 211H936V282H976" fill="none" stroke="#44789a" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path class="flow" d="M878 211H936V282H976" fill="none" stroke="#44789a" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.5s"/>
+<path class="flow" d="M878 211H936V282H976" fill="none" stroke="#44789a" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.5s"/>
+<path d="M162 602H210" fill="none" stroke="#44789a" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path class="flow" d="M162 602H210" fill="none" stroke="#44789a" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.4s"/>
+<path class="flow" d="M162 602H210" fill="none" stroke="#44789a" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.4s"/>
+<path d="M352 602H938V182H976" fill="none" stroke="#44789a" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path class="flow" d="M352 602H938V182H976" fill="none" stroke="#44789a" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.2s"/>
+<path class="flow" d="M352 602H938V182H976" fill="none" stroke="#44789a" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.2s"/>
+<path d="M352 614H954V290H976" fill="none" stroke="#44789a" stroke-opacity="0.55" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path class="flow" d="M352 614H954V290H976" fill="none" stroke="#44789a" stroke-opacity="0.18" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.0s"/>
+<path class="flow" d="M352 614H954V290H976" fill="none" stroke="#44789a" stroke-opacity="1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.0s"/>
+<rect x="40" y="170" width="122" height="72" rx="10" fill="#eaf5ef" stroke="#198368" stroke-width="1.4"/>
+<text x="101.0" y="200" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">사용자</text>
+<text x="101.0" y="222" text-anchor="middle" font-size="11" fill="#6a7d74">문구 · 제품 · 보유 실증</text>
+<rect x="40" y="300" width="122" height="72" rx="10" fill="#eaf5ef" stroke="#198368" stroke-width="1.4"/>
+<text x="101.0" y="330" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">Streamlit</text>
+<text x="101.0" y="352" text-anchor="middle" font-size="11" fill="#6a7d74">검토 · 생성 · 챗봇 UI</text>
+<rect x="210" y="300" width="142" height="72" rx="10" fill="#eaf5ef" stroke="#198368" stroke-width="1.4"/>
+<text x="281.0" y="330" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">FastAPI</text>
+<text x="281.0" y="352" text-anchor="middle" font-size="11" fill="#6a7d74">요청 검증 · 결과 계약</text>
+<rect x="410" y="160" width="194" height="72" rx="10" fill="#eaf5ef" stroke="#198368" stroke-width="1.4"/>
+<text x="507.0" y="190" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">통합 챗봇</text>
+<text x="507.0" y="212" text-anchor="middle" font-size="11" fill="#6a7d74">자연어 의도 · 대화 맥락</text>
+<rect x="410" y="300" width="194" height="72" rx="10" fill="#eaf5ef" stroke="#198368" stroke-width="1.4"/>
+<text x="507.0" y="330" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">검토 워크플로</text>
+<text x="507.0" y="352" text-anchor="middle" font-size="11" fill="#6a7d74">규칙 판정 · 교정 · 검증</text>
+<rect x="410" y="440" width="194" height="72" rx="10" fill="#eaf5ef" stroke="#198368" stroke-width="1.4"/>
+<text x="507.0" y="470" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">생성 워크플로</text>
+<text x="507.0" y="492" text-anchor="middle" font-size="11" fill="#6a7d74">후보 생성 · 검증 · 재작성</text>
+<rect x="680" y="160" width="198" height="72" rx="10" fill="#ecf3f8" stroke="#44789a" stroke-width="1.4"/>
+<text x="779.0" y="190" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">Hybrid Retriever</text>
+<text x="779.0" y="212" text-anchor="middle" font-size="11" fill="#6a7d74">Dense + BM25 · 가중 RRF</text>
+<rect x="976" y="140" width="178" height="72" rx="10" fill="#ecf3f8" stroke="#44789a" stroke-width="1.4"/>
+<text x="1065.0" y="170" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">Qdrant Cloud</text>
+<text x="1065.0" y="192" text-anchor="middle" font-size="11" fill="#6a7d74">Dense · 조항 벡터</text>
+<rect x="976" y="250" width="178" height="72" rx="10" fill="#ecf3f8" stroke="#44789a" stroke-width="1.4"/>
+<text x="1065.0" y="280" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">BM25</text>
+<text x="1065.0" y="302" text-anchor="middle" font-size="11" fill="#6a7d74">Sparse · 로컬 색인</text>
+<rect x="680" y="310" width="198" height="72" rx="10" fill="#f1edf9" stroke="#8560b4" stroke-width="1.4"/>
+<text x="779.0" y="340" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">OpenAI</text>
+<text x="779.0" y="362" text-anchor="middle" font-size="11" fill="#6a7d74">판정 · 생성 · 대화</text>
+<rect x="680" y="460" width="198" height="72" rx="10" fill="#fbf3e5" stroke="#b78030" stroke-width="1.4"/>
+<text x="779.0" y="490" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">규칙 · 실증 역검증</text>
+<text x="779.0" y="512" text-anchor="middle" font-size="11" fill="#6a7d74">금지 표현 · 기능성 · 수치</text>
+<rect x="40" y="570" width="122" height="72" rx="10" fill="#ecf3f8" stroke="#44789a" stroke-width="1.4"/>
+<text x="101.0" y="600" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">규정 원문</text>
+<text x="101.0" y="622" text-anchor="middle" font-size="11" fill="#6a7d74">법령 · 고시 · 지침 · 사례</text>
+<rect x="210" y="570" width="142" height="72" rx="10" fill="#ecf3f8" stroke="#44789a" stroke-width="1.4"/>
+<text x="281.0" y="600" text-anchor="middle" font-size="15" font-weight="700" fill="#263e36">오프라인 인덱싱</text>
+<text x="281.0" y="622" text-anchor="middle" font-size="11" fill="#6a7d74">청킹 · 메타데이터 · 임베딩</text>
+<path d="M38 755H82" stroke="#198368" stroke-width="3.5" marker-end="url(#arrow-green)"/><text x="94" y="759" font-size="11" fill="#6d7e77">화살표 방향으로 이동하는 강조선 · 데이터 / 처리 흐름</text>
+</svg>
