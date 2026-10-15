@@ -44,6 +44,7 @@ def _evidence_state(product: dict) -> list[bool]:
 
 def _on_product_change(key: str) -> None:
     st.session_state[_PID] = st.session_state[key]
+    st.session_state["bw_pid_by_select"] = True
 
 
 def _on_evidence_change(pid: str, i: int, key: str) -> None:
@@ -90,13 +91,18 @@ def render_project(key: str = "proj") -> None:
     pid = st.session_state[_PID]
 
     with st.container(key=key, gap="small"):
-        sel_key = f"{key}_product"
-        if st.session_state.get(sel_key) not in (None, pid):  # 새로 등록한 제품으로 바로 전환
-            st.session_state[sel_key] = pid
-        # 세션 값이 이미 있으면 index 를 주지 않는다 (둘 다 주면 Streamlit 경고)
-        initial = {} if sel_key in st.session_state else {"index": ids.index(pid)}
+        # 다른 화면(제품 등록·광고문 생성 → 예상 매출)이 제품을 바꾸면 선택 상자가 옛 제품을 보여 주지 않도록
+        # 위젯을 새 키로 다시 만든다. (세션 값으로 덮어쓰면 옵션이 바뀐 직후 옛 값이 남는 경우가 있었다)
+        nonce = st.session_state.get(f"{key}_product_nonce", 0)
+        shown = st.session_state.get(f"{key}_product_shown")
+        by_user = st.session_state.pop("bw_pid_by_select", False)
+        if shown is not None and shown != pid and not by_user:
+            nonce += 1
+            st.session_state[f"{key}_product_nonce"] = nonce
+        st.session_state[f"{key}_product_shown"] = pid
+        sel_key = f"{key}_product" if nonce == 0 else f"{key}_product_{nonce}"
         st.selectbox(
-            "검토할 제품", ids, **initial,
+            "검토할 제품", ids, index=ids.index(pid),
             format_func=lambda i: ("✎ " if i.startswith("CUSTOM_") else "") + by_id[i]["name"],
             key=sel_key, label_visibility="collapsed",
             on_change=_on_product_change, args=(sel_key,),

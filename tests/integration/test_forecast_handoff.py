@@ -44,9 +44,13 @@ def test_new_product_selection_reaches_forecast_and_survives_rerun(monkeypatch):
     assert not page.exception
     assert page.session_state["bw_generation_records"][pid]["selected"] == 0
     assert any(w.value == "오늘의 수분 루틴" for w in page.code)
-    # Equal assumptions for all copies, including different strong/balanced/safe tiers.
-    captions = [w.value for w in page.caption if w.value.startswith("공통 가정 ±")]
-    assert len(captions) == 3 and len(set(captions)) == 1
+    # 기본: 표현 강도에 따라 후보마다 반응 폭이 다르다 (강한 표현 > 균형 > 가장 안전)
+    cards = "".join(h.proto.body for h in page.get("html"))
+    assert "+37.4%" in cards and "+19.1%" in cards and "+9.2%" in cards
+    # 같은 폭 모드로 바꾸면 모든 후보가 같은 숫자
+    page.segmented_control(key=f"fc_mode_{pid}").set_value("same").run()
+    cards = "".join(h.proto.body for h in page.get("html"))
+    assert "+37.4%" not in cards and "+9.2%" not in cards and cards.count("+19.1%") >= 3
 
 
 def test_handoff_activates_product_without_refreshing_stale_evidence(monkeypatch):
