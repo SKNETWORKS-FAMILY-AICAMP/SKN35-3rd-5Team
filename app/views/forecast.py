@@ -34,6 +34,7 @@ from app.services.revenue_scenario import DISPLAY_LABEL, build_scenario
 
 health = st.session_state["bw_health"]
 inject_css("pages")
+generation_results.receive_forecast()
 product, ctx = current()
 pid = ctx["product_id"]
 
@@ -136,7 +137,7 @@ def render_candidate_compare(rows: list[dict], selected: int, pid: str) -> None:
                 f'{"우리 시험 " + escape(", ".join(r["evidence_ids"])) + " 사용" if r["uses_evidence"] else "시험 수치 없음"}'
                 f'</div></div>'
             )
-            if r["index"] != selected and st.button("이 후보로 계산", key=f"fc_use_{pid}_{r['index']}", width="stretch"):
+            if r["index"] != selected and st.button("이 후보로 계산", key=f"fc_use_{pid}_{r['index']}", width="stretch", disabled=not r["verified"]):
                 st.session_state[f"fc_pick_{pid}"] = r["index"]
                 st.rerun()
     best = next((r for r in rows if r["recommended"]), None)
@@ -301,10 +302,11 @@ with st.container(key="pagebody"):
     step("3", "생성 후보 비교 · 매출 시나리오에 쓸 문구", "광고문 생성 후보를 문구 유형 · 시장 사용도 · 규칙 판정 · 처분 위험으로 나란히 비교해요.")
     saved, stale = generation_results.record(registered_product)
     best = None
+    rows: list[dict] = []
     if stale:
         st.warning("제품 정보 또는 선택한 실증 자료가 바뀌었습니다. 광고문 생성에서 다시 생성해 주세요.")
-    elif saved and saved["response"].get("status") == "생성완료" and saved["response"].get("candidates"):
-        candidates = saved["response"]["candidates"]
+    elif saved and saved["response"].get("candidates") and generation_results.selected(registered_product):
+        candidates = [{**c, "verified": generation_results.usable(c)} for c in saved["response"]["candidates"]]
         pick = st.session_state.pop(f"fc_pick_{pid}", None)
         if pick is not None:
             generation_results.choose(registered_product, pick)   # saved 도 같은 기록이라 바로 반영된다
@@ -328,6 +330,8 @@ with st.container(key="pagebody"):
             if ref:
                 st.caption(f"참고 {ref_id} · {ref['brand']} · {ref['copy_text']}")
         st.caption("생성 조건: " + " · ".join(str(saved["conditions"].get(k, "")) for k in ("channel", "tone", "length")))
+    elif saved and saved["response"].get("candidates"):
+        st.warning("선택한 후보는 확인이 필요합니다. 광고문 생성에서 검토를 통과한 후보를 선택해 주세요.")
     else:
         st.info("이 제품으로 생성한 문구가 없습니다. 광고문 생성에서 후보를 만든 뒤 후보 아래 ‘이 문구를 매출 시나리오에 사용’을 눌러 주세요.")
     if st.button("광고문 생성으로 이동", key="fc_open_generation"):
