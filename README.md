@@ -2,14 +2,19 @@
 
 <h2 align="center">🛠️ Tech Stack</h2>
 
-| Category | Technologies |
-| :--- | :--- |
-| **Languages** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black) ![CSS](https://img.shields.io/badge/CSS-663399?style=flat&logo=css&logoColor=white) |
-| **Backend & UI** | ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white) ![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=flat&logo=pydantic&logoColor=white) ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white) |
-| **AI & Agents** | ![OpenAI API](https://img.shields.io/badge/OpenAI_API-412991?style=flat) ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=flat&logo=langchain&logoColor=white) ![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=flat&logo=langgraph&logoColor=white) |
-| **Database & Search** | ![Qdrant Cloud](https://img.shields.io/badge/Qdrant_Cloud-DC244C?style=flat&logo=qdrant&logoColor=white) ![BM25](https://img.shields.io/badge/BM25-2563EB?style=flat) ![Hybrid RRF](https://img.shields.io/badge/Hybrid_RRF-7C3AED?style=flat) |
-| **Server & Cloud** | ![Render](https://img.shields.io/badge/Render-000000?style=flat&logo=render&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) ![Uvicorn](https://img.shields.io/badge/Uvicorn-4051B5?style=flat) |
-| **Tools & Testing** | ![uv](https://img.shields.io/badge/uv-DE5FE9?style=flat&logo=uv&logoColor=white) ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white) ![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white) ![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=flat&logo=pytest&logoColor=white) |
+<table align="center">
+  <thead>
+    <tr><th align="center">Category</th><th align="center">Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td align="center"><strong>Languages</strong></td><td align="center"><img alt="Python" src="https://img.shields.io/badge/Python-3776AB?style=flat&amp;logo=python&amp;logoColor=white"> <img alt="JavaScript" src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&amp;logo=javascript&amp;logoColor=black"> <img alt="CSS" src="https://img.shields.io/badge/CSS-663399?style=flat&amp;logo=css&amp;logoColor=white"></td></tr>
+    <tr><td align="center"><strong>Backend &amp; UI</strong></td><td align="center"><img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-009688?style=flat&amp;logo=fastapi&amp;logoColor=white"> <img alt="Pydantic" src="https://img.shields.io/badge/Pydantic-E92063?style=flat&amp;logo=pydantic&amp;logoColor=white"> <img alt="Streamlit" src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&amp;logo=streamlit&amp;logoColor=white"></td></tr>
+    <tr><td align="center"><strong>AI &amp; Agents</strong></td><td align="center"><img alt="OpenAI API" src="https://img.shields.io/badge/OpenAI_API-412991?style=flat"> <img alt="LangChain" src="https://img.shields.io/badge/LangChain-1C3C3C?style=flat&amp;logo=langchain&amp;logoColor=white"> <img alt="LangGraph" src="https://img.shields.io/badge/LangGraph-1C3C3C?style=flat&amp;logo=langgraph&amp;logoColor=white"></td></tr>
+    <tr><td align="center"><strong>Database &amp; Search</strong></td><td align="center"><img alt="Qdrant Cloud" src="https://img.shields.io/badge/Qdrant_Cloud-DC244C?style=flat&amp;logo=qdrant&amp;logoColor=white"> <img alt="BM25" src="https://img.shields.io/badge/BM25-2563EB?style=flat"> <img alt="Hybrid RRF" src="https://img.shields.io/badge/Hybrid_RRF-7C3AED?style=flat"></td></tr>
+    <tr><td align="center"><strong>Server &amp; Cloud</strong></td><td align="center"><img alt="Render" src="https://img.shields.io/badge/Render-000000?style=flat&amp;logo=render&amp;logoColor=white"> <img alt="Docker" src="https://img.shields.io/badge/Docker-2496ED?style=flat&amp;logo=docker&amp;logoColor=white"> <img alt="Uvicorn" src="https://img.shields.io/badge/Uvicorn-4051B5?style=flat"></td></tr>
+    <tr><td align="center"><strong>Tools &amp; Testing</strong></td><td align="center"><img alt="uv" src="https://img.shields.io/badge/uv-DE5FE9?style=flat&amp;logo=uv&amp;logoColor=white"> <img alt="Git" src="https://img.shields.io/badge/Git-F05032?style=flat&amp;logo=git&amp;logoColor=white"> <img alt="GitHub" src="https://img.shields.io/badge/GitHub-181717?style=flat&amp;logo=github&amp;logoColor=white"> <img alt="pytest" src="https://img.shields.io/badge/pytest-0A9EDC?style=flat&amp;logo=pytest&amp;logoColor=white"></td></tr>
+  </tbody>
+</table>
 
 ## 팀원별 역할 및 기여
 
@@ -33,7 +38,28 @@ SK Networks Family AI Camp 35기 · 3차 프로젝트 · 5팀
 
 배포 환경의 기동 상태에 따라 첫 응답이 지연될 수 있습니다.
 
-![Beaurette 검토 화면](app/static/landing/review-preview.webp)
+### 서비스 화면
+
+2026-10-15 배포 서비스에서 직접 캡처한 화면입니다. 최신 홈 디자인과 내 제품 등록, 통합 챗봇, 광고문 생성, 시장 비교·매출 시나리오를 반영했습니다. 이미지를 누르면 원본 크기로 볼 수 있습니다.
+
+![Beaurette 최신 홈 화면](docs/screenshots/home-2026-10-15.jpg)
+
+| 문구 검토 · 규정 근거 | 수정 후보 · 역검증 |
+| :---: | :---: |
+| [![실제 API 검토 결과와 근거 조항](docs/screenshots/review-2026-10-15.jpg)](docs/screenshots/review-2026-10-15.jpg) | [![표현 강도별 수정 후보와 역검증 결과](docs/screenshots/review-candidates-2026-10-15.jpg)](docs/screenshots/review-candidates-2026-10-15.jpg) |
+| 문제 표현과 연결된 규정 원문 확인 | 근거 최대·균형·가장 안전 후보 선택 |
+
+| 통합 챗봇 | 광고문 생성 |
+| :---: | :---: |
+| [![최신 통합 챗봇과 제품 검토 기준](docs/screenshots/chat-2026-10-15.jpg)](docs/screenshots/chat-2026-10-15.jpg) | [![실제 생성 후보와 매출 시나리오 연결 버튼](docs/screenshots/generate-2026-10-15.jpg)](docs/screenshots/generate-2026-10-15.jpg) |
+| 화장품·성분 Q&A부터 생성·검토까지 | 검토를 통과한 후보 확인 및 매출 시나리오 연결 |
+
+| 내 제품 · 시장 비교 | 예상 매출 시나리오 |
+| :---: | :---: |
+| [![제품 실증 자료와 유사 시장 제품 비교](docs/screenshots/market-2026-10-15.jpg)](docs/screenshots/market-2026-10-15.jpg) | [![가정에 따른 매출 상승·하락 시나리오](docs/screenshots/forecast-2026-10-15.jpg)](docs/screenshots/forecast-2026-10-15.jpg) |
+| 예시 제품의 성분·기능성·제형을 기준으로 비교 | 입력 가정에 따른 변화 범위 확인 |
+
+검토·광고문 생성 이미지는 실제 API 실행 결과입니다. 시장 비교·매출 화면은 앱에서 제공하는 비타민A 앰플 예시를 사용했으며, 표시된 판매량과 매출 변화는 가정 기반 시나리오입니다.
 
 ## 1. 프로젝트 소개
 
