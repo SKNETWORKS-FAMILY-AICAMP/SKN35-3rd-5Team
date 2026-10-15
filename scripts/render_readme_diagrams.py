@@ -11,7 +11,7 @@ class Diagram:
         self.height = height
         self.edges, self.cards, self.signals = [], [], []
         self.parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="{height}" viewBox="0 0 1200 {height}" role="img" aria-labelledby="title description">',
-            f'<title id="title">{escape(title)}</title><desc id="description">{escape(subtitle)} 각 연결선에서 신호가 화살표 방향으로 이동하며 시작 시점은 서로 다릅니다.</desc>', '<defs>']
+            f'<title id="title">{escape(title)}</title><desc id="description">{escape(subtitle)} 각 화살표에 독립적인 신호가 이동하며, 공통 갈림길에서는 세 경로로 나뉩니다.</desc>', '<defs>']
         for name, color in COLORS.items():
             self.parts.append(f'<marker id="arrow-{name}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="{color}"/></marker>')
         self.parts.append('''</defs><style>
@@ -37,9 +37,10 @@ text { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
         width = len(text) * 11 + 18
         return f'<rect x="{x-width/2}" y="{y-15}" width="{width}" height="24" rx="6" fill="#ffffff"/><text x="{x}" y="{y+1}" text-anchor="middle" font-size="12" fill="{COLORS[color]}">{escape(text)}</text>'
 
-    def edge(self, path, color='green', phase=None, label=None, dashed=False):
+    def edge(self, path, color='green', phase=None, label=None, dashed=False, arrow=True):
         dash = ' stroke-dasharray="5 5"' if dashed else ''
-        self.edges.append(f'<path d="{path}" fill="none" stroke="{COLORS[color]}" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-{color})"{dash}/>')
+        marker = f' marker-end="url(#arrow-{color})"' if arrow else ''
+        self.edges.append(f'<path d="{path}" fill="none" stroke="{COLORS[color]}" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"{marker}{dash}/>')
         # Each edge has one signal. Offset the loops so they do not move in unison.
         offset = (phase if phase is not None else len(self.edges) * 0.73) % 6.5
         self.signals.append(f'<path class="signal" pathLength="100" d="{path}" fill="none" stroke="{COLORS[color]}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-{offset:.2f}s"/>')
@@ -73,10 +74,14 @@ def architecture():
     d.node(474, 170, 170, 'FastAPI', '요청 검증 · 응답 계약')
     d.node(696, 156, 450, 'LangGraph', '통합 챗봇  /  검토 워크플로  /  생성 워크플로', height=100)
     d.panel(24, 376, 1152, 218, '02 / 워크플로에서 사용하는 공통 기능')
-    # A single shared branch replaces the many-to-many graph connections.
-    d.edge('M921 256V330H600V418', phase=3.9, label=(751, 321, '필요한 기능 호출'))
-    d.edge('M600 330H220V418', 'blue')
-    d.edge('M921 330H980V418', 'amber')
+    # One incoming trunk reaches one junction; exactly three arrows leave it.
+    d.edge('M921 256V310H600V342', phase=0, label=(751, 300, '필요한 기능 호출'), arrow=False)
+    # Launch three independent signals together when the incoming signal arrives.
+    # Incoming arrival: 6.5 * .78 = 5.07 s; branch launch: 6.5 - 1.82 + .39 = 5.07 s.
+    d.edge('M600 342H220V418', 'blue', phase=1.82)
+    d.edge('M600 342V418', 'purple', phase=1.82)
+    d.edge('M600 342H980V418', 'amber', phase=1.82)
+    d.cards.append('<circle cx="600" cy="342" r="3.5" fill="#24765e"/>')
     d.node(58, 418, 324, 'Hybrid Retriever', 'Dense + BM25 · 가중 RRF', 'blue', 92)
     d.node(438, 418, 324, 'OpenAI', '판정 · 생성 · 대화', 'purple', 92)
     d.node(818, 418, 324, '규칙 · 실증 역검증', '금지 표현 · 기능성 · 시험 수치', 'amber', 92)

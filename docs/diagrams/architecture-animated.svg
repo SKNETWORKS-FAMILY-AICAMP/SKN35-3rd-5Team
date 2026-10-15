@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="850" viewBox="0 0 1200 850" role="img" aria-labelledby="title description">
-<title id="title">Beaurette · 시스템 아키텍처</title><desc id="description">요청 처리 · 공통 실행 기능 · 오프라인 데이터 준비 각 연결선에서 신호가 화살표 방향으로 이동하며 시작 시점은 서로 다릅니다.</desc>
+<title id="title">Beaurette · 시스템 아키텍처</title><desc id="description">요청 처리 · 공통 실행 기능 · 오프라인 데이터 준비 각 화살표에 독립적인 신호가 이동하며, 공통 갈림길에서는 세 경로로 나뉩니다.</desc>
 <defs>
 <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#24765e"/></marker>
 <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#547b98"/></marker>
@@ -28,19 +28,21 @@ text { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
 <path d="M200 206H252" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
 <path d="M422 206H474" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
 <path d="M644 206H696" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
-<path d="M921 256V330H600V418" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
-<path d="M600 330H220V418" fill="none" stroke="#547b98" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
-<path d="M921 330H980V418" fill="none" stroke="#a78450" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-amber)"/>
+<path d="M921 256V310H600V342" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M600 342H220V418" fill="none" stroke="#547b98" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path d="M600 342V418" fill="none" stroke="#89739f" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-purple)"/>
+<path d="M600 342H980V418" fill="none" stroke="#a78450" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-amber)"/>
 <path d="M290 722H362" fill="none" stroke="#547b98" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
 <path d="M682 722H754" fill="none" stroke="#547b98" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
 <path class="signal" pathLength="100" d="M200 206H252" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.00s"/>
 <path class="signal" pathLength="100" d="M422 206H474" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.30s"/>
 <path class="signal" pathLength="100" d="M644 206H696" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.60s"/>
-<path class="signal" pathLength="100" d="M921 256V330H600V418" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-3.90s"/>
-<path class="signal" pathLength="100" d="M600 330H220V418" fill="none" stroke="#547b98" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-3.65s"/>
-<path class="signal" pathLength="100" d="M921 330H980V418" fill="none" stroke="#a78450" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-4.38s"/>
-<path class="signal" pathLength="100" d="M290 722H362" fill="none" stroke="#547b98" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-5.11s"/>
-<path class="signal" pathLength="100" d="M682 722H754" fill="none" stroke="#547b98" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-5.84s"/>
+<path class="signal" pathLength="100" d="M921 256V310H600V342" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.00s"/>
+<path class="signal" pathLength="100" d="M600 342H220V418" fill="none" stroke="#547b98" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.82s"/>
+<path class="signal" pathLength="100" d="M600 342V418" fill="none" stroke="#89739f" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.82s"/>
+<path class="signal" pathLength="100" d="M600 342H980V418" fill="none" stroke="#a78450" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.82s"/>
+<path class="signal" pathLength="100" d="M290 722H362" fill="none" stroke="#547b98" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-5.84s"/>
+<path class="signal" pathLength="100" d="M682 722H754" fill="none" stroke="#547b98" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.07s"/>
 <rect x="48" y="170" width="152" height="72" rx="10" fill="#edf5f0" stroke="#24765e" stroke-opacity="0.65"/>
 <text x="124.0" y="200" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">사용자</text>
 <text x="124.0" y="223" text-anchor="middle" font-size="12" fill="#738078">광고 문구 · 제품 자료</text>
@@ -53,7 +55,8 @@ text { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
 <rect x="696" y="156" width="450" height="100" rx="10" fill="#edf5f0" stroke="#24765e" stroke-opacity="0.65"/>
 <text x="921.0" y="186" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">LangGraph</text>
 <text x="921.0" y="209" text-anchor="middle" font-size="12" fill="#738078">통합 챗봇  /  검토 워크플로  /  생성 워크플로</text>
-<rect x="692.5" y="306" width="117" height="24" rx="6" fill="#ffffff"/><text x="751" y="322" text-anchor="middle" font-size="12" fill="#24765e">필요한 기능 호출</text>
+<rect x="692.5" y="285" width="117" height="24" rx="6" fill="#ffffff"/><text x="751" y="301" text-anchor="middle" font-size="12" fill="#24765e">필요한 기능 호출</text>
+<circle cx="600" cy="342" r="3.5" fill="#24765e"/>
 <rect x="58" y="418" width="324" height="92" rx="10" fill="#eff4f8" stroke="#547b98" stroke-opacity="0.65"/>
 <text x="220.0" y="448" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">Hybrid Retriever</text>
 <text x="220.0" y="471" text-anchor="middle" font-size="12" fill="#738078">Dense + BM25 · 가중 RRF</text>

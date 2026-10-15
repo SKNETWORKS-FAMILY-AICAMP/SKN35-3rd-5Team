@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="870" viewBox="0 0 1200 870" role="img" aria-labelledby="title description">
-<title id="title">Beaurette · 검토 워크플로</title><desc id="description">입력 → 근거 검색 → 교정·검증 → 결과. 예외 경로는 점선으로 구분합니다. 각 연결선에서 신호가 화살표 방향으로 이동하며 시작 시점은 서로 다릅니다.</desc>
+<title id="title">Beaurette · 검토 워크플로</title><desc id="description">입력 → 근거 검색 → 교정·검증 → 결과. 예외 경로는 점선으로 구분합니다. 각 화살표에 독립적인 신호가 이동하며, 공통 갈림길에서는 세 경로로 나뉩니다.</desc>
 <defs>
 <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#24765e"/></marker>
 <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#547b98"/></marker>
