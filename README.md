@@ -124,6 +124,13 @@ SK Networks Family AI Camp 35기 · 3차 프로젝트 · 5팀
 
 ## 3. 시스템 아키텍처
 
+![Beaurette 시스템 아키텍처 · 공통 기능을 묶은 구성도](docs/diagrams/architecture-animated.svg)
+
+세 워크플로가 사용하는 검색·모델·검증 기능은 공통 영역으로 묶었습니다. 각 화살표에서 신호가 독립적으로 이동하며, 공통 갈림길에서는 검색·모델·검증의 세 경로로 나뉘어 전달 방향을 보여줍니다.
+
+<details>
+<summary>상세 연결 관계 보기 (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     U[사용자] --> UI[Streamlit]
@@ -148,7 +155,14 @@ flowchart LR
     CHUNK --> B
 ```
 
+</details>
+
 ### 검토 워크플로
+
+![Beaurette 검토 워크플로 · 주요 처리와 예외 경로](docs/diagrams/review-workflow-animated.svg)
+
+<details>
+<summary>상세 분기 보기 (Mermaid)</summary>
 
 ```mermaid
 flowchart TD
@@ -166,6 +180,8 @@ flowchart TD
     I -->|실패·재시도 가능| H
     I -->|검증 결과 확정| J
 ```
+
+</details>
 
 검토 그래프는 9개 노드로 구성하고 재검색·재제안 횟수를 제한합니다. 생성 그래프는 별도로 구성하되 같은 규칙 엔진과 검증기를 재사용합니다. 조건부·불가 판정에는 근거 조항을, 조건부 판정에는 필요한 추가 시험을 포함하도록 Pydantic 응답 계약을 검증합니다.
 

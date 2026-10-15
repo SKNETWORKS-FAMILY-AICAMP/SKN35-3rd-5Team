@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="850" viewBox="0 0 1200 850" role="img" aria-labelledby="title description">
+<title id="title">Beaurette · 시스템 아키텍처</title><desc id="description">요청 처리 · 공통 실행 기능 · 오프라인 데이터 준비 각 화살표에 독립적인 신호가 이동하며, 공통 갈림길에서는 세 경로로 나뉩니다.</desc>
+<defs>
+<marker id="arrow-green" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#24765e"/></marker>
+<marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#547b98"/></marker>
+<marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#89739f"/></marker>
+<marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#a78450"/></marker>
+</defs><style>
+text { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
+.signal { stroke-dasharray: 7 107; stroke-dashoffset: 8; opacity: 0; animation: transmit 6.5s linear infinite; }
+@keyframes transmit {
+  0% { stroke-dashoffset: 8; opacity: 0; }
+  6% { stroke-dashoffset: 0; opacity: 1; }
+  78% { stroke-dashoffset: -100; opacity: 1; }
+  82%, 100% { stroke-dashoffset: -100; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .signal { animation: none; opacity: 0; } }
+</style>
+<rect x="1" y="1" width="1198" height="848" rx="16" fill="#ffffff" stroke="#e2e8e4"/>
+<text x="42" y="48" font-size="23" font-weight="700" fill="#243e34">Beaurette · 시스템 아키텍처</text>
+<text x="42" y="76" font-size="13" fill="#738078">요청 처리 · 공통 실행 기능 · 오프라인 데이터 준비</text>
+<rect x="24" y="104" width="1152" height="190" rx="14" fill="#fafcfb" stroke="#e4eae6"/>
+<text x="44" y="132" font-size="12" font-weight="700" fill="#7a8980">01 / 사용자 요청 · 워크플로</text>
+<rect x="24" y="376" width="1152" height="218" rx="14" fill="#fafcfb" stroke="#e4eae6"/>
+<text x="44" y="404" font-size="12" font-weight="700" fill="#7a8980">02 / 워크플로에서 사용하는 공통 기능</text>
+<rect x="24" y="644" width="1152" height="138" rx="14" fill="#fafcfb" stroke="#e4eae6"/>
+<text x="44" y="672" font-size="12" font-weight="700" fill="#7a8980">03 / 오프라인 데이터 준비</text>
+<path d="M200 206H252" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path d="M422 206H474" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path d="M644 206H696" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path d="M921 256V310H600V342" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M600 342H220V418" fill="none" stroke="#547b98" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path d="M600 342V418" fill="none" stroke="#89739f" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-purple)"/>
+<path d="M600 342H980V418" fill="none" stroke="#a78450" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-amber)"/>
+<path d="M290 722H362" fill="none" stroke="#547b98" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path d="M682 722H754" fill="none" stroke="#547b98" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path class="signal" pathLength="100" d="M200 206H252" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.00s"/>
+<path class="signal" pathLength="100" d="M422 206H474" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.30s"/>
+<path class="signal" pathLength="100" d="M644 206H696" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.60s"/>
+<path class="signal" pathLength="100" d="M921 256V310H600V342" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.00s"/>
+<path class="signal" pathLength="100" d="M600 342H220V418" fill="none" stroke="#547b98" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.82s"/>
+<path class="signal" pathLength="100" d="M600 342V418" fill="none" stroke="#89739f" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.82s"/>
+<path class="signal" pathLength="100" d="M600 342H980V418" fill="none" stroke="#a78450" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.82s"/>
+<path class="signal" pathLength="100" d="M290 722H362" fill="none" stroke="#547b98" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-5.84s"/>
+<path class="signal" pathLength="100" d="M682 722H754" fill="none" stroke="#547b98" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.07s"/>
+<rect x="48" y="170" width="152" height="72" rx="10" fill="#edf5f0" stroke="#24765e" stroke-opacity="0.65"/>
+<text x="124.0" y="200" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">사용자</text>
+<text x="124.0" y="223" text-anchor="middle" font-size="12" fill="#738078">광고 문구 · 제품 자료</text>
+<rect x="252" y="170" width="170" height="72" rx="10" fill="#edf5f0" stroke="#24765e" stroke-opacity="0.65"/>
+<text x="337.0" y="200" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">Streamlit</text>
+<text x="337.0" y="223" text-anchor="middle" font-size="12" fill="#738078">검토 · 생성 · 챗봇 UI</text>
+<rect x="474" y="170" width="170" height="72" rx="10" fill="#edf5f0" stroke="#24765e" stroke-opacity="0.65"/>
+<text x="559.0" y="200" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">FastAPI</text>
+<text x="559.0" y="223" text-anchor="middle" font-size="12" fill="#738078">요청 검증 · 응답 계약</text>
+<rect x="696" y="156" width="450" height="100" rx="10" fill="#edf5f0" stroke="#24765e" stroke-opacity="0.65"/>
+<text x="921.0" y="186" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">LangGraph</text>
+<text x="921.0" y="209" text-anchor="middle" font-size="12" fill="#738078">통합 챗봇  /  검토 워크플로  /  생성 워크플로</text>
+<rect x="692.5" y="285" width="117" height="24" rx="6" fill="#ffffff"/><text x="751" y="301" text-anchor="middle" font-size="12" fill="#24765e">필요한 기능 호출</text>
+<circle cx="600" cy="342" r="3.5" fill="#24765e"/>
+<rect x="58" y="418" width="324" height="92" rx="10" fill="#eff4f8" stroke="#547b98" stroke-opacity="0.65"/>
+<text x="220.0" y="448" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">Hybrid Retriever</text>
+<text x="220.0" y="471" text-anchor="middle" font-size="12" fill="#738078">Dense + BM25 · 가중 RRF</text>
+<rect x="438" y="418" width="324" height="92" rx="10" fill="#f4f0f7" stroke="#89739f" stroke-opacity="0.65"/>
+<text x="600.0" y="448" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">OpenAI</text>
+<text x="600.0" y="471" text-anchor="middle" font-size="12" fill="#738078">판정 · 생성 · 대화</text>
+<rect x="818" y="418" width="324" height="92" rx="10" fill="#faf5eb" stroke="#a78450" stroke-opacity="0.65"/>
+<text x="980.0" y="448" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">규칙 · 실증 역검증</text>
+<text x="980.0" y="471" text-anchor="middle" font-size="12" fill="#738078">금지 표현 · 기능성 · 시험 수치</text>
+<text x="76" y="549" font-size="12" fill="#7b867f">Qdrant Cloud + BM25 색인 사용</text>
+<text x="456" y="549" font-size="12" fill="#7b867f">선택한 판정 백엔드와 작업에 따라 호출</text>
+<text x="836" y="549" font-size="12" fill="#7b867f">검토·생성 결과에 같은 검증기 재사용</text>
+<rect x="48" y="686" width="242" height="72" rx="10" fill="#eff4f8" stroke="#547b98" stroke-opacity="0.65"/>
+<text x="169.0" y="716" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">규정 원문</text>
+<text x="169.0" y="739" text-anchor="middle" font-size="12" fill="#738078">법령 · 고시 · 지침 · 적발 사례</text>
+<rect x="362" y="686" width="320" height="72" rx="10" fill="#eff4f8" stroke="#547b98" stroke-opacity="0.65"/>
+<text x="522.0" y="716" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">청킹 · 메타데이터 · 임베딩</text>
+<text x="522.0" y="739" text-anchor="middle" font-size="12" fill="#738078">조항 단위로 검색 데이터 구성</text>
+<rect x="754" y="686" width="392" height="72" rx="10" fill="#eff4f8" stroke="#547b98" stroke-opacity="0.65"/>
+<text x="950.0" y="716" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">Qdrant Cloud + BM25</text>
+<text x="950.0" y="739" text-anchor="middle" font-size="12" fill="#738078">온라인 검색에서 공통으로 사용하는 색인</text>
+<text x="42" y="823" font-size="11" fill="#87928b">실선: 주요 흐름 · 점선: 재시도 / 예외 · 이동 신호: 각 경로의 전달 방향</text>
+</svg>

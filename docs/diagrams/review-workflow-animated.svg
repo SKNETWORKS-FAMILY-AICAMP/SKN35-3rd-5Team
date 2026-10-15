@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="870" viewBox="0 0 1200 870" role="img" aria-labelledby="title description">
+<title id="title">Beaurette · 검토 워크플로</title><desc id="description">입력 → 근거 검색 → 교정·검증 → 결과. 예외 경로는 점선으로 구분합니다. 각 화살표에 독립적인 신호가 이동하며, 공통 갈림길에서는 세 경로로 나뉩니다.</desc>
+<defs>
+<marker id="arrow-green" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#24765e"/></marker>
+<marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#547b98"/></marker>
+<marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#89739f"/></marker>
+<marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#a78450"/></marker>
+</defs><style>
+text { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
+.signal { stroke-dasharray: 7 107; stroke-dashoffset: 8; opacity: 0; animation: transmit 6.5s linear infinite; }
+@keyframes transmit {
+  0% { stroke-dashoffset: 8; opacity: 0; }
+  6% { stroke-dashoffset: 0; opacity: 1; }
+  78% { stroke-dashoffset: -100; opacity: 1; }
+  82%, 100% { stroke-dashoffset: -100; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .signal { animation: none; opacity: 0; } }
+</style>
+<rect x="1" y="1" width="1198" height="868" rx="16" fill="#ffffff" stroke="#e2e8e4"/>
+<text x="42" y="48" font-size="23" font-weight="700" fill="#243e34">Beaurette · 검토 워크플로</text>
+<text x="42" y="76" font-size="13" fill="#738078">입력 → 근거 검색 → 교정·검증 → 결과. 예외 경로는 점선으로 구분합니다.</text>
+<rect x="24" y="104" width="1152" height="144" rx="14" fill="#fafcfb" stroke="#e4eae6"/>
+<text x="44" y="132" font-size="12" font-weight="700" fill="#7a8980">01 / 입력 · 사전 판정</text>
+<path d="M360 186H440" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path d="M740 186H820" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path d="M980 222V268H175V340" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path d="M290 388H360" fill="none" stroke="#547b98" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path d="M590 388H660" fill="none" stroke="#547b98" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path d="M890 388H960" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path d="M475 340V304H322V363H290" fill="none" stroke="#89739f" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-purple)" stroke-dasharray="5 5"/>
+<path d="M775 340V300H1050V340" fill="none" stroke="#a78450" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-amber)" stroke-dasharray="5 5"/>
+<path d="M775 436V560" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path d="M660 608H590" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path d="M475 656V706H775V656" fill="none" stroke="#89739f" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-purple)" stroke-dasharray="5 5"/>
+<path d="M360 608H318V772H1050V436" fill="none" stroke="#24765e" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-green)"/>
+<path class="signal" pathLength="100" d="M360 186H440" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-0.00s"/>
+<path class="signal" pathLength="100" d="M740 186H820" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.30s"/>
+<path class="signal" pathLength="100" d="M980 222V268H175V340" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.60s"/>
+<path class="signal" pathLength="100" d="M290 388H360" fill="none" stroke="#547b98" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-3.90s"/>
+<path class="signal" pathLength="100" d="M590 388H660" fill="none" stroke="#547b98" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-5.20s"/>
+<path class="signal" pathLength="100" d="M890 388H960" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-4.38s"/>
+<path class="signal" pathLength="100" d="M475 340V304H322V363H290" fill="none" stroke="#89739f" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-5.11s"/>
+<path class="signal" pathLength="100" d="M775 340V300H1050V340" fill="none" stroke="#a78450" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-5.84s"/>
+<path class="signal" pathLength="100" d="M775 436V560" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.30s"/>
+<path class="signal" pathLength="100" d="M660 608H590" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-2.60s"/>
+<path class="signal" pathLength="100" d="M475 656V706H775V656" fill="none" stroke="#89739f" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-1.53s"/>
+<path class="signal" pathLength="100" d="M360 608H318V772H1050V436" fill="none" stroke="#24765e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-3.90s"/>
+<rect x="60" y="150" width="300" height="72" rx="10" fill="#edf5f0" stroke="#24765e" stroke-opacity="0.65"/>
+<text x="210.0" y="180" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">입력 정규화</text>
+<text x="210.0" y="203" text-anchor="middle" font-size="12" fill="#738078">문구 · 제품 · 보유 실증</text>
+<rect x="440" y="150" width="300" height="72" rx="10" fill="#edf5f0" stroke="#24765e" stroke-opacity="0.65"/>
+<text x="590.0" y="180" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">규칙 검사</text>
+<text x="590.0" y="203" text-anchor="middle" font-size="12" fill="#738078">금지 표현 · 기능성 범위</text>
+<rect x="820" y="150" width="320" height="72" rx="10" fill="#edf5f0" stroke="#24765e" stroke-opacity="0.65"/>
+<text x="980.0" y="180" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">사전 판정</text>
+<text x="980.0" y="203" text-anchor="middle" font-size="12" fill="#738078">Rule / GPT · 규칙 하한</text>
+<rect x="883.0" y="356" width="84" height="24" rx="6" fill="#ffffff"/><text x="925" y="372" text-anchor="middle" font-size="12" fill="#24765e">교정 불필요</text>
+<rect x="342.5" y="280" width="139" height="24" rx="6" fill="#ffffff"/><text x="412" y="296" text-anchor="middle" font-size="12" fill="#89739f">근거 부족 · 재검색</text>
+<rect x="856.5" y="277" width="161" height="24" rx="6" fill="#ffffff"/><text x="937" y="293" text-anchor="middle" font-size="12" fill="#a78450">재검색 소진 · 판단보류</text>
+<rect x="60" y="340" width="230" height="96" rx="10" fill="#eff4f8" stroke="#547b98" stroke-opacity="0.65"/>
+<text x="175.0" y="370" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">검색 질의 작성</text>
+<text x="175.0" y="393" text-anchor="middle" font-size="12" fill="#738078">제품 맥락 · 질의 재작성</text>
+<rect x="360" y="340" width="230" height="96" rx="10" fill="#eff4f8" stroke="#547b98" stroke-opacity="0.65"/>
+<text x="475.0" y="370" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">하이브리드 검색</text>
+<text x="475.0" y="393" text-anchor="middle" font-size="12" fill="#738078">Dense + BM25 · RRF</text>
+<rect x="660" y="340" width="230" height="96" rx="10" fill="#eff4f8" stroke="#547b98" stroke-opacity="0.65"/>
+<text x="775.0" y="370" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">근거 정리 · 판정 분기</text>
+<text x="775.0" y="393" text-anchor="middle" font-size="12" fill="#738078">근거 충분성 · 교정 필요성</text>
+<rect x="960" y="340" width="180" height="96" rx="10" fill="#edf5f0" stroke="#24765e" stroke-opacity="0.65"/>
+<text x="1050.0" y="370" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">최종 결과</text>
+<text x="1050.0" y="393" text-anchor="middle" font-size="12" fill="#738078">판정 / 판단보류</text>
+<rect x="785.5" y="488" width="73" height="24" rx="6" fill="#ffffff"/><text x="822" y="504" text-anchor="middle" font-size="12" fill="#24765e">교정 필요</text>
+<rect x="660" y="560" width="230" height="96" rx="10" fill="#edf5f0" stroke="#24765e" stroke-opacity="0.65"/>
+<text x="775.0" y="590" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">교정 후보 제안</text>
+<text x="775.0" y="613" text-anchor="middle" font-size="12" fill="#738078">실증 범위 내 표현</text>
+<rect x="360" y="560" width="230" height="96" rx="10" fill="#f4f0f7" stroke="#89739f" stroke-opacity="0.65"/>
+<text x="475.0" y="590" text-anchor="middle" font-size="16" font-weight="700" fill="#2d4138">제안 문구 역검증</text>
+<text x="475.0" y="613" text-anchor="middle" font-size="12" fill="#738078">금지 표현 · 실증 수치</text>
+<rect x="558.5" y="682" width="139" height="24" rx="6" fill="#ffffff"/><text x="628" y="698" text-anchor="middle" font-size="12" fill="#89739f">검증 실패 · 재제안</text>
+<rect x="877.0" y="748" width="106" height="24" rx="6" fill="#ffffff"/><text x="930" y="764" text-anchor="middle" font-size="12" fill="#24765e">검증 결과 확정</text>
+<text x="60" y="814" font-size="12" fill="#7b867f">재검색·재제안에는 횟수 상한을 적용합니다. 세부 노드와 분기는 아래 원본 코드를 참고하세요.</text>
+<text x="42" y="843" font-size="11" fill="#87928b">실선: 주요 흐름 · 점선: 재시도 / 예외 · 이동 신호: 각 경로의 전달 방향</text>
+</svg>
