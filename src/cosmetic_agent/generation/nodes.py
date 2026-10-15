@@ -120,6 +120,8 @@ _WORRY_RE = re.compile(r"걱정\s*(없이|없는)")
 
 def _soften(text: str) -> str:
     text = _WORRY_RE.sub(r"부담 \1", _SOFTEN_RE.sub("", text or ""))
+    # 문장 끝 부사를 지우면 '메이크업 전에도 .'처럼 공백 + 문장부호가 남으므로 붙인다
+    text = re.sub(r"[ \t]+([.,!?…~])", r"\1", text)
     return re.sub(r"\s{2,}", " ", text).strip()
 
 

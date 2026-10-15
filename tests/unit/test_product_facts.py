@@ -122,3 +122,5 @@ def test_soften_keeps_sentence_when_removing_worry_free():
 
     assert _soften("백탁 걱정 없이 매끄럽게 마무리") == "백탁 부담 없이 매끄럽게 마무리"
     assert _soften("완벽하게 촉촉한 마무리") == "촉촉한 마무리"
+    # 문장 끝 부사를 지워도 '전에도 .'처럼 공백이 남지 않는다
+    assert _soften("끈적임 없이 가볍게, 메이크업 전에도 완벽하게. #수분크림") == "끈적임 없이 가볍게, 메이크업 전에도. #수분크림"
