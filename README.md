@@ -38,7 +38,28 @@ SK Networks Family AI Camp 35기 · 3차 프로젝트 · 5팀
 
 배포 환경의 기동 상태에 따라 첫 응답이 지연될 수 있습니다.
 
-![Beaurette 검토 화면](app/static/landing/review-preview.webp)
+### 서비스 화면
+
+2026-10-15 배포 서비스에서 직접 캡처한 화면입니다. 최신 홈 디자인과 내 제품 등록, 통합 챗봇, 광고문 생성, 시장 비교·매출 시나리오를 반영했습니다. 이미지를 누르면 원본 크기로 볼 수 있습니다.
+
+![Beaurette 최신 홈 화면](docs/screenshots/home-2026-10-15.jpg)
+
+| 문구 검토 · 규정 근거 | 수정 후보 · 역검증 |
+| :---: | :---: |
+| [![실제 API 검토 결과와 근거 조항](docs/screenshots/review-2026-10-15.jpg)](docs/screenshots/review-2026-10-15.jpg) | [![표현 강도별 수정 후보와 역검증 결과](docs/screenshots/review-candidates-2026-10-15.jpg)](docs/screenshots/review-candidates-2026-10-15.jpg) |
+| 문제 표현과 연결된 규정 원문 확인 | 근거 최대·균형·가장 안전 후보 선택 |
+
+| 통합 챗봇 | 광고문 생성 |
+| :---: | :---: |
+| [![최신 통합 챗봇과 제품 검토 기준](docs/screenshots/chat-2026-10-15.jpg)](docs/screenshots/chat-2026-10-15.jpg) | [![실제 생성 후보와 매출 시나리오 연결 버튼](docs/screenshots/generate-2026-10-15.jpg)](docs/screenshots/generate-2026-10-15.jpg) |
+| 화장품·성분 Q&A부터 생성·검토까지 | 검토를 통과한 후보 확인 및 매출 시나리오 연결 |
+
+| 내 제품 · 시장 비교 | 예상 매출 시나리오 |
+| :---: | :---: |
+| [![제품 실증 자료와 유사 시장 제품 비교](docs/screenshots/market-2026-10-15.jpg)](docs/screenshots/market-2026-10-15.jpg) | [![가정에 따른 매출 상승·하락 시나리오](docs/screenshots/forecast-2026-10-15.jpg)](docs/screenshots/forecast-2026-10-15.jpg) |
+| 예시 제품의 성분·기능성·제형을 기준으로 비교 | 입력 가정에 따른 변화 범위 확인 |
+
+검토·광고문 생성 이미지는 실제 API 실행 결과입니다. 시장 비교·매출 화면은 앱에서 제공하는 비타민A 앰플 예시를 사용했으며, 표시된 판매량과 매출 변화는 가정 기반 시나리오입니다.
 
 ## 1. 프로젝트 소개
 
