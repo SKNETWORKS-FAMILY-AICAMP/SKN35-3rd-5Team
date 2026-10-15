@@ -126,7 +126,7 @@ SK Networks Family AI Camp 35기 · 3차 프로젝트 · 5팀
 
 ![Beaurette 시스템 아키텍처 · 공통 기능을 묶은 구성도](docs/diagrams/architecture-animated.svg)
 
-세 워크플로가 사용하는 검색·모델·검증 기능은 공통 영역으로 묶었습니다. 주요 요청 경로에만 짧은 신호가 순차적으로 이동합니다.
+세 워크플로가 사용하는 검색·모델·검증 기능은 공통 영역으로 묶었습니다. 각 연결선의 신호가 화살표 방향으로 이동하며, 경로별 시작 시점을 달리해 전달 방향을 보여줍니다.
 
 <details>
 <summary>상세 연결 관계 보기 (Mermaid)</summary>

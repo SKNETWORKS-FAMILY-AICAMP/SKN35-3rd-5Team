@@ -1,4 +1,4 @@
-"""Build README diagrams: uncluttered routing and one quiet signal per step."""
+"""Build README diagrams with uncluttered routing and a signal on each edge."""
 from html import escape
 from pathlib import Path
 
@@ -11,17 +11,17 @@ class Diagram:
         self.height = height
         self.edges, self.cards, self.signals = [], [], []
         self.parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="{height}" viewBox="0 0 1200 {height}" role="img" aria-labelledby="title description">',
-            f'<title id="title">{escape(title)}</title><desc id="description">{escape(subtitle)} 주요 연결선에서만 짧은 신호가 순서대로 이동합니다.</desc>', '<defs>']
+            f'<title id="title">{escape(title)}</title><desc id="description">{escape(subtitle)} 각 연결선에서 신호가 화살표 방향으로 이동하며 시작 시점은 서로 다릅니다.</desc>', '<defs>']
         for name, color in COLORS.items():
             self.parts.append(f'<marker id="arrow-{name}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="{color}"/></marker>')
         self.parts.append('''</defs><style>
 text { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
-.signal { stroke-dasharray: 5 100; stroke-dashoffset: 6; opacity: 0; animation: transmit 14s linear infinite; }
+.signal { stroke-dasharray: 7 107; stroke-dashoffset: 8; opacity: 0; animation: transmit 6.5s linear infinite; }
 @keyframes transmit {
-  0% { stroke-dashoffset: 6; opacity: 0; }
-  1% { stroke-dashoffset: 0; opacity: 1; }
-  9% { stroke-dashoffset: -100; opacity: 1; }
-  10%, 100% { stroke-dashoffset: -100; opacity: 0; }
+  0% { stroke-dashoffset: 8; opacity: 0; }
+  6% { stroke-dashoffset: 0; opacity: 1; }
+  78% { stroke-dashoffset: -100; opacity: 1; }
+  82%, 100% { stroke-dashoffset: -100; opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .signal { animation: none; opacity: 0; } }
 </style>''')
@@ -40,8 +40,9 @@ text { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
     def edge(self, path, color='green', phase=None, label=None, dashed=False):
         dash = ' stroke-dasharray="5 5"' if dashed else ''
         self.edges.append(f'<path d="{path}" fill="none" stroke="{COLORS[color]}" stroke-opacity="0.6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-{color})"{dash}/>')
-        if phase is not None:
-            self.signals.append(f'<path class="signal" pathLength="100" d="{path}" fill="none" stroke="{COLORS[color]}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:{phase}s"/>')
+        # Each edge has one signal. Offset the loops so they do not move in unison.
+        offset = (phase if phase is not None else len(self.edges) * 0.73) % 6.5
+        self.signals.append(f'<path class="signal" pathLength="100" d="{path}" fill="none" stroke="{COLORS[color]}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="animation-delay:-{offset:.2f}s"/>')
         if label:
             self.cards.append(self.label(*label, color))
 
@@ -56,7 +57,7 @@ text { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
 
     def save(self, name):
         self.parts += self.edges + self.signals + self.cards
-        self.parts += [f'<text x="42" y="{self.height-27}" font-size="11" fill="#87928b">실선: 주요 흐름 · 점선: 재시도 / 예외 · 짧은 신호: 처리 순서 안내</text>', '</svg>']
+        self.parts += [f'<text x="42" y="{self.height-27}" font-size="11" fill="#87928b">실선: 주요 흐름 · 점선: 재시도 / 예외 · 이동 신호: 각 경로의 전달 방향</text>', '</svg>']
         OUTPUT.mkdir(parents=True, exist_ok=True)
         (OUTPUT / name).write_text('\n'.join(self.parts), encoding='utf-8')
 
