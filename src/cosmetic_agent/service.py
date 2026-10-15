@@ -29,10 +29,25 @@ from .common.logger import get_logger
 logger = get_logger("ReviewService")
 
 
+BM25_TOKENIZER = "ko-char-ngram-v2+metadata-v1"  # indexing/05_build_indexes.py 가 저장하는 값과 같아야 한다
+
+
+def _bm25_is_current(path) -> bool:
+    """예전 토크나이저로 만든 pkl 을 조용히 쓰면 로컬과 배포 검색 결과가 달라진다."""
+    import pickle
+
+    try:
+        with open(path, "rb") as stream:
+            payload = pickle.load(stream)
+    except Exception:  # noqa: BLE001 - 깨진 파일은 다시 만든다
+        return False
+    return isinstance(payload, dict) and payload.get("tokenizer") == BM25_TOKENIZER
+
+
 def _ensure_bm25_index() -> None:
     """BM25 인덱스(bm25_index.pkl)는 git 에 올리지 않는 생성 파일이다.
     배포 환경처럼 파일이 없으면 저장소의 chunks.jsonl 로 한 번 만든다 (API 키 불필요, 수 초)."""
-    if settings.BM25_INDEX_PATH.exists():
+    if settings.BM25_INDEX_PATH.exists() and _bm25_is_current(settings.BM25_INDEX_PATH):
         return
     import importlib.util
     import sys

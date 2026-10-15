@@ -22,8 +22,13 @@ from ..common.config import settings
 
 # 숫자 + 단위. 단위 없는 숫자(제품명의 숫자 등)는 효능 주장으로 보지 않는다.
 NUMBER_RE = re.compile(
-    r"(\d+(?:\.\d+)?)\s*(%|퍼센트|주|일(?!반)|시간|개월|배(?!합|송)|명(?!품)|세(?!럼|트|정|안|대|틸|포|라|척)|살(?!균)|년|분(?![말석비])|회(?!사))"
+    r"(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*"
+    r"(%|퍼센트|주(?!년)|일(?!반)|시간|개월|배(?!합|송)|명(?!품)|세(?!럼|트|정|안|대|틸|포|라|척)|살(?!균)|년|"
+    r"분(?![말석비기])|회(?!사)|초|h(?![a-z]))"
 )
+# 효능 수치가 아닌 숫자: 사용법(하루 2회, 10분 후 헹굼), 조건(30일 이내, 만 3세 이상), 함량 표기(5% 함유)
+USAGE_AFTER_RE = re.compile(r"^\s*(?:이내|이상|이하|미만|동안\s*(?:올려|두|방치)|후\s*(?:헹|씻|닦|떼|제거|사용)|간격|마다|함유|배합|농도)")
+USAGE_BEFORE_RE = re.compile(r"(?:하루|1일|매일|주|만)\s*$")
 UNIT_ALIASES = {"퍼센트": "%", "살": "세"}
 
 
@@ -44,8 +49,18 @@ def _compact(text: str) -> str:
 
 
 def _number_tokens(text: str) -> set[str]:
-    """'4주', '42%' 처럼 숫자+단위를 정규화해 모은다. ('24주' 안의 '4주'는 별개로 본다)"""
-    return {f"{number}{UNIT_ALIASES.get(unit, unit)}" for number, unit in NUMBER_RE.findall(text or "")}
+    """'4주', '42%' 처럼 숫자+단위를 정규화해 모은다. ('24주' 안의 '4주'는 별개로 본다)
+    사용법·조건·함량 표기의 숫자는 효능 수치가 아니므로 뺀다."""
+    text = text or ""
+    tokens = set()
+    for m in NUMBER_RE.finditer(text):
+        number, unit = m.group(1), m.group(2)
+        before, after = text[max(0, m.start() - 4):m.start()], text[m.end():m.end() + 8]
+        if USAGE_AFTER_RE.match(after) or (unit in ("회", "번") and USAGE_BEFORE_RE.search(before)) \
+                or (unit in ("세", "살") and USAGE_BEFORE_RE.search(before)):
+            continue
+        tokens.add(f"{number}{UNIT_ALIASES.get(unit, unit)}")
+    return tokens
 
 
 def _evidence_text(evidence: dict[str, Any]) -> str:
@@ -179,6 +194,14 @@ class CopyVerifier:
             if not match:
                 continue
             if own_types & set(rule.get("functional_supports", [])):
+                continue
+            if rule.get("functional_only") and not own_types:
+                # 실증규정 [별표]: 일반 화장품은 이 주장을 실증할 수 있는 자료 자체가 없다
+                issues.append(VerifyIssue(
+                    "실증필요", rule["basis_id"],
+                    "일반 화장품은 콜라겐·효소 증감을 주장할 수 없습니다 (기능성에서 실증한 자료만 인정)",
+                    match.group(0),
+                ))
                 continue
             keywords = [_compact(k) for k in rule.get("evidence_keywords", [])]
             supported = any(

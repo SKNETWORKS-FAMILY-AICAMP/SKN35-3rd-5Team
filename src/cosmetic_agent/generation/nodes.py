@@ -4,7 +4,7 @@ import re
 from types import SimpleNamespace
 from typing import Any
 
-from ..domain.copy_knowledge import build_generation_knowledge, material_claim_notes
+from ..domain.copy_knowledge import build_generation_knowledge, material_claim_notes, with_request_form
 from ..domain.rules import RuleEngine
 from ..domain.schemas import ProductCard
 from ..domain.verifier import NUMBER_RE, CopyVerifier
@@ -94,7 +94,10 @@ def generate_candidates_node(
             reference_copy=state.get("reference_copy", ""),
             retry_note=" / ".join(notes) if notes else None,
             knowledge=build_generation_knowledge(
-                state["product"], state["channel"],
+                with_request_form(state["product"], state["instruction"], state.get("product_description", ""),
+                                  " ".join(state.get("keywords") or [])),
+                state["channel"],
+                tone=state.get("tone", ""),
                 market_refs=state.get("market_references", []),
                 profiles=state.get("ingredient_profiles", []),
             ),
@@ -106,6 +109,27 @@ def generate_candidates_node(
             "generation_error": type(error).__name__,
             "rejected_notes": ["광고 문구 생성 모델을 호출하지 못했습니다."],
         }
+
+
+# 근거는 맞는데 과장 단어 하나 때문에 탈락하는 후보가 많다 (예: 'SPF50+ PA++++로 완벽한 자외선 차단').
+# 그런 단어만 빼고 한 번 더 검증해, 가장 강한 근거 후보를 살린다. 뜻을 바꾸는 단어는 건드리지 않는다.
+_SOFTEN_RE = re.compile(r"(?:완벽(?:한|하게|히)|확실(?:한|하게|히)|확연(?:한|히)|눈에\s*띄게|놀라운)\s*")
+# '걱정 없이'는 지우면 '백탁 매끄럽게'처럼 문장이 깨지므로 보장 뜻이 약한 '부담 없이'로 바꾼다
+_WORRY_RE = re.compile(r"걱정\s*(없이|없는)")
+
+
+def _soften(text: str) -> str:
+    text = _WORRY_RE.sub(r"부담 \1", _SOFTEN_RE.sub("", text or ""))
+    return re.sub(r"\s{2,}", " ", text).strip()
+
+
+def _pin_numbers(copy: str, reports: list[dict[str, Any]]) -> str:
+    """설명 문구에서 숫자가 든 문장만 실증 원문으로 바꾸고, 장면·성분 문장은 남긴다."""
+    # 원문 그대로 (시험 종류·기관은 evidence_note 주석에 따로 붙는다)
+    pinned = list(dict.fromkeys(str(e["value"]) for e in reports if e.get("value")))
+    sentences = [x for x in re.split(r"(?<=[.!?])\s+|\n+", copy or "") if x.strip()]
+    kept = [x for x in sentences if not NUMBER_RE.search(x)]
+    return "\n".join(pinned + kept) if pinned else "\n".join(kept)
 
 
 SHOWN_CANDIDATES = 3
@@ -188,6 +212,16 @@ def verify_candidates_node(
         if unsupported:
             rejected.extend(unsupported)
             continue
+        if _SOFTEN_RE.search(text):
+            softened = {k: _soften(draft.get(k, "")) for k in ("text", "headline", "supporting_copy")}
+            ok_soft, _ = verifier.verify_suggestion(
+                compose_copy({**draft, **softened}) if structured else softened["text"],
+                selected_reports if used_ids else product.get("owned_evidence", []), rule_engine,
+                product_category=product.get("category", "일반"), functional_type=product.get("functional_type"))
+            if ok_soft:
+                draft = {**draft, **softened}
+                draft["text"] = compose_copy(draft) if structured else softened["text"]
+                text = draft["text"]
         passed, note = verifier.verify_suggestion(
             text,
             selected_reports if used_ids else product.get("owned_evidence", []),
@@ -199,7 +233,7 @@ def verify_candidates_node(
             # 수치 자체가 맞아도 분모·방향을 바꾸어 설명할 수 있으므로,
             # 수치 설명은 선택한 제품 시험의 원문으로 고정한다. (준호)
             if structured and used_ids and NUMBER_RE.search(draft.get("supporting_copy", "")):
-                draft["supporting_copy"] = "\n".join(str(e["value"]) for e in selected_reports if e.get("value"))
+                draft["supporting_copy"] = _pin_numbers(draft.get("supporting_copy", ""), selected_reports)
                 draft["text"] = compose_copy(draft)
                 passed, note = verifier.verify_suggestion(
                     draft["text"], selected_reports, rule_engine,

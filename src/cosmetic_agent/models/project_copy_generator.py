@@ -81,13 +81,16 @@ class CopyGenerator:
         # 후보를 넉넉히(최대 6개) 받아, 검증을 통과한 것 중 끌림 순위로 3개를 고른다 (generation/nodes.py)
         order = {tier: i for i, tier in enumerate(required)}
         ranked = sorted(output.candidates, key=lambda c: order[c.tier])
-        return [dict(c.model_dump(), text=clean_copy(c.text)) for c in ranked]
+        # 화면에는 헤드라인·설명이 따로 나가므로 세 필드 모두 정리한다
+        return [dict(c.model_dump(), text=clean_copy(c.text), headline=clean_copy(c.headline),
+                     supporting_copy=clean_copy(c.supporting_copy)) for c in ranked]
 
 
 def clean_copy(text: str) -> str:
     """광고 문구에 섞여 나오는 마크다운 강조·무대 지시([제품을 보여주며])·이스케이프 줄바꿈을 지운다."""
     text = text.replace("\\n", "\n").replace("**", "")
-    text = re.sub(r"\[[^\]\n]{1,30}\]", "", text)
+    # 라이브커머스 무대 지시([제품을 보여주며], [감탄하며])만 지운다. [NEW]·[1+1 기획] 같은 표기는 남긴다
+    text = re.sub(r"\[[^\]\n]{0,30}(?:며|면서|하고|보여|들고|감탄|웃|카메라|화면|진행자|손짓)[^\]\n]{0,10}\]", "", text)
     text = re.sub(r"(?m)^#{1,6}\s+", "", text)  # 마크다운 제목. 해시태그(#보습)는 공백이 없어 남는다
     text = re.sub(r"\n{2,}", "\n", text)
     return re.sub(r"[ \t]{2,}", " ", text).strip()

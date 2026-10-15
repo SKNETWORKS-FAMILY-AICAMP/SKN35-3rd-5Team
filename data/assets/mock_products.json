@@ -11,21 +11,39 @@
         "value": "4주 사용 후 보습력 42% 개선",
         "institute": "한국피부과학연구원"
       }
-    ]
+    ],
+    "texture": "물처럼 가볍게 펴지는 젤 타입 수분 크림, 끈적임 없이 산뜻한 마무리",
+    "scent": "은은한 아쿠아 향",
+    "package": "50ml 튜브",
+    "usage_step": "세안 후 토너 다음, 스킨케어 마지막 단계",
+    "skin_type": "건성·복합성",
+    "highlight": "메이크업 전에 발라도 밀리지 않는 가벼운 텍스처"
   },
   {
     "product_id": "PROD_002",
     "name": "시카 릴리프 진정 토너",
     "category": "일반",
     "functional_type": null,
-    "owned_evidence": []
+    "owned_evidence": [],
+    "texture": "물처럼 묽은 워터 토너",
+    "scent": "허브 계열의 은은한 향",
+    "package": "200ml 대용량 보틀",
+    "usage_step": "세안 직후 화장솜이나 손바닥으로",
+    "skin_type": "민감·지성",
+    "highlight": "화장솜에 적셔 팩처럼 올려두기 좋음"
   },
   {
     "product_id": "PROD_003",
     "name": "데일리 프레시 샴푸",
     "category": "일반",
     "functional_type": null,
-    "owned_evidence": []
+    "owned_evidence": [],
+    "texture": "풍성하게 거품이 나는 투명 젤",
+    "scent": "상쾌한 시트러스 향",
+    "package": "500ml 펌프형",
+    "usage_step": "젖은 두피에 거품 내 마사지 후 헹굼",
+    "skin_type": "모든 두피",
+    "highlight": "온 가족이 함께 쓰는 대용량 펌프"
   },
   {
     "product_id": "PROD_004",
@@ -39,14 +57,26 @@
         "value": "24주 사용 대조군 비교 유의미성 확보",
         "institute": "글로벌의학연구센터"
       }
-    ]
+    ],
+    "texture": "쫀쫀한 거품의 젤 샴푸",
+    "scent": "허브 민트 향",
+    "package": "400ml 펌프형",
+    "usage_step": "두피에 거품을 내 2~3분 마사지 후 헹굼",
+    "skin_type": "두피 고민이 있는 성인",
+    "highlight": "두피 마사지가 쉬운 쫀쫀한 거품"
   },
   {
     "product_id": "PROD_005",
     "name": "아크네 클리어 폼클렌저",
     "category": "기능성",
     "functional_type": "여드름성 피부 완화",
-    "owned_evidence": []
+    "owned_evidence": [],
+    "texture": "쫀쫀하고 촘촘한 크림 거품",
+    "scent": "은은한 그린티 향",
+    "package": "150ml 튜브",
+    "usage_step": "아침·저녁 미온수로 거품 내 세안",
+    "skin_type": "지성·복합성",
+    "highlight": "적은 양으로도 풍성한 거품"
   },
   {
     "product_id": "PROD_006",
@@ -60,6 +90,12 @@
         "value": "사용 2주차 만족도 91%",
         "institute": "사내 설문평가"
       }
-    ]
+    ],
+    "texture": "살짝 쫀득하게 펴지는 세럼",
+    "scent": "무향",
+    "package": "30ml 스포이드 보틀",
+    "usage_step": "토너 다음, 크림 전 2~3방울",
+    "skin_type": "탄력 고민 피부",
+    "highlight": "스포이드로 필요한 만큼만 덜어 씀"
   }
 ]

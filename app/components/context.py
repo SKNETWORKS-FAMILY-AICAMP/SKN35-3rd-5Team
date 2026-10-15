@@ -16,6 +16,7 @@ import streamlit as st
 from app.components.layout import esc, html
 from app.services import backend
 from app.services.peer_market import FORMS, form_of
+from cosmetic_agent.domain.copy_knowledge import ingredient_names
 
 _PID = "bw_pid"          # 선택한 제품 id (화면을 옮겨도 유지)
 _EV = "bw_ev_state"      # {product_id: [체크 여부, ...]}
@@ -23,9 +24,10 @@ _CUSTOM = "bw_custom_products"  # 직접 등록한 제품 목록 (세션에만 �
 
 # 실증규정 · 관리지침에서 쓰는 자료 종류. '자사 설문'은 광고 근거로 인정되지 않는다(실증규정 제5조).
 TEST_TYPES = ["인체적용시험", "인체외시험", "피부자극 시험", "비교 시험", "소비자 조사(외부 기관)", "자사 설문"]
-# 시행규칙 제2조의 기능성화장품 범위
-FUNCTIONAL_TYPES = ["피부 미백", "주름 개선", "자외선 차단", "탈모 증상 완화", "여드름성 피부 완화",
-                    "피부장벽 기능 회복(가려움 개선)", "튼살 붉은 선 완화", "피부 미백, 주름 개선"]
+# 화장품법 시행규칙 제2조 제1~11호의 기능성화장품 범위 (10종). 2중·3중 기능성은 여러 개 고른다.
+FUNCTIONAL_TYPES = ["피부 미백", "주름 개선", "자외선 차단", "피부를 곱게 태워줌", "모발의 색상 변화(염모)",
+                    "체모 제거(제모)", "탈모 증상 완화", "여드름성 피부 완화", "피부장벽 기능 회복(가려움 개선)",
+                    "튼살 붉은 선 완화"]
 
 
 GENERAL_ID = "GENERAL_DEFAULT"
@@ -155,6 +157,9 @@ def _render_product_card(key: str, product: dict) -> None:
                     st.link_button("공식 시험 요약 출처", ev["source_url"], key=f"{key}_ev_source_{product['product_id']}_{i}")
     if product.get("key_ingredients"):
         html(f'<div class="bw-proj-meta">주요 성분 · {esc(", ".join(product["key_ingredients"]))}</div>')
+    facts = [product.get(k) for k in ("texture", "scent", "package", "usage_step") if product.get(k)]
+    if facts:
+        html(f'<div class="bw-proj-meta">제품 사실 · {esc(" · ".join(facts))}</div>')
     c1, c2 = st.columns(2)
     if c1.button("기준 해제", key=f"{key}_clear_{product['product_id']}", type="tertiary",
                  icon=":material/close:", help="제품 정보 없이 일반 화장품 기준으로 검토"):
@@ -190,15 +195,30 @@ def _register_dialog(key: str) -> None:
     c1, c2 = st.columns([3, 2])
     name = c1.text_input("제품명", placeholder="예: 비타 브라이트닝 앰플")
     category = c2.radio("구분", ["일반", "기능성"], horizontal=True)
-    c3, c4 = st.columns([2, 3])
-    functional_type = c3.selectbox("기능성 종류 (기능성일 때만)", FUNCTIONAL_TYPES)
-    ingredients = c4.text_input("주요 성분 (쉼표로 구분)", placeholder="예: 나이아신아마이드, 판테놀")
+    functional_types = st.multiselect(
+        "기능성 종류 (기능성일 때, 2중·3중 기능성은 여러 개)", FUNCTIONAL_TYPES,
+        disabled=category != "기능성", placeholder="심사·보고받은 기능성을 고르세요",
+        help="화장품법 시행규칙 제2조의 기능성화장품 10종")
+    functional_type = ", ".join(functional_types)
+    ingredient_list = st.multiselect(
+        "주요 성분", ingredient_names(), accept_new_options=True, max_selections=15,
+        placeholder="한두 글자를 입력하면 식약처 원료사전 21,945개에서 찾아줍니다",
+        help="목록에 없는 이름은 입력 후 Enter 로 추가할 수 있습니다")
     # 예상 매출 시나리오에서 비슷한 시장 제품을 찾고 가격을 비교하는 데 쓴다
     c5, c6 = st.columns([2, 3])
     form_choice = c5.selectbox("제형", ["제품명에서 자동 확인", *FORMS], help="제품명에 토너·크림 등이 있으면 자동으로 확인합니다. 모호한 제품은 직접 선택하세요.")
     form = form_of(name) if form_choice == "제품명에서 자동 확인" else form_choice
     c5.caption(f"비교 제형: {form or '제품명으로 확인할 수 없어 직접 선택이 필요합니다.'}")
     price = c6.number_input("판매가 (원, 선택)", min_value=0, value=None, step=1000, placeholder="예: 32000")
+    with st.expander("제품 사실 (선택) · 채울수록 광고문이 구체적이 됩니다"):
+        st.caption("질감·향·용기처럼 확인된 사실만 적어 주세요. 광고문 생성에 그대로 쓰이며, 효능 근거로는 쓰지 않습니다.")
+        f1, f2 = st.columns(2)
+        texture = f1.text_input("제형·질감", placeholder="예: 물처럼 가볍게 펴지는 젤 크림", max_chars=200)
+        scent = f2.text_input("향", placeholder="예: 은은한 풀잎 향 / 무향", max_chars=100)
+        package = f1.text_input("용량·용기", placeholder="예: 50ml 튜브", max_chars=100)
+        usage_step = f2.text_input("사용 순서", placeholder="예: 세안 후 토너 다음, 마지막 단계", max_chars=200)
+        skin_type = f1.text_input("추천 피부 타입", placeholder="예: 건성·복합성", max_chars=100)
+        highlight = f2.text_input("한 줄 특징", placeholder="예: 펌프형이라 한 손으로 덜어 쓰기 편함", max_chars=200)
     st.markdown("**보유 실증 자료** · 표 아래 ＋ 로 행을 추가해 여러 개 입력 (항목이 빈 행은 무시)")
     rows = st.data_editor(
         [{"시험 종류": "인체적용시험", "항목": "", "결과": "", "기관": ""}],
@@ -220,6 +240,9 @@ def _register_dialog(key: str) -> None:
     if not form:
         st.error("제품명으로 제형을 확인할 수 없습니다. 제형을 직접 선택해 주세요.")
         return
+    if category == "기능성" and not functional_types:
+        st.error("기능성 제품은 심사·보고받은 기능성 종류를 하나 이상 골라 주세요")
+        return
     evidence = [
         {"test_type": r["시험 종류"], "item": (r.get("항목") or "").strip(),
          "value": (r.get("결과") or "").strip() or None, "institute": (r.get("기관") or "").strip() or None}
@@ -232,9 +255,11 @@ def _register_dialog(key: str) -> None:
         "name": name.strip(),
         "category": category,
         "functional_type": functional_type if category == "기능성" else None,
-        "key_ingredients": [s.strip() for s in ingredients.split(",") if s.strip()],
+        "key_ingredients": list(dict.fromkeys(i.strip() for i in ingredient_list if i.strip())),
         "form": form,
         "price_krw": int(price) if price else None,
+        **{k: v.strip() for k, v in {"texture": texture, "scent": scent, "package": package, "usage_step": usage_step,
+                                     "skin_type": skin_type, "highlight": highlight}.items() if v and v.strip()},
         "owned_evidence": evidence,
     }
     register_product(product)
