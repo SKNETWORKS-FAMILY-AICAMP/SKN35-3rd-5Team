@@ -65,7 +65,11 @@ def send_to_forecast(product: dict, response: dict, conditions: dict, index: int
     save(product, response, conditions)
     choose(product, index)
     st.session_state["bw_pid"] = product["product_id"]
-    st.session_state["bw_forecast_handoff"] = {"product_id": product["product_id"]}
+    # 응답 전체를 함께 넘긴다: 예상 매출 화면에서 제품 정보가 조금 달라 보여도 이 선택을 그대로 이어받는다
+    st.session_state["bw_forecast_handoff"] = {
+        "product_id": product["product_id"], "response": copy.deepcopy(response),
+        "conditions": copy.deepcopy(conditions), "selected": index,
+    }
 
 
 def receive_forecast() -> bool:
@@ -74,7 +78,19 @@ def receive_forecast() -> bool:
     if not handoff:
         return False
     pid = handoff.get("product_id")
-    if pid not in st.session_state.get("bw_generation_records", {}):
+    if pid not in st.session_state.get("bw_generation_records", {}) and not handoff.get("response"):
         return False
     st.session_state["bw_pid"] = pid
+    st.session_state["bw_forecast_pending"] = handoff
+    return True
+
+
+def bind_pending(product: dict) -> bool:
+    """receive_forecast 로 넘어온 선택을 예상 매출 화면의 현재 제품 기준으로 다시 묶는다.
+    (생성 화면과 예상 매출 화면이 같은 제품을 조금 다르게 읽어도 연결이 끊기지 않게 한다)"""
+    pending = st.session_state.pop("bw_forecast_pending", None)
+    if not pending or pending.get("product_id") != product.get("product_id") or not pending.get("response"):
+        return False
+    save(product, pending["response"], pending.get("conditions") or {})
+    choose(product, pending.get("selected", 0))
     return True
