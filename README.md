@@ -1,5 +1,16 @@
 # Beaurette | 뷰렛
 
+<h2 align="center">🛠️ Tech Stack</h2>
+
+| Category | Technologies |
+| :--- | :--- |
+| **Languages** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black) ![CSS](https://img.shields.io/badge/CSS-663399?style=flat&logo=css&logoColor=white) |
+| **Backend & UI** | ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white) ![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=flat&logo=pydantic&logoColor=white) ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white) |
+| **AI & Agents** | ![OpenAI API](https://img.shields.io/badge/OpenAI_API-412991?style=flat) ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=flat&logo=langchain&logoColor=white) ![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=flat&logo=langgraph&logoColor=white) |
+| **Database & Search** | ![Qdrant Cloud](https://img.shields.io/badge/Qdrant_Cloud-DC244C?style=flat&logo=qdrant&logoColor=white) ![BM25](https://img.shields.io/badge/BM25-2563EB?style=flat) ![Hybrid RRF](https://img.shields.io/badge/Hybrid_RRF-7C3AED?style=flat) |
+| **Server & Cloud** | ![Render](https://img.shields.io/badge/Render-000000?style=flat&logo=render&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) ![Uvicorn](https://img.shields.io/badge/Uvicorn-4051B5?style=flat) |
+| **Tools & Testing** | ![uv](https://img.shields.io/badge/uv-DE5FE9?style=flat&logo=uv&logoColor=white) ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white) ![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white) ![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=flat&logo=pytest&logoColor=white) |
+
 ## 팀원별 역할 및 기여
 
 | 팀원 | 작업 브랜치 | 주요 역할 | 구현 및 기여 | 대표 커밋 |
@@ -143,22 +154,7 @@ LLM은 확인된 제품 사실·성분 역할·시장 표현을 재료로 후보
 
 구현: [`generation/`](src/cosmetic_agent/generation/) · [`copy_suggester.py`](src/cosmetic_agent/models/copy_suggester.py) · [`appeal_ranker.py`](src/cosmetic_agent/models/appeal_ranker.py)
 
-## 5. 기술 스택
-
-| 영역 | 기술 |
-| --- | --- |
-| 언어·환경 | Python 3.11 이상, uv |
-| API·응답 계약 | FastAPI, Uvicorn, Pydantic |
-| 에이전트 | LangGraph StateGraph, LangChain |
-| LLM·임베딩 | OpenAI `gpt-4o-mini`, `text-embedding-3-small` (기본 설정) |
-| 검색 | Qdrant Cloud, rank-bm25, 가중 RRF, 경량 reranker |
-| 프론트엔드 | Streamlit, CSS, JavaScript |
-| 테스트 | pytest, API·UI 통합 테스트, 판정·검색 평가 스크립트 |
-| 배포 | Render, Docker, Docker Compose |
-
-`finetune/`에는 QLoRA 실험용 골격이 있으나, 학습 완료 모델이나 검증된 파인튜닝 성능을 제공하는 상태는 아닙니다. 실행 시 `JUDGE_BACKEND=rule` 또는 구현된 GPT 백엔드를 사용합니다.
-
-## 6. 데이터와 평가
+## 5. 데이터와 평가
 
 ### 데이터 구성
 
@@ -211,7 +207,7 @@ holdout은 반복 실행하는 고정 회귀셋으로 사용했으므로 블라�
 
 출처: [dev 검색 보고서](eval/reports/rag_retrieval_dev_2026-10-14.md) · [holdout 검색 보고서](eval/reports/rag_retrieval_holdout_2026-10-14.md)
 
-## 7. 로컬 실행
+## 6. 로컬 실행
 
 저장소 루트에서 실행합니다. 실제 검토·생성에는 OpenAI API 키와 Qdrant Cloud 접속 정보가 필요하며 API 사용 비용이 발생할 수 있습니다.
 
@@ -274,7 +270,7 @@ uv run streamlit run app/streamlit_app.py
 
 실행 환경에 이미 설정한 환경변수는 `.env`보다 우선합니다. API 모드에서는 서버 오류를 Mock 응답으로 대체하지 않고 오류로 표시합니다.
 
-## 8. API
+## 7. API
 
 | Method | 경로 | 기능 |
 | --- | --- | --- |
@@ -302,7 +298,7 @@ uv run streamlit run app/streamlit_app.py
 
 응답은 `request_id`, `input_text`, `result`, `timing`을 포함합니다. `result.level`은 0(가능)·1(조건부)·2(불가)이며 판단보류 시 `null`입니다. 근거는 `citations`, 교정 문구는 `suggestion`, 필요한 추가 시험은 `next_test`로 제공합니다. 상세 계약은 [API 가이드](api/README.md)와 [스키마](src/cosmetic_agent/domain/schemas.py)를 참고하세요.
 
-## 9. 테스트와 평가 재현
+## 8. 테스트와 평가 재현
 
 ```powershell
 # 단위·통합 회귀 테스트
@@ -323,7 +319,7 @@ uv run python scripts/validate_rag.py --split holdout --confirm-holdout
 
 테스트는 규칙 판정·기능성 예외·수치 검증·응답 계약·검색 결합·재시도 상한·생성·챗봇·UI 연결·매출 시나리오를 다룹니다. 테스트용 서비스나 대역을 주입한 검증은 실제 외부 모델의 품질 평가와 구분합니다. 판정 평가의 세부 조건은 [평가 가이드](eval/README.md)에 정리했습니다.
 
-## 10. 디렉토리 구조
+## 9. 디렉토리 구조
 
 ```text
 ├── api/                       # FastAPI 라우트·요청 처리
@@ -355,8 +351,9 @@ uv run python scripts/validate_rag.py --split holdout --confirm-holdout
 └── render.yaml                # Render 서비스 구성
 ```
 
-## 11. 한계와 개선 방향
+## 10. 한계와 개선 방향
 
+- **파인튜닝**: `finetune/`은 QLoRA 실험용 골격이며, 학습 완료 모델이나 검증된 성능을 제공하는 상태는 아닙니다. 실행에는 `JUDGE_BACKEND=rule` 또는 구현된 GPT 백엔드를 사용합니다.
 - **검증 범위**: 팀 작성 소규모 평가셋 중심입니다. 새로운 독립 평가셋과 전문가 검토를 통해 과잉 경고·미탐을 검증할 필요가 있습니다.
 - **복합 실증**: 현재 효능 감지는 키워드에 의존합니다. 시험 자료를 효능·시점·대상·수치로 구조화해 복합 주장의 대응 관계를 정밀하게 검증하는 것이 다음 과제입니다.
 - **규정 갱신**: 수집된 문서 버전에 의존합니다. 개정 감지, 효력 시점 관리, 재색인 절차를 고도화할 필요가 있습니다.
