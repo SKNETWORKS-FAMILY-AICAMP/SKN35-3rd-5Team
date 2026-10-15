@@ -21,10 +21,10 @@
 <table align="center">
   <tbody>
     <tr>
-      <td align="center" valign="middle" width="160"><img src="docs/team/kim-gyeongmin.png" alt="김경민 소개 이미지" width="160"></td>
-      <td align="center" valign="middle" width="160"><img src="docs/team/kwon-junho.png" alt="권준호 소개 이미지" width="160"></td>
-      <td align="center" valign="middle" width="160"><img src="docs/team/yu-jiho.png" alt="유지호 소개 이미지" width="160"></td>
-      <td align="center" valign="middle" width="160"><img src="docs/team/lee-hyeongmin.png" alt="이형민 소개 이미지" width="160"></td>
+      <td align="center" valign="middle" width="160"><img src="docs/team/kim-gyeongmin-portrait.jpg" alt="김경민 소개 이미지" width="160" height="213"></td>
+      <td align="center" valign="middle" width="160"><img src="docs/team/kwon-junho-portrait.jpg" alt="권준호 소개 이미지" width="160" height="213"></td>
+      <td align="center" valign="middle" width="160"><img src="docs/team/yu-jiho-portrait.jpg" alt="유지호 소개 이미지" width="160" height="213"></td>
+      <td align="center" valign="middle" width="160"><img src="docs/team/lee-hyeongmin-portrait.jpg" alt="이형민 소개 이미지" width="160" height="213"></td>
       <td align="center" valign="middle" width="160"><!-- 이세희 소개 이미지 추가 예정 --></td>
     </tr>
     <tr>
