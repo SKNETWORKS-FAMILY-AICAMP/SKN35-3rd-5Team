@@ -5,8 +5,7 @@
 흐름
   ① 비슷한 시장 제품 찾기   app/services/peer_market.py  (성분·기능성·제형으로 매칭, 가격·랭킹·리뷰·공개 판매 신호)
   ② 경쟁 제품의 문구 분석   문구 유형별 사용 현황 + 규칙 판정
-  ③ 우리 제품 추천 문구      우리 제품 정보로만 후보를 만들고 규칙 엔진으로 다시 판정 → 쓸 수 있는 가장 강한 표현
-  ④ 예상 매출               app/services/revenue_scenario.py (처분 위험 매출 · 문구 교체 변화 폭)
+  매출: 생성 후보 선택과 공통 가정에 따른 매출 변화 폭
   ⑤ 참고 자료               공개 A/B 실험 · 성과 입력 비교 (이전 「시장 근거 · 문구 비교」 화면, 참조용)
 
 경쟁 제품의 매출은 거의 공개되지 않는다 — 랭킹·리뷰 수는 인기 신호이고 매출이 아니다. 판매량은 가정 입력이다.
@@ -22,15 +21,25 @@ import streamlit as st
 
 from app.components.context import current, open_register, register_product
 from app.components.layout import page_header
-from app.components.market_reference import render_public_experiments, render_reference_guide
+from app.components.market_reference import (
+    render_public_experiments,
+    render_reference_guide,
+)
 from app.components.performance import render_performance
 from app.components.theme import inject_css
-from app.services.peer_market import (appeal_summary, candidate_copies, find_peers,
-                                      judge_candidates, price_benchmark, product_profile, FORMS, form_of, load_market_products)
-from app.services.product_market import latest_review_pair
 from app.services import generation_results
-from app.services.candidate_compare import compare_candidates
-from app.services.revenue_scenario import DISPLAY_LABEL, build_scenario
+from app.services.peer_market import (
+    FORMS,
+    appeal_summary,
+    candidate_copies,
+    find_peers,
+    form_of,
+    judge_candidates,
+    load_market_products,
+    price_benchmark,
+    product_profile,
+)
+from app.services.revenue_scenario import Range3, copy_change_band
 
 health = st.session_state["bw_health"]
 inject_css("pages")
@@ -108,43 +117,6 @@ def step(no: str, title: str, sub: str = "") -> None:
         f'<span style="font-size:22px;font-weight:750;color:#182230">{escape(title)}</span></div>'
         + (f'<div style="font-size:14px;color:#667085;margin-bottom:6px">{escape(sub)}</div>' if sub else "")
     )
-
-
-def render_candidate_compare(rows: list[dict], selected: int, pid: str) -> None:
-    """생성 후보 3개를 카드로 나란히 — 추천(★)과 지금 시나리오에 쓰는 후보를 표시한다."""
-    level_color = {"green": SAFE, "orange": CAUTION, "red": RISK}
-    cols = st.columns(len(rows)) if rows else []
-    for col, r in zip(cols, rows):
-        label, color = LEVEL_TEXT.get(r["level"], LEVEL_TEXT[None])
-        risk = ("처분 위험 없음" if r["penalty"] == "no_violation"
-                else f"{r['sanction']} {r['months']}개월" if r["months"] else "처분 기준 개별 검토")
-        market = (f"시장 {r['peer_total']}개 중 {r['peer_products']}개 사용 · 인기 상위 {r['peer_popular']}개"
-                  if r["peer_total"] else "비교할 시장 제품 없음")
-        border = "2px solid #0f5c55" if r["recommended"] else "1px solid #dedbd4"
-        badge = '<span style="color:#0f5c55;font-weight:700">★ 매출 시나리오 추천 · </span>' if r["recommended"] else ""
-        using = '<span style="color:#d63838;font-weight:700"> · 지금 계산 중</span>' if r["index"] == selected else ""
-        with col:
-            st.html(
-                f'<div style="border:{border};border-radius:14px;padding:16px 18px;background:#fffdf8;min-height:300px">'
-                f'<div style="font-size:12px;color:#667085">{badge}후보 {r["index"] + 1} · {escape(r["tier_label"])}{using}</div>'
-                f'<div style="font-size:18px;font-weight:750;color:#182230;margin:8px 0 4px">{escape(r["headline"])}</div>'
-                f'<div style="font-size:13px;color:#475467;min-height:38px">{escape(r["supporting"])}</div>'
-                f'<div style="margin:10px 0 6px">' + "".join(chip(t, "#0f5c55", "#e3f2ef") for t in r["types"]) + '</div>'
-                f'<div style="font-size:12px;color:#475467;line-height:1.7">'
-                f'규칙 판정 <b style="color:{level_color.get(color, FLAT)}">{escape(label)}</b> · {escape(risk)}<br>'
-                f'{escape(market)}<br>'
-                f'창작 구조 {escape(", ".join(r["creative"]) or "—")} · '
-                f'{"우리 시험 " + escape(", ".join(r["evidence_ids"])) + " 사용" if r["uses_evidence"] else "시험 수치 없음"}'
-                f'</div></div>'
-            )
-            if r["index"] != selected and st.button("이 후보로 계산", key=f"fc_use_{pid}_{r['index']}", width="stretch", disabled=not r["verified"]):
-                st.session_state[f"fc_pick_{pid}"] = r["index"]
-                st.rerun()
-    best = next((r for r in rows if r["recommended"]), None)
-    if best:
-        st.caption(f"★ 추천 이유: {best['why']} 문구별 매출 상승률은 데이터가 없어 비교하지 않고, ‘처분 위험 없이 가장 강하게 말할 수 있는가’로 골랐어요.")
-    else:
-        st.warning("규칙상 바로 쓸 수 있는 후보가 없어요. 광고문 생성에서 다시 만들거나 근거 자료를 확인해 주세요.")
 
 
 page_header(
@@ -300,157 +272,72 @@ with st.container(key="pagebody"):
     else:
         st.caption("비교할 시장 제품이 있어야 문구를 분석할 수 있어요.")
 
-    # ------------------------------------------------------------------ ③ 공통 생성 결과
-    step("3", "생성 후보 비교 · 매출 시나리오에 쓸 문구", "광고문 생성 후보를 문구 유형 · 시장 사용도 · 규칙 판정 · 처분 위험으로 나란히 비교해요.")
+    # 광고문 생성의 후보 선택과 변화 폭만 표시한다. 검토 결과를 반복하지 않는다.
+    step("매출", "문구를 바꾸면 움직이는 매출 폭", "생성한 후보를 선택하고 같은 계산 기준에서 변화 폭을 살펴보세요.")
     saved, stale = generation_results.record(registered_product)
-    best = None
-    rows: list[dict] = []
+    candidates = saved["response"].get("candidates", []) if saved and not stale else []
+    recommended = ""
     if stale:
         st.warning("제품 정보 또는 선택한 실증 자료가 바뀌었습니다. 광고문 생성에서 다시 생성해 주세요.")
-    elif saved and saved["response"].get("candidates") and generation_results.selected(registered_product):
-        candidates = [{**c, "verified": generation_results.usable(c)} for c in saved["response"]["candidates"]]
-        pick = st.session_state.pop(f"fc_pick_{pid}", None)
-        if pick is not None:
-            generation_results.choose(registered_product, pick)   # saved 도 같은 기록이라 바로 반영된다
-        rows = compare_candidates(product, candidates, summary)
-        render_candidate_compare(rows, saved["selected"], pid)
-        index = saved["selected"]
-        generation_results.choose(registered_product, index)
-        chosen = generation_results.selected(registered_product)
-        best = {"copy": chosen["text"]}
-        st.markdown("##### 선택한 문구 자세히")
-        if chosen.get("evidence_note"):
-            st.caption("선택한 문구와 함께 확인할 시험 정보: " + chosen["evidence_note"])
-        st.caption(chosen.get("verify_note") or "생성 단계 검증 통과")
-        if chosen.get("market_application"):
-            st.write("시장 표현 반영: " + chosen["market_application"])
-        if chosen.get("ingredient_application"):
-            st.write("성분 역할 반영: " + chosen["ingredient_application"])
-        refs = {r["reference_id"]: r for r in saved["response"].get("market_references", [])}
-        for ref_id in chosen.get("market_reference_ids", []):
-            ref = refs.get(ref_id)
-            if ref:
-                st.caption(f"참고 {ref_id} · {ref['brand']} · {ref['copy_text']}")
-        st.caption("생성 조건: " + " · ".join(str(saved["conditions"].get(k, "")) for k in ("channel", "tone", "length")))
-    elif saved and saved["response"].get("candidates"):
-        st.warning("선택한 후보는 확인이 필요합니다. 광고문 생성에서 검토를 통과한 후보를 선택해 주세요.")
-    else:
-        st.info("이 제품으로 생성한 문구가 없습니다. 광고문 생성에서 후보를 만든 뒤 후보 아래 ‘이 문구를 매출 시나리오에 사용’을 눌러 주세요.")
+    elif not candidates:
+        st.info("광고문 생성에서 후보를 만든 뒤 ‘이 문구를 매출 시나리오에 사용’을 눌러 주세요.")
     if st.button("광고문 생성으로 이동", key="fc_open_generation"):
         st.switch_page(st.session_state["bw_pages"]["generate"])
 
-    # ------------------------------------------------------------------ ④ 예상 매출
-    step("4", "문구를 바꿨을 때의 매출 시나리오", "지금 쓰려는 문구(원문)와 추천 문구를 비교해요. " + DISPLAY_LABEL + ".")
-    review = latest_review_pair(st.session_state.get("bw_threads"), pid)
-    default_orig = (review or {}).get("original") or ""
-    orig_key = f"fc_orig_{pid}"
-    risky = sorted(({"brand": p["brand"], "copy": c["copy_text"].replace("\n", " ").strip(), "level": c["level"]}
-                    for p in peers for c in p.get("copies", []) if (c.get("level") or 0) >= 1),
-                   key=lambda r: -r["level"])
-    if risky:
-        with st.container(horizontal=True):
-            st.caption("원문이 없다면 — 경쟁 제품에서 ‘근거 필요·쓰면 안 됨’ 판정이 나온 표현을 우리 제품에 그대로 쓴다고 가정해 비교해 볼 수 있어요.")
-            if st.button(f"경쟁 문구로 비교 · {risky[0]['brand']} “{risky[0]['copy'][:18]}”", key=f"fc_risky_{pid}"):
-                st.session_state[orig_key] = risky[0]["copy"]
-                st.rerun()
-    c1, c2 = st.columns(2)
-    with c1:
-        initial = {} if orig_key in st.session_state else {"value": default_orig}
-        original = st.text_area("지금 쓰려는 문구 (원문)", height=80, key=orig_key, **initial,
-                                help="검토 대화에서 이 제품으로 검토한 문구가 있으면 그 문구가 먼저 들어와요")
-    with c2:
-        recommended = st.text_area("선택한 생성 문구", value=best["copy"] if best else "", height=80, disabled=True,
-                                   key=f"fc_rec_{pid}_{best['copy'] if best else ''}")
-
     bench = price_benchmark(peers) if peers else None
     default_price = product.get("price_krw") or (bench["median"] if bench else 27500)
-    p1, p2, p3, p4 = st.columns(4)
-    with p1:
-        price = st.number_input("1개 판매가 (원)", min_value=0, value=default_price, step=500, key=f"fc_price_{pid}",
-                                help="등록한 판매가 → 없으면 비슷한 제품 가격 중간값")
-    with p2:
-        units_low = st.number_input("월 판매량 · 적게 팔릴 때", min_value=0, value=300, step=50, key=f"fc_ul_{pid}")
-    with p3:
-        units_mid = st.number_input("월 판매량 · 평소", min_value=0, value=600, step=50, key=f"fc_um_{pid}")
-    with p4:
-        units_high = st.number_input("월 판매량 · 잘 팔릴 때", min_value=0, value=1200, step=50, key=f"fc_uh_{pid}")
-    st.caption("판매량은 경쟁 제품도 공개하지 않아 예시값이 들어 있어요. 우리 계획 수량으로 바꿔 넣으세요.")
-    with st.expander("노출 · 처분 조건 바꾸기"):
-        q1, q2, q3, q4 = st.columns(4)
-        with q1:
-            exposed = st.slider("이 문구를 보고 들어오는 매출 비중", 0, 100, 100, format="%d%%")
-        with q2:
-            know_ad = st.checkbox("광고로 들어오는 매출 비중을 알고 있음", value=False)
-            ad_share = st.slider("광고로 들어오는 매출 비중", 0, 100, 40, format="%d%%", disabled=not know_ad)
-        with q3:
-            sanction = st.radio("위반 위치", ["광고", "표시"], horizontal=True)
-        with q4:
-            offense = st.selectbox("위반 차수", [1, 2, 3, 4], format_func=lambda n: f"{n}차" if n < 4 else "4차 이상")
-
-    if not (units_low <= units_mid <= units_high) or price <= 0 or units_mid <= 0:
-        st.error("판매가를 넣고, 월 판매량은 적게 ≤ 평소 ≤ 잘 팔릴 때 순서로 입력해 주세요.")
+    with st.expander("계산 기준 설정 · 판매가와 계획 수량", expanded=False):
+        p1, p2 = st.columns(2)
+        price = p1.number_input("1개 판매가 (원)", min_value=0, value=default_price, step=500, key=f"fc_price_{pid}")
+        units_mid = p2.number_input("월 계획 판매량 (개)", min_value=0, value=600, step=50, key=f"fc_um_{pid}")
+        exposed = st.slider("문구 노출 경로의 매출 비중", 0, 100, 100, format="%d%%", key=f"fc_exposed_{pid}")
+        st.caption("등록 판매가가 없으면 유사 제품 가격 중간값, 없으면 예시 27,500원을 사용합니다. 계획 수량 기본값 600개는 실제 판매량이 아닙니다.")
+    if price <= 0 or units_mid <= 0:
+        st.info("계산 기준 설정에서 판매가와 월 계획 판매량을 0보다 크게 입력해 주세요.")
         st.stop()
-    common = dict(price_krw=price, monthly_units={"low": units_low, "mid": units_mid, "high": units_high},
-                  product=product, offense=offense, sanction_kind=sanction,
-                  ad_dependent_share=ad_share / 100 if know_ad else None, copy_exposed_share=exposed / 100)
-    before = build_scenario(copy_text=original, **common)
-    after = build_scenario(copy_text=recommended, **common) if recommended.strip() else None
-    revenue, base = before["monthly_revenue_krw"], before["monthly_revenue_krw"]["mid"]
-
-    m1, m2, m3 = st.columns(3)
-    for col, key, label, u in ((m1, "low", "적게 팔릴 때", units_low), (m2, "mid", "평소", units_mid), (m3, "high", "잘 팔릴 때", units_high)):
-        col.metric(f"한 달 매출 · {label}", won(revenue[key]), units(u), delta_color="off", delta_arrow="off", border=True)
-
-    st.markdown("##### 적발되면 잃을 수 있는 매출")
-
-    def risk_card(title: str, text: str, scen: dict) -> None:
-        label, color = LEVEL_TEXT.get(scen["inputs"]["level"], LEVEL_TEXT[None])
-        risk = scen["revenue_at_risk_if_unchanged"]
-        st.markdown(f"**{title}**")
-        st.caption(text)
-        st.badge(f"규칙 판정 · {label}", color=color)
-        if risk["status"] == "no_violation":
-            arrow_card("처분 위험 매출", "없음", 0, "처분 대상 표현 없음", "규칙상 처분 대상 표현이 확인되지 않았어요.")
-            return
-        if risk["status"] == "needs_review":
-            arrow_card("처분 위험 매출", "개별 검토", 0, "처분표와 연결되지 않은 조항", risk.get("note") or "")
-            return
-        amount = risk.get("amount_krw") or risk.get("estimate_krw") or risk["upper_bound_krw"]
-        arrow_card(f"{risk['condition']} · {risk['sanction']} {risk['months']}개월", won(-amount["mid"]), -1,
-                   f"{risk['months']}개월 동안 최대 {won(amount['mid'])} · 약 {units(amount['mid'] / price)} 덜 팔림",
-                   f"범위 {won(amount['low'])} ~ {won(amount['high'])} · 근거 {risk['basis_law_id']}")
-
-    r1, r2 = st.columns(2)
-    with r1, st.container(border=True):
-        if original.strip():
-            risk_card("원문 그대로", original, before)
-        else:
-            st.markdown("**원문 그대로**")
-            st.info("지금 쓰려는 문구를 위 ‘원문’ 칸에 넣으면, 그 문구를 그대로 쓸 때의 처분 위험을 추천 문구와 나란히 비교해요.")
-    with r2, st.container(border=True):
-        if after:
-            risk_card("추천 문구로 바꾸면", recommended, after)
-        else:
-            st.info("추천 문구가 있으면 나란히 비교해요.")
-    st.caption("적발 확률은 공개 자료로 추정할 수 없어 표시하지 않아요. 위반이 여러 개면 가장 무거운 기준 하나만 씁니다.")
-
-    st.markdown("##### 문구를 바꾸면 매출이 움직일 수 있는 폭")
-    band = before["copy_change_band"]
-    choice = st.segmented_control("움직임 크기", options=list(EFFECT_LEVELS), default="typical",
-                                  format_func=lambda k: EFFECT_LEVELS[k]["name"], key="forecast_effect_level") or "typical"
+    base = price * units_mid
+    st.caption(f"계산 기준: {price:,}원 × 월 계획 {units_mid:,}개 = {won(base)} · 문구 노출 경로 {exposed}%")
+    choice = st.segmented_control("변화 폭 가정", options=list(EFFECT_LEVELS), default="typical",
+                                  format_func=lambda k: EFFECT_LEVELS[k]["name"], key=f"fc_effect_{pid}") or "typical"
+    band = copy_change_band(Range3.of(base, "기준 매출"), exposed / 100)
     sel = EFFECT_LEVELS[choice]
-    pct, delta = band["change_magnitude_pct"][sel["q"]], band["change_magnitude_krw"][sel["q"]]
-    du = delta / price
-    a1, a2 = st.columns(2)
-    with a1:
-        arrow_card("반응이 좋을 때", won(base + delta), 1, f"+{pct}% · {won(delta, signed=True)} · {units(du, signed=True)}",
-                   f"평소 {won(base)} · {units(units_mid)} → 약 {units(units_mid + du)}")
-    with a2:
-        arrow_card("반응이 나쁠 때", won(base - delta), -1, f"−{pct}% · {won(-delta, signed=True)} · {units(-du, signed=True)}",
-                   f"평소 {won(base)} · {units(units_mid)} → 약 {units(max(units_mid - du, 0))}")
-    st.caption(f"‘{sel['name']}’ = {sel['hint']} (공개 A/B 실험 148건 기준 · 아래 참고 자료에서 실험을 직접 볼 수 있어요)")
-    st.warning("움직임 폭은 다른 분야(뉴스 제목) 실험에서 빌려온 가정이에요. 추천 문구가 매출을 올린다고 보장하지 않고, "
-               "‘바꾸면 이 정도 범위에서 움직일 수 있다’는 뜻이에요. 확실히 하려면 실제 A/B 테스트가 필요해요.")
+    pct = band["change_magnitude_pct"][sel["q"]]
+    delta = band["change_magnitude_krw"][sel["q"]]
+    st.caption("문구별 효과는 아직 측정하지 않았으므로 모든 후보에 같은 변화 폭 가정을 적용합니다. 후보 선택은 실제 A/B 테스트 대상을 고르는 용도입니다.")
+
+    if candidates:
+        for row_start in range(0, len(candidates), 3):
+            cols = st.columns(min(3, len(candidates) - row_start))
+            for index, col in zip(range(row_start, min(row_start + 3, len(candidates))), cols):
+                candidate = candidates[index]
+                active = index == saved["selected"]
+                usable = generation_results.usable(candidate)
+                with col, st.container(border=True):
+                    st.caption(f"후보 {index + 1}" + (" · 선택 중" if active else ""))
+                    st.markdown(f"**{candidate.get('headline') or candidate['text'].split(chr(10))[0]}**")
+                    if candidate.get("supporting_copy"):
+                        st.write(candidate["supporting_copy"])
+                    st.markdown(f":red[▲ {won(base + delta)}] / :blue[▼ {won(max(base - delta, 0))}]")
+                    st.caption(f"공통 가정 ±{pct}% · 문구 노출 경로에 적용")
+                    if st.button("선택한 문구" if active else f"후보 {index + 1} 선택", key=f"fc_select_{pid}_{index}",
+                                 type="primary" if active else "secondary", disabled=not usable):
+                        generation_results.choose(registered_product, index)
+                        st.rerun()
+        chosen = generation_results.selected(registered_product)
+        if chosen:
+            recommended = chosen["text"]
+            st.markdown(f"##### 선택한 문구 · 후보 {saved['selected'] + 1}")
+            st.code(recommended, language=None)
+            a1, a2 = st.columns(2)
+            with a1:
+                arrow_card("반응이 좋을 때 · 가정", won(base + delta), 1,
+                           f"+{pct}% · {won(delta, signed=True)}", f"기준 {won(base)} 대비 · 약 {units(units_mid + delta / price)}")
+            with a2:
+                arrow_card("반응이 나쁠 때 · 가정", won(max(base - delta, 0)), -1,
+                           f"−{pct}% · {won(-delta, signed=True)}", f"기준 {won(base)} 대비 · 약 {units(max(units_mid - delta / price, 0))}")
+        else:
+            st.info("검토를 통과한 후보를 선택해 주세요.")
+    st.caption("변화 폭은 미국 뉴스 제목 A/B 실험 148쌍에서 관찰된 클릭률 차이를 참고한 가정입니다. 구매전환율·객단가를 고정한 시나리오이며 화장품 매출 예측이나 상승 보장이 아닙니다.")
 
     # ------------------------------------------------------------------ ⑤ 참고 자료
     step("참고", "자료와 계산, 한눈에 이해하기", "시장 문구는 표현 참고에, 공개 실험은 변화 폭 가정에 사용합니다.")
@@ -478,20 +365,16 @@ with st.container(key="pagebody"):
 |---|---|---|
 | 유사 제품의 공개 성분·문구·가격·순위 | 시장 비교와 표현 유형 참고 | 순위·리뷰는 매출이 아님 |
 | 우리 제품 정보·시험 자료와 규정 | 문구 후보 생성과 규칙 검토 | 다른 제품의 실증을 대신 쓰지 않음 |
-| 처분 기준표 | 처분이 적용될 경우의 기간 비교 | 적발 확률·확정 손실이 아님 |
 | 뉴스 제목 A/B 실험 148건 | 매출 변화 폭에 넣은 가정의 참고값 | 화장품 매출 효과가 아님 |
 | 판매가·월 판매량 입력값 | 기준 월 매출 계산 | 계획 수량을 사용한 가정 |""")
         render_public_experiments()
         with st.expander("현재 계산 가정 · 연결 파일 확인"):
             st.markdown("**계산에 사용한 가정**")
-            for assumption in before["assumptions"]:
-                st.write(f"• {assumption}")
-            st.caption("제공하지 않는 값: " + " · ".join(before["not_provided"]))
-            st.caption("원문 규칙 검토에서 연결된 조항: " + (", ".join(before["inputs"]["law_ids"]) or "없음"))
+            st.write(f"판매가 {price:,}원 · 월 계획 {units_mid:,}개 · 문구 노출 경로 {exposed}%")
+            st.write("구매전환율·객단가 고정. 후보별 효과·적발 확률은 추정하지 않습니다.")
             st.code("\n".join([
                 "data/top_product_copies/wrinkle_serum_sample/products.csv",
                 "data/market_reference/",
                 "data/sales_forecast_reference/copy_comparison/market_copy_judgements.jsonl",
-                "data/sales_forecast_reference/penalty_schedule.json",
                 "data/sales_forecast_reference/copy_effect_size_distribution.json",
             ]), language=None)

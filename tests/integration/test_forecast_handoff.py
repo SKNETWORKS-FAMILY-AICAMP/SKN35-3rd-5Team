@@ -26,14 +26,27 @@ def test_new_product_selection_reaches_forecast_and_survives_rerun(monkeypatch):
     next(w for w in page.button if w.label == "광고문 만들기").click().run()
     page.button(key="select_generated_1").click().run()
     assert not page.exception
-    assert next(w.value for w in page.text_area if w.label == "선택한 생성 문구") == "판테놀을 담은 데일리 크림"
+    assert any(w.value == "판테놀을 담은 데일리 크림" for w in page.code)
     pid = page.session_state["bw_pid"]
     assert pid.startswith("CUSTOM_")
     assert page.session_state["bw_generation_records"][pid]["selected"] == 1
     page.switch_page("views/forecast.py").run()
     assert not page.exception
-    assert next(w.value for w in page.text_area if w.label == "선택한 생성 문구") == "판테놀을 담은 데일리 크림"
+    assert any(w.value == "판테놀을 담은 데일리 크림" for w in page.code)
     assert len(page.session_state["bw_custom_products"]) == 1
+    assert not any(w.label in ("지금 쓰려는 문구 (원문)", "선택한 생성 문구") for w in page.text_area)
+    assert not any(w.label == "노출 · 처분 조건 바꾸기" for w in page.expander)
+    page.button(key=f"fc_select_{pid}_2").click().run()
+    assert not page.exception
+    assert page.session_state["bw_generation_records"][pid]["selected"] == 2
+    assert any(w.value == "나를 챙기는 크림 루틴" for w in page.code)
+    page.button(key=f"fc_select_{pid}_0").click().run()
+    assert not page.exception
+    assert page.session_state["bw_generation_records"][pid]["selected"] == 0
+    assert any(w.value == "오늘의 수분 루틴" for w in page.code)
+    # Equal assumptions for all copies, including different strong/balanced/safe tiers.
+    captions = [w.value for w in page.caption if w.value.startswith("공통 가정 ±")]
+    assert len(captions) == 3 and len(set(captions)) == 1
 
 
 def test_handoff_activates_product_without_refreshing_stale_evidence(monkeypatch):
