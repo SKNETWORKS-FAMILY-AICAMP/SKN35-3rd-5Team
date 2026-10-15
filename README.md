@@ -124,10 +124,12 @@ SK Networks Family AI Camp 35기 · 3차 프로젝트 · 5팀
 
 ## 3. 시스템 아키텍처
 
-![Beaurette 시스템 아키텍처 · 화살표 방향 흐름 강조](docs/diagrams/architecture-animated.svg)
+![Beaurette 시스템 아키텍처 · 공통 기능을 묶은 구성도](docs/diagrams/architecture-animated.svg)
+
+세 워크플로가 사용하는 검색·모델·검증 기능은 공통 영역으로 묶었습니다. 주요 요청 경로에만 짧은 신호가 순차적으로 이동합니다.
 
 <details>
-<summary>다이어그램 원본 코드 보기</summary>
+<summary>상세 연결 관계 보기 (Mermaid)</summary>
 
 ```mermaid
 flowchart LR
@@ -157,10 +159,10 @@ flowchart LR
 
 ### 검토 워크플로
 
-![Beaurette 검토 워크플로 · 재검색과 재제안 흐름 강조](docs/diagrams/review-workflow-animated.svg)
+![Beaurette 검토 워크플로 · 주요 처리와 예외 경로](docs/diagrams/review-workflow-animated.svg)
 
 <details>
-<summary>다이어그램 원본 코드 보기</summary>
+<summary>상세 분기 보기 (Mermaid)</summary>
 
 ```mermaid
 flowchart TD
